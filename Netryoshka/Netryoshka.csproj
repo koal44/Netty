@@ -1,0 +1,100 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\netty.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="lib\WinDivert-2.2.2-A\**" />
+    <Compile Remove="Retire\**" />
+    <EmbeddedResource Remove="lib\WinDivert-2.2.2-A\**" />
+    <EmbeddedResource Remove="Retire\**" />
+    <None Remove="lib\WinDivert-2.2.2-A\**" />
+    <None Remove="Retire\**" />
+    <Page Remove="lib\WinDivert-2.2.2-A\**" />
+    <Page Remove="Retire\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="AttachedBehaviors\CapturesPacketsBehavior.cs" />
+    <Compile Remove="AttachedBehaviors\MatryoshkaButtonMouseOverBehavior.cs" />
+    <Compile Remove="Helpers\AttachedPropertiesBase.cs" />
+    <Compile Remove="Services\PacketCollectionService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\netty.png" />
+	<Resource Include="Assets\netty.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Dummy.xaml" />
+    <Page Remove="Skins\Skin.Common.xaml" />
+    <Page Remove="Skins\Skin.Dark.xaml" />
+    <Page Remove="Skins\Skin.Light.xaml" />
+    <Page Remove="Styles\Dictionary1.xaml" />
+    <Page Remove="Styles\MyContentDialog.xaml" />
+    <Page Remove="Styles\SliderV1.xaml" />
+    <Page Remove="Styles\SliderV2.xaml" />
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="DarkNet" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SharpPcap" Version="6.2.5" />
+  </ItemGroup>
+
+    <ItemGroup><!-- WinDivert support has been temporarily disabled. 
+         These references have been commented out and may be re-enabled if WinDivert support is reactivated.
+         See the InitializeWinDivertAsync method in CaptureWindowsService.cs for more details.
+    <None Update="lib\WinDivert-*\x64\*.dll;lib\WinDivert-*\x64\*.sys;lib\WinDivert-*\x86\*.dll;lib\WinDivert-*\x86\*.sys">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    -->
+    
+      <Folder Include="lib\" />
+    
+      <Folder Include="WpfUiAdapters\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\.editorconfig" Link=".editorconfig" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Wpf.Ui">
+        <HintPath>..\..\_wpf\fluentui\src\Wpf.Ui\bin\Debug\net7.0-windows\Wpf.Ui.dll</HintPath>
+        <Private>True</Private>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Properties\Settings.Designer.cs">
+        <DesignTimeSharedInput>True</DesignTimeSharedInput>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Settings.settings</DependentUpon>
+      </Compile>
+      <Compile Update="Views\UserControls\MatryoshkaBox.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Properties\Settings.settings">
+        <Generator>SettingsSingleFileGenerator</Generator>
+        <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      </None>
+    </ItemGroup>
+
+
+</Project>

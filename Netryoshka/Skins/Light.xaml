@@ -1,0 +1,602 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--  LIGHT THEME  -->
+
+  <!--  core colors  -->
+  <Color x:Key="Grey1">#F5F6F7</Color>
+  <Color x:Key="Grey2">#D5DADD</Color>
+  <Color x:Key="Grey3">#A9B4BE</Color>
+  <Color x:Key="Grey4">#8396A8</Color>
+  <Color x:Key="Grey5">#5B738B</Color>
+  <Color x:Key="Grey6">#475E75</Color>
+  <Color x:Key="Grey7">#354A5F</Color>
+  <Color x:Key="Grey8">#223548</Color>
+  <Color x:Key="Grey9">#111D29</Color>
+  <Color x:Key="Blue1">#FFEBF8FF</Color>
+  <Color x:Key="Blue2">#FF89D1FF</Color>
+  <Color x:Key="Blue3">#FF4DB1FF</Color>
+  <Color x:Key="Blue4">#FF1B90FF</Color>
+  <Color x:Key="Blue5">#FF0070F2</Color>
+  <Color x:Key="Blue6">#FF0057D2</Color>
+  <Color x:Key="Blue7">#FF0040B0</Color>
+  <Color x:Key="Blue8">#FF002A86</Color>
+  <Color x:Key="Blue9">#FF00144A</Color>
+  <Color x:Key="Teal1">#FFDAFDF5</Color>
+  <Color x:Key="Teal2">#FF64EDD2</Color>
+  <Color x:Key="Teal3">#FF00CEAC</Color>
+  <Color x:Key="Teal4">#FF04ACA7</Color>
+  <Color x:Key="Teal5">#FF07838F</Color>
+  <Color x:Key="Teal6">#FF046C7A</Color>
+  <Color x:Key="Teal7">#FF035663</Color>
+  <Color x:Key="Teal8">#FF02414C</Color>
+  <Color x:Key="Teal9">#FF012931</Color>
+  <Color x:Key="Green1">#FFF5FAE5</Color>
+  <Color x:Key="Green2">#FF97DD40</Color>
+  <Color x:Key="Green3">#FF5DC122</Color>
+  <Color x:Key="Green4">#FF36A41D</Color>
+  <Color x:Key="Green5">#FF188918</Color>
+  <Color x:Key="Green6">#FF256F3A</Color>
+  <Color x:Key="Green7">#FF1E592F</Color>
+  <Color x:Key="Green8">#FF164323</Color>
+  <Color x:Key="Green9">#FF0E2B16</Color>
+  <Color x:Key="Mango1">#FFFFF8D6</Color>
+  <Color x:Key="Mango2">#FFFFDF72</Color>
+  <Color x:Key="Mango3">#FFFFB300</Color>
+  <Color x:Key="Mango4">#FFF58B00</Color>
+  <Color x:Key="Mango5">#FFC35500</Color>
+  <Color x:Key="Mango6">#FFA93E00</Color>
+  <Color x:Key="Mango7">#FF8D2A00</Color>
+  <Color x:Key="Mango8">#FF6D1900</Color>
+  <Color x:Key="Mango9">#FF450B00</Color>
+  <Color x:Key="Red1">#FFFFE0E5</Color>
+  <Color x:Key="Red2">#FFFF8CB2</Color>
+  <Color x:Key="Red3">#FFFF5C77</Color>
+  <Color x:Key="Red4">#FFEE3939</Color>
+  <Color x:Key="Red5">#FFD20A0A</Color>
+  <Color x:Key="Red6">#FFAA0808</Color>
+  <Color x:Key="Red7">#FF840606</Color>
+  <Color x:Key="Red8">#FF5A0404</Color>
+  <Color x:Key="Red9">#FF350000</Color>
+  <Color x:Key="Pink1">#FFFFF0FA</Color>
+  <Color x:Key="Pink2">#FFFFB4F7</Color>
+  <Color x:Key="Pink3">#FFFF8AF0</Color>
+  <Color x:Key="Pink4">#FFF31DED</Color>
+  <Color x:Key="Pink5">#FFCC00DC</Color>
+  <Color x:Key="Pink6">#FFA100C2</Color>
+  <Color x:Key="Pink7">#FF7800A4</Color>
+  <Color x:Key="Pink8">#FF510080</Color>
+  <Color x:Key="Pink9">#FF28004A</Color>
+  <Color x:Key="Indigo1">#FFF1ECFF</Color>
+  <Color x:Key="Indigo2">#FFD3B6FF</Color>
+  <Color x:Key="Indigo3">#FFB894FF</Color>
+  <Color x:Key="Indigo4">#FF9B76FF</Color>
+  <Color x:Key="Indigo5">#FF7858FF</Color>
+  <Color x:Key="Indigo6">#FF5D36FF</Color>
+  <Color x:Key="Indigo7">#FF470CED</Color>
+  <Color x:Key="Indigo8">#FF2C13AD</Color>
+  <Color x:Key="Indigo9">#FF1C0C6E</Color>
+  <Color x:Key="BaseWhite">#FFFFFFFF</Color>
+  <Color x:Key="BaseBlack">#FF000000</Color>
+
+  <!--  shadow colors  -->
+  <Color x:Key="CardShadow">#5B738B14</Color>
+  <Color x:Key="SectionShadow">#5B738B3D</Color>
+
+  <!--  grouped background colors  -->
+  <Color x:Key="PrimaryGroupedBackground">#FFF5F6F7</Color>
+  <Color x:Key="SecondaryGroupedBackground">#FFFFFFFF</Color>
+  <Color x:Key="TertiaryGroupedBackground">#FFF5F6F7</Color>
+  <Color x:Key="PrimaryElevatedGroupedBackground">#FFF5F6F7</Color>
+  <Color x:Key="SecondaryElevatedGroupedBackground">#FFFFFFFF</Color>
+  <Color x:Key="TertiaryElevatedGroupedBackground">#FFF5F6F7</Color>
+
+  <!--  background colors  -->
+  <Color x:Key="PrimaryBackground">#FFFFFFFF</Color>
+  <Color x:Key="SecondaryBackground">#FFF5F6F7</Color>
+  <Color x:Key="TertiaryBackground">#FFFFFFFF</Color>
+  <Color x:Key="PrimaryElevatedBackground">#FFFFFFFF</Color>
+  <Color x:Key="SecondaryElevatedBackground">#FFF5F6F7</Color>
+  <Color x:Key="TertiaryElevatedBackground">#FFFFFFFF</Color>
+
+  <!--  label colors  -->
+  <Color x:Key="PrimaryLabel">#FF223548</Color>
+  <Color x:Key="SecondaryLabel">#FF475E75</Color>
+  <Color x:Key="TertiaryLabel">#E5475E75</Color>
+  <Color x:Key="QuarternaryLabel">#D45B738B</Color>
+
+  <!--  fill colors  -->
+  <Color x:Key="PrimaryFill">#FFFFFFFF</Color>
+  <Color x:Key="SecondaryFill">#0F5B738B</Color>
+  <Color x:Key="TertiaryFill">#295B738B</Color>
+  <Color x:Key="QuarternaryFill">#145B738B</Color>
+
+  <!--  tint colors  -->
+  <Color x:Key="TintColor1">#FF0070F2</Color>
+  <Color x:Key="TintColor2">#FF0057D2</Color>
+  <Color x:Key="TintColorTapState">#FF0040B0</Color>
+
+  <!--  semantic colors  -->
+  <Color x:Key="NegativeLabel">#FFD20A0A</Color>
+  <Color x:Key="PositiveLabel">#FF256F3A</Color>
+  <Color x:Key="CriticalLabel">#FFA93E00</Color>
+  <Color x:Key="NegativeBackground">#FFEAF4FF</Color>
+  <Color x:Key="PositiveBackground">#FFF5FAE5</Color>
+  <Color x:Key="CriticalBackground">#FFFFF8D6</Color>
+  <Color x:Key="InformationBackground">#FFEBF8FF</Color>
+
+  <!--  separator colors  -->
+  <Color x:Key="Seperator">#5E5B738B</Color>
+  <Color x:Key="SeparatorOpaque">#D45B738B</Color>
+
+  <!--  ui materials colors  -->
+  <Color x:Key="Header">#FFFFFFFF</Color>
+  <Color x:Key="HeaderBlended">#FFFFFFFF</Color>
+  <Color x:Key="BarTransparent">#D9111D29</Color>
+  <Color x:Key="ContrastElement">#FF5B738B</Color>
+  <Color x:Key="Footer">#FFFFFFFF</Color>
+  <Color x:Key="CellBackground">#00FFFFFF</Color>
+
+  <!--  chart colors  -->
+  <Color x:Key="Chart1">#FF5899DA</Color>
+  <Color x:Key="Chart2">#FFE8743B</Color>
+  <Color x:Key="Chart3">#FF19A979</Color>
+  <Color x:Key="Chart4">#FFED4A7B</Color>
+  <Color x:Key="Chart5">#FF945ECF</Color>
+  <Color x:Key="Chart6">#FF13A4B4</Color>
+  <Color x:Key="Chart7">#FF525DF4</Color>
+  <Color x:Key="Chart8">#FFBF399E</Color>
+  <Color x:Key="Chart9">#FF6C8893</Color>
+  <Color x:Key="Chart10">#FFEE6868</Color>
+  <Color x:Key="Chart11">#FF2F6497</Color>
+  <Color x:Key="StockUpStroke">#FF19A979</Color>
+  <Color x:Key="StockDownStroke">#FFAB2217</Color>
+
+  <!--  map colors  -->
+  <Color x:Key="Map1">#FF2E4A62</Color>
+  <Color x:Key="Map2">#FF56840E</Color>
+  <Color x:Key="Map3">#FFA63788</Color>
+  <Color x:Key="Map4">#FF0079C6</Color>
+  <Color x:Key="Map5">#FF6B4EA0</Color>
+  <Color x:Key="Map6">#FFA16B00</Color>
+  <Color x:Key="Map7">#FF0B6295</Color>
+  <Color x:Key="Map8">#FFD07774</Color>
+  <Color x:Key="Map9">#FF1C857A</Color>
+  <Color x:Key="Map10">#FFC45300</Color>
+  <Color x:Key="EsriEdit">#FF1B6DD2</Color>
+
+  <!--  Accent Colors  -->
+  <Color x:Key="Accent1">#FFA93E00</Color>
+  <Color x:Key="Accent2">#FFAA0808</Color>
+  <Color x:Key="Accent3">#FFBA066C</Color>
+  <Color x:Key="Accent4">#FFA100C2</Color>
+  <Color x:Key="Accent5">#FF470CED</Color>
+  <Color x:Key="Accent6">#FF0057D2</Color>
+  <Color x:Key="Accent7">#FF046C7A</Color>
+  <Color x:Key="Accent8">#FF256F3A</Color>
+  <Color x:Key="Accent9">#FF354A5F</Color>
+  <Color x:Key="AccentBackground1">#FFFFF3B8</Color>
+  <Color x:Key="AccentBackground2">#FFFFD5EA</Color>
+  <Color x:Key="AccentBackground3">#FFFFDCE8</Color>
+  <Color x:Key="AccentBackground4">#FFFFDCF3</Color>
+  <Color x:Key="AccentBackground5">#FFE2D8FF</Color>
+  <Color x:Key="AccentBackground6">#FFD1EFFF</Color>
+  <Color x:Key="AccentBackground7">#FFC2FCEE</Color>
+  <Color x:Key="AccentBackground8">#FFEBF5CB</Color>
+  <Color x:Key="AccentBackground9">#FFEAECEE</Color>
+
+
+
+
+
+
+
+  <!--  ================== BRUSHES ==================  -->
+
+
+  <!--  core colors  -->
+  <SolidColorBrush x:Key="Grey1Brush"
+                   Color="{StaticResource Grey1}" />
+  <SolidColorBrush x:Key="Grey2Brush"
+                   Color="{StaticResource Grey2}" />
+  <SolidColorBrush x:Key="Grey3Brush"
+                   Color="{StaticResource Grey3}" />
+  <SolidColorBrush x:Key="Grey4Brush"
+                   Color="{StaticResource Grey4}" />
+  <SolidColorBrush x:Key="Grey5Brush"
+                   Color="{StaticResource Grey5}" />
+  <SolidColorBrush x:Key="Grey6Brush"
+                   Color="{StaticResource Grey6}" />
+  <SolidColorBrush x:Key="Grey7Brush"
+                   Color="{StaticResource Grey7}" />
+  <SolidColorBrush x:Key="Grey8Brush"
+                   Color="{StaticResource Grey8}" />
+  <SolidColorBrush x:Key="Grey9Brush"
+                   Color="{StaticResource Grey9}" />
+  <SolidColorBrush x:Key="Blue1Brush"
+                   Color="{StaticResource Blue1}" />
+  <SolidColorBrush x:Key="Blue2Brush"
+                   Color="{StaticResource Blue2}" />
+  <SolidColorBrush x:Key="Blue3Brush"
+                   Color="{StaticResource Blue3}" />
+  <SolidColorBrush x:Key="Blue4Brush"
+                   Color="{StaticResource Blue4}" />
+  <SolidColorBrush x:Key="Blue5Brush"
+                   Color="{StaticResource Blue5}" />
+  <SolidColorBrush x:Key="Blue6Brush"
+                   Color="{StaticResource Blue6}" />
+  <SolidColorBrush x:Key="Blue7Brush"
+                   Color="{StaticResource Blue7}" />
+  <SolidColorBrush x:Key="Blue8Brush"
+                   Color="{StaticResource Blue8}" />
+  <SolidColorBrush x:Key="Blue9Brush"
+                   Color="{StaticResource Blue9}" />
+  <SolidColorBrush x:Key="Teal1Brush"
+                   Color="{StaticResource Teal1}" />
+  <SolidColorBrush x:Key="Teal2Brush"
+                   Color="{StaticResource Teal2}" />
+  <SolidColorBrush x:Key="Teal3Brush"
+                   Color="{StaticResource Teal3}" />
+  <SolidColorBrush x:Key="Teal4Brush"
+                   Color="{StaticResource Teal4}" />
+  <SolidColorBrush x:Key="Teal5Brush"
+                   Color="{StaticResource Teal5}" />
+  <SolidColorBrush x:Key="Teal6Brush"
+                   Color="{StaticResource Teal6}" />
+  <SolidColorBrush x:Key="Teal7Brush"
+                   Color="{StaticResource Teal7}" />
+  <SolidColorBrush x:Key="Teal8Brush"
+                   Color="{StaticResource Teal8}" />
+  <SolidColorBrush x:Key="Teal9Brush"
+                   Color="{StaticResource Teal9}" />
+  <SolidColorBrush x:Key="Green1Brush"
+                   Color="{StaticResource Green1}" />
+  <SolidColorBrush x:Key="Green2Brush"
+                   Color="{StaticResource Green2}" />
+  <SolidColorBrush x:Key="Green3Brush"
+                   Color="{StaticResource Green3}" />
+  <SolidColorBrush x:Key="Green4Brush"
+                   Color="{StaticResource Green4}" />
+  <SolidColorBrush x:Key="Green5Brush"
+                   Color="{StaticResource Green5}" />
+  <SolidColorBrush x:Key="Green6Brush"
+                   Color="{StaticResource Green6}" />
+  <SolidColorBrush x:Key="Green7Brush"
+                   Color="{StaticResource Green7}" />
+  <SolidColorBrush x:Key="Green8Brush"
+                   Color="{StaticResource Green8}" />
+  <SolidColorBrush x:Key="Green9Brush"
+                   Color="{StaticResource Green9}" />
+  <SolidColorBrush x:Key="Mango1Brush"
+                   Color="{StaticResource Mango1}" />
+  <SolidColorBrush x:Key="Mango2Brush"
+                   Color="{StaticResource Mango2}" />
+  <SolidColorBrush x:Key="Mango3Brush"
+                   Color="{StaticResource Mango3}" />
+  <SolidColorBrush x:Key="Mango4Brush"
+                   Color="{StaticResource Mango4}" />
+  <SolidColorBrush x:Key="Mango5Brush"
+                   Color="{StaticResource Mango5}" />
+  <SolidColorBrush x:Key="Mango6Brush"
+                   Color="{StaticResource Mango6}" />
+  <SolidColorBrush x:Key="Mango7Brush"
+                   Color="{StaticResource Mango7}" />
+  <SolidColorBrush x:Key="Mango8Brush"
+                   Color="{StaticResource Mango8}" />
+  <SolidColorBrush x:Key="Mango9Brush"
+                   Color="{StaticResource Mango9}" />
+  <SolidColorBrush x:Key="Red1Brush"
+                   Color="{StaticResource Red1}" />
+  <SolidColorBrush x:Key="Red2Brush"
+                   Color="{StaticResource Red2}" />
+  <SolidColorBrush x:Key="Red3Brush"
+                   Color="{StaticResource Red3}" />
+  <SolidColorBrush x:Key="Red4Brush"
+                   Color="{StaticResource Red4}" />
+  <SolidColorBrush x:Key="Red5Brush"
+                   Color="{StaticResource Red5}" />
+  <SolidColorBrush x:Key="Red6Brush"
+                   Color="{StaticResource Red6}" />
+  <SolidColorBrush x:Key="Red7Brush"
+                   Color="{StaticResource Red7}" />
+  <SolidColorBrush x:Key="Red8Brush"
+                   Color="{StaticResource Red8}" />
+  <SolidColorBrush x:Key="Red9Brush"
+                   Color="{StaticResource Red9}" />
+  <SolidColorBrush x:Key="Pink1Brush"
+                   Color="{StaticResource Pink1}" />
+  <SolidColorBrush x:Key="Pink2Brush"
+                   Color="{StaticResource Pink2}" />
+  <SolidColorBrush x:Key="Pink3Brush"
+                   Color="{StaticResource Pink3}" />
+  <SolidColorBrush x:Key="Pink4Brush"
+                   Color="{StaticResource Pink4}" />
+  <SolidColorBrush x:Key="Pink5Brush"
+                   Color="{StaticResource Pink5}" />
+  <SolidColorBrush x:Key="Pink6Brush"
+                   Color="{StaticResource Pink6}" />
+  <SolidColorBrush x:Key="Pink7Brush"
+                   Color="{StaticResource Pink7}" />
+  <SolidColorBrush x:Key="Pink8Brush"
+                   Color="{StaticResource Pink8}" />
+  <SolidColorBrush x:Key="Pink9Brush"
+                   Color="{StaticResource Pink9}" />
+  <SolidColorBrush x:Key="Indigo1Brush"
+                   Color="{StaticResource Indigo1}" />
+  <SolidColorBrush x:Key="Indigo2Brush"
+                   Color="{StaticResource Indigo2}" />
+  <SolidColorBrush x:Key="Indigo3Brush"
+                   Color="{StaticResource Indigo3}" />
+  <SolidColorBrush x:Key="Indigo4Brush"
+                   Color="{StaticResource Indigo4}" />
+  <SolidColorBrush x:Key="Indigo5Brush"
+                   Color="{StaticResource Indigo5}" />
+  <SolidColorBrush x:Key="Indigo6Brush"
+                   Color="{StaticResource Indigo6}" />
+  <SolidColorBrush x:Key="Indigo7Brush"
+                   Color="{StaticResource Indigo7}" />
+  <SolidColorBrush x:Key="Indigo8Brush"
+                   Color="{StaticResource Indigo8}" />
+  <SolidColorBrush x:Key="Indigo9Brush"
+                   Color="{StaticResource Indigo9}" />
+  <SolidColorBrush x:Key="BaseWhiteBrush"
+                   Color="{StaticResource BaseWhite}" />
+  <SolidColorBrush x:Key="BaseBlackBrush"
+                   Color="{StaticResource BaseBlack}" />
+
+  <!--  shadow colors  -->
+  <SolidColorBrush x:Key="CardShadowBrush"
+                   Color="{StaticResource CardShadow}" />
+  <SolidColorBrush x:Key="SectionShadowBrush"
+                   Color="{StaticResource SectionShadow}" />
+
+  <!--  grouped background colors  -->
+  <SolidColorBrush x:Key="PrimaryGroupedBackgroundBrush"
+                   Color="{StaticResource PrimaryGroupedBackground}" />
+  <SolidColorBrush x:Key="SecondaryGroupedBackgroundBrush"
+                   Color="{StaticResource SecondaryGroupedBackground}" />
+  <SolidColorBrush x:Key="TertiaryGroupedBackgroundBrush"
+                   Color="{StaticResource TertiaryGroupedBackground}" />
+  <SolidColorBrush x:Key="PrimaryElevatedGroupedBackgroundBrush"
+                   Color="{StaticResource PrimaryElevatedGroupedBackground}" />
+  <SolidColorBrush x:Key="SecondaryElevatedGroupedBackgroundBrush"
+                   Color="{StaticResource SecondaryElevatedGroupedBackground}" />
+  <SolidColorBrush x:Key="TertiaryElevatedGroupedBackgroundBrush"
+                   Color="{StaticResource TertiaryElevatedGroupedBackground}" />
+
+  <!--  background colors  -->
+  <SolidColorBrush x:Key="PrimaryBackgroundBrush"
+                   Color="{StaticResource PrimaryBackground}" />
+  <SolidColorBrush x:Key="SecondaryBackgroundBrush"
+                   Color="{StaticResource SecondaryBackground}" />
+  <SolidColorBrush x:Key="TertiaryBackgroundBrush"
+                   Color="{StaticResource TertiaryBackground}" />
+  <SolidColorBrush x:Key="PrimaryElevatedBackgroundBrush"
+                   Color="{StaticResource PrimaryElevatedBackground}" />
+  <SolidColorBrush x:Key="SecondaryElevatedBackgroundBrush"
+                   Color="{StaticResource SecondaryElevatedBackground}" />
+  <SolidColorBrush x:Key="TertiaryElevatedBackgroundBrush"
+                   Color="{StaticResource TertiaryElevatedBackground}" />
+
+  <!--  label colors  -->
+  <SolidColorBrush x:Key="PrimaryLabelBrush"
+                   Color="{StaticResource PrimaryLabel}" />
+  <SolidColorBrush x:Key="SecondaryLabelBrush"
+                   Color="{StaticResource SecondaryLabel}" />
+  <SolidColorBrush x:Key="TertiaryLabelBrush"
+                   Color="{StaticResource TertiaryLabel}" />
+  <SolidColorBrush x:Key="QuarternaryLabelBrush"
+                   Color="{StaticResource QuarternaryLabel}" />
+
+  <!--  fill colors  -->
+  <SolidColorBrush x:Key="PrimaryFillBrush"
+                   Color="{StaticResource PrimaryFill}" />
+  <SolidColorBrush x:Key="SecondaryFillBrush"
+                   Color="{StaticResource SecondaryFill}" />
+  <SolidColorBrush x:Key="TertiaryFillBrush"
+                   Color="{StaticResource TertiaryFill}" />
+  <SolidColorBrush x:Key="QuarternaryFillBrush"
+                   Color="{StaticResource QuarternaryFill}" />
+
+  <!--  tint colors  -->
+  <SolidColorBrush x:Key="TintColor1Brush"
+                   Color="{StaticResource TintColor1}" />
+  <SolidColorBrush x:Key="TintColor2Brush"
+                   Color="{StaticResource TintColor2}" />
+  <SolidColorBrush x:Key="TintColorTapStateBrush"
+                   Color="{StaticResource TintColorTapState}" />
+
+  <!--  semantic colors  -->
+  <SolidColorBrush x:Key="NegativeLabelBrush"
+                   Color="{StaticResource NegativeLabel}" />
+  <SolidColorBrush x:Key="PositiveLabelBrush"
+                   Color="{StaticResource PositiveLabel}" />
+  <SolidColorBrush x:Key="CriticalLabelBrush"
+                   Color="{StaticResource CriticalLabel}" />
+  <SolidColorBrush x:Key="NegativeBackgroundBrush"
+                   Color="{StaticResource NegativeBackground}" />
+  <SolidColorBrush x:Key="PositiveBackgroundBrush"
+                   Color="{StaticResource PositiveBackground}" />
+  <SolidColorBrush x:Key="CriticalBackgroundBrush"
+                   Color="{StaticResource CriticalBackground}" />
+  <SolidColorBrush x:Key="InformationBackgroundBrush"
+                   Color="{StaticResource InformationBackground}" />
+
+  <!--  separator colors  -->
+  <SolidColorBrush x:Key="SeperatorBrush"
+                   Color="{StaticResource Seperator}" />
+  <SolidColorBrush x:Key="SeparatorOpaqueBrush"
+                   Color="{StaticResource SeparatorOpaque}" />
+
+  <!--  ui materials colors  -->
+  <SolidColorBrush x:Key="HeaderBrush"
+                   Color="{StaticResource Header}" />
+  <SolidColorBrush x:Key="HeaderBlendedBrush"
+                   Color="{StaticResource HeaderBlended}" />
+  <SolidColorBrush x:Key="BarTransparentBrush"
+                   Color="{StaticResource BarTransparent}" />
+  <SolidColorBrush x:Key="ContrastElementBrush"
+                   Color="{StaticResource ContrastElement}" />
+  <SolidColorBrush x:Key="FooterBrush"
+                   Color="{StaticResource Footer}" />
+  <SolidColorBrush x:Key="CellBackgroundBrush"
+                   Color="{StaticResource CellBackground}" />
+
+  <!--  chart colors (assuming they remain the same in dark theme)  -->
+  <SolidColorBrush x:Key="Chart1Brush"
+                   Color="{StaticResource Chart1}" />
+  <SolidColorBrush x:Key="Chart2Brush"
+                   Color="{StaticResource Chart2}" />
+  <SolidColorBrush x:Key="Chart3Brush"
+                   Color="{StaticResource Chart3}" />
+  <SolidColorBrush x:Key="Chart4Brush"
+                   Color="{StaticResource Chart4}" />
+  <SolidColorBrush x:Key="Chart5Brush"
+                   Color="{StaticResource Chart5}" />
+  <SolidColorBrush x:Key="Chart6Brush"
+                   Color="{StaticResource Chart6}" />
+  <SolidColorBrush x:Key="Chart7Brush"
+                   Color="{StaticResource Chart7}" />
+  <SolidColorBrush x:Key="Chart8Brush"
+                   Color="{StaticResource Chart8}" />
+  <SolidColorBrush x:Key="Chart9Brush"
+                   Color="{StaticResource Chart9}" />
+  <SolidColorBrush x:Key="Chart10Brush"
+                   Color="{StaticResource Chart10}" />
+  <SolidColorBrush x:Key="Chart11Brush"
+                   Color="{StaticResource Chart11}" />
+  <SolidColorBrush x:Key="StockUpStrokeBrush"
+                   Color="{StaticResource StockUpStroke}" />
+  <SolidColorBrush x:Key="StockDownStrokeBrush"
+                   Color="{StaticResource StockDownStroke}" />
+
+  <!--  map colors  -->
+  <SolidColorBrush x:Key="Map1Brush"
+                   Color="{StaticResource Map1}" />
+  <SolidColorBrush x:Key="Map2Brush"
+                   Color="{StaticResource Map2}" />
+  <SolidColorBrush x:Key="Map3Brush"
+                   Color="{StaticResource Map3}" />
+  <SolidColorBrush x:Key="Map4Brush"
+                   Color="{StaticResource Map4}" />
+  <SolidColorBrush x:Key="Map5Brush"
+                   Color="{StaticResource Map5}" />
+  <SolidColorBrush x:Key="Map6Brush"
+                   Color="{StaticResource Map6}" />
+  <SolidColorBrush x:Key="Map7Brush"
+                   Color="{StaticResource Map7}" />
+  <SolidColorBrush x:Key="Map8Brush"
+                   Color="{StaticResource Map8}" />
+  <SolidColorBrush x:Key="Map9Brush"
+                   Color="{StaticResource Map9}" />
+  <SolidColorBrush x:Key="Map10Brush"
+                   Color="{StaticResource Map10}" />
+  <SolidColorBrush x:Key="EsriEditBrush"
+                   Color="{StaticResource EsriEdit}" />
+
+  <!--  Accent Colors  -->
+  <SolidColorBrush x:Key="Accent1Brush"
+                   Color="{StaticResource Accent1}" />
+  <SolidColorBrush x:Key="Accent2Brush"
+                   Color="{StaticResource Accent2}" />
+  <SolidColorBrush x:Key="Accent3Brush"
+                   Color="{StaticResource Accent3}" />
+  <SolidColorBrush x:Key="Accent4Brush"
+                   Color="{StaticResource Accent4}" />
+  <SolidColorBrush x:Key="Accent5Brush"
+                   Color="{StaticResource Accent5}" />
+  <SolidColorBrush x:Key="Accent6Brush"
+                   Color="{StaticResource Accent6}" />
+  <SolidColorBrush x:Key="Accent7Brush"
+                   Color="{StaticResource Accent7}" />
+  <SolidColorBrush x:Key="Accent8Brush"
+                   Color="{StaticResource Accent8}" />
+  <SolidColorBrush x:Key="Accent9Brush"
+                   Color="{StaticResource Accent9}" />
+  <SolidColorBrush x:Key="AccentBackground1Brush"
+                   Color="{StaticResource AccentBackground1}" />
+  <SolidColorBrush x:Key="AccentBackground2Brush"
+                   Color="{StaticResource AccentBackground2}" />
+  <SolidColorBrush x:Key="AccentBackground3Brush"
+                   Color="{StaticResource AccentBackground3}" />
+  <SolidColorBrush x:Key="AccentBackground4Brush"
+                   Color="{StaticResource AccentBackground4}" />
+  <SolidColorBrush x:Key="AccentBackground5Brush"
+                   Color="{StaticResource AccentBackground5}" />
+  <SolidColorBrush x:Key="AccentBackground6Brush"
+                   Color="{StaticResource AccentBackground6}" />
+  <SolidColorBrush x:Key="AccentBackground7Brush"
+                   Color="{StaticResource AccentBackground7}" />
+  <SolidColorBrush x:Key="AccentBackground8Brush"
+                   Color="{StaticResource AccentBackground8}" />
+  <SolidColorBrush x:Key="AccentBackground9Brush"
+                   Color="{StaticResource AccentBackground9}" />
+
+
+
+  <SolidColorBrush x:Key="FlowBubblePivotBackgroundBrush"
+                   Color="{StaticResource Indigo2}" />
+  <SolidColorBrush x:Key="FlowBubbleOrbitBackgroundBrush"
+                   Color="{StaticResource Blue2}" />
+
+  <Color x:Key="BotBorderColor">#FF5DC122</Color>
+  <SolidColorBrush x:Key="BotBorderBrush"
+                   Color="{StaticResource BotBorderColor}" />
+  <Color x:Key="BotBorderTransparentColor">#005DC122</Color>
+  <SolidColorBrush x:Key="BotBorderTransparentBrush"
+                   Color="{StaticResource BotBorderTransparentColor}" />
+
+
+  <Color x:Key="MatryoshkaRed7">#FFFF5C77</Color>
+  <Color x:Key="MatryoshkaMango7">#FFFFB300</Color>
+  <Color x:Key="MatryoshkaGreen7">#FF5DC122</Color>
+  <Color x:Key="MatryoshkaBlue7">#FF4DB1FF</Color>
+  <Color x:Key="MatryoshkaPink7">#FFFF8AF0</Color>
+
+  <SolidColorBrush x:Key="MatryoshkaRed7Brush"
+                   Color="{StaticResource MatryoshkaRed7}" />
+  <SolidColorBrush x:Key="MatryoshkaMango7Brush"
+                   Color="{StaticResource MatryoshkaMango7}" />
+  <SolidColorBrush x:Key="MatryoshkaGreen7Brush"
+                   Color="{StaticResource MatryoshkaGreen7}" />
+  <SolidColorBrush x:Key="MatryoshkaBlue7Brush"
+                   Color="{StaticResource MatryoshkaBlue7}" />
+  <SolidColorBrush x:Key="MatryoshkaPink7Brush"
+                   Color="{StaticResource MatryoshkaPink7}" />
+
+
+
+  <!--  Play24  -->
+  <Color x:Key="Green6B">#FF188918</Color>
+  <!--  Pause24  -->
+  <Color x:Key="Red6B">#FFEE3939</Color>
+  <!--  Save24  -->
+  <Color x:Key="Blue7B">#FF1B90FF</Color>
+  <!--  FolderOpen24  -->
+  <Color x:Key="Mango8B">#FFFFB300</Color>
+  <!--  Key24  -->
+  <Color x:Key="Indigo6B">#FF7858FF</Color>
+  <!--  DeveloperBoardSearch24  -->
+  <Color x:Key="Indigo8B">#FF9B76FF</Color>
+  <!--  Edit24  -->
+  <Color x:Key="Mango6B">#FFF58B00</Color>
+
+  <SolidColorBrush x:Key="Green6BBrush"
+                   Color="{StaticResource Green6B}" />
+  <SolidColorBrush x:Key="Red6BBrush"
+                   Color="{StaticResource Red6B}" />
+  <SolidColorBrush x:Key="Blue7BBrush"
+                   Color="{StaticResource Blue7B}" />
+  <SolidColorBrush x:Key="Mango8BBrush"
+                   Color="{StaticResource Mango8B}" />
+  <SolidColorBrush x:Key="Indigo6BBrush"
+                   Color="{StaticResource Indigo6B}" />
+  <SolidColorBrush x:Key="Indigo8BBrush"
+                   Color="{StaticResource Indigo8B}" />
+  <SolidColorBrush x:Key="Mango6BBrush"
+                   Color="{StaticResource Mango6B}" />
+
+  <Color x:Key="BotColor">#5B738B</Color>
+  <SolidColorBrush x:Key="BotBrush"
+                   Color="{StaticResource BotColor}" />
+
+</ResourceDictionary>

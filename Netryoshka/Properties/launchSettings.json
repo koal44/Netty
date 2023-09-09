@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Netty": {
+      "commandName": "Project",
+      "nativeDebugging": false,
+      "hotReloadEnabled": false
+    }
+  }
+}

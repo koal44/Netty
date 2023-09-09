@@ -1,0 +1,25 @@
+﻿<Page x:Class="Netty.DevPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Netty"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="Dev"
+      d:DesignHeight="450"
+      d:DesignWidth="800"
+      mc:Ignorable="d">
+
+  <StackPanel HorizontalAlignment="Center"
+              Orientation="Vertical">
+    <!--<Button Width="100" Padding="10"
+            Height="100"
+            Content="{StaticResource Netty}" />-->
+    <Button Margin="0,50,0,20"
+            HorizontalAlignment="Center"
+            Click="PrintTemplateClickHandler"
+            Content="Print Template" />
+    <RichTextBox x:Name="OutputRichTextBox"
+                 MinHeight="200"
+                 Margin="50,0,50,0" />
+  </StackPanel>
+</Page>
