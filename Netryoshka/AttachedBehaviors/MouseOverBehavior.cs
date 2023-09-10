@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace Netty
+namespace Netryoshka
 {
     /* WARNING:
         This only works if a view's state is determined by one if its elements  

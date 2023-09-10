@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Netty.Utils
+namespace Netryoshka.Utils
 {
     public static class HexFun
     {

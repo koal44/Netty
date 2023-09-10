@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class MatryoshkaBoxViewModel : ObservableObject
     {

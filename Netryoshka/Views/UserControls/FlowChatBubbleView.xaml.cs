@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class FlowChatBubbleView : UserControl
     {

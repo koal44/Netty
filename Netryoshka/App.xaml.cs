@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Netty.Services;
-using Netty.ViewModels;
+using Netryoshka.Services;
+using Netryoshka.ViewModels;
 using System;
 using System.Windows;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Contracts;
 using Wpf.Ui.Services;
 
-namespace Netty;
+namespace Netryoshka;
 
 public partial class App : Application
 {

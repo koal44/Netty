@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace Netty
+namespace Netryoshka
 {
     /// <summary>
     /// Base value converter allowing direct xaml use

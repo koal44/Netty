@@ -6,7 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Wpf.Ui.Controls;
 
-namespace Netty.Views
+namespace Netryoshka.Views
 {
     /// <summary>
     /// Interaction logic for ProcessPortsDialog.xaml

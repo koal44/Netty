@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Netty.Services
+namespace Netryoshka.Services
 {
     public class FlowManager
     {

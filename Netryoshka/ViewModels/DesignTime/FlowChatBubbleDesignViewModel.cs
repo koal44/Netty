@@ -1,24 +1,27 @@
 ﻿using System;
+using System.Windows;
 
-namespace Netty.DesignTime
+namespace Netryoshka.DesignTime
 {
-    public class FlowChatBubbleDesignViewModel : IFlowChatBubbleViewModel
+    public class FlowChatBubbleDesignViewModel
     {
-        public string? Content { get; set; }
-        public FlowEndpointRole EndPointRole { get; set; }
-        public TimeSpan PacketInterval { get; set; }
-        public string TcpHeadersDisplay { get; set; }
-        public string MacHeadersDisplay { get; set; }
-        public IFlowsPageViewModel ParentViewModel { get; }
+        //public BasicPacket BasicPacket { get; }
+        public FlowEndpointRole EndPointRole { get; }
+        //public TimeSpan? PacketInterval { get; }
+        public string? HeaderContent { get; set; }
+        public string? BodyContent { get; set; }
+        public string? FooterContent { get; set; }
+        //public Template Template { get; set; }
 
         public FlowChatBubbleDesignViewModel()
         {
-            Content = "Sample Content";
+            //BasicPacket = DesignTimeData.GetPackets()[0];
             EndPointRole = FlowEndpointRole.Pivot;
-            PacketInterval = new TimeSpan(0, 0, 0, 0, 500);
-            TcpHeadersDisplay = "Sample TCP Headers";
-            MacHeadersDisplay = "Sample MAC Headers";
-            ParentViewModel = FlowsPageDesignViewModel.Instance;
+            //PacketInterval = new TimeSpan(0, 0, 0, 0, 500);
+            HeaderContent = "Header";
+            BodyContent = "Body";
+            FooterContent = "Footer";
+            //Template = Application.Current.FindResource("TcpHexDataTemplate") as Template ?? throw new InvalidOperationException("Could not find TcpHexDataTemplate");
         }
     }
 

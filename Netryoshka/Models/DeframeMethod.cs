@@ -1,4 +1,4 @@
-﻿namespace Netty
+﻿namespace Netryoshka
 {
     public enum DeframeMethod
     {

@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class MatryoshkaBox : UserControl
     {

@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace Netty.Views.Dialogs
+namespace Netryoshka.Views.Dialogs
 {
     /// <summary>
     /// Interaction logic for FilterEditorDialog.xaml

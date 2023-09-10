@@ -4,7 +4,7 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace Netty
+namespace Netryoshka
 {
 
     public class PathToBitmapExtension : MarkupExtension

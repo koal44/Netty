@@ -1,9 +1,9 @@
-﻿using Netty.Services;
+﻿using Netryoshka.Services;
 using System;
 using System.Net;
 using System.Net.NetworkInformation;
 
-namespace Netty
+namespace Netryoshka
 {
     public class BasicPacket
     {

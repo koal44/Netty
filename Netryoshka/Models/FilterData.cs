@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using static Netty.BasicPacket;
+using static Netryoshka.BasicPacket;
 
-namespace Netty
+namespace Netryoshka
 {
     public readonly struct FilterData
     {

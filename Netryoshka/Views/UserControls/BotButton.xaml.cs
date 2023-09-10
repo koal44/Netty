@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class BotButton : UserControl
     {

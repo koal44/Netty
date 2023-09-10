@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 
-namespace Netty
+namespace Netryoshka
 {
 
     /// <summary>

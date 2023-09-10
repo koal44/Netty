@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Netty.Utils;
+using Netryoshka.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
-using static Netty.TSharkHttp;
+using static Netryoshka.TSharkHttp;
 
-namespace Netty
+namespace Netryoshka
 {
     public class TSharkPacket
     {

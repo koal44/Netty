@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Netty
+namespace Netryoshka
 {
     public interface ISocketProcessMapperService
     {

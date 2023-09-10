@@ -1,14 +1,14 @@
-﻿using Netty.Services;
-using Netty.Utils;
+﻿using Netryoshka.Services;
+using Netryoshka.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
-using static Netty.BasicPacket;
+using static Netryoshka.BasicPacket;
 
-namespace Netty.DesignTime
+namespace Netryoshka.DesignTime
 {
-    public static class TestData
+    public static class DesignTimeData
     {
 
         public static TcpHeaders CreateTcpHeaderFields(TcpRole role)
@@ -136,7 +136,6 @@ namespace Netty.DesignTime
                     ackHeader)
             };
         }
-
 
     }
 }

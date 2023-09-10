@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
 
-namespace Netty
+namespace Netryoshka
 {
     public class MainWindowViewModel
     {

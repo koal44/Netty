@@ -24,7 +24,10 @@
     <Compile Remove="AttachedBehaviors\CapturesPacketsBehavior.cs" />
     <Compile Remove="AttachedBehaviors\MatryoshkaButtonMouseOverBehavior.cs" />
     <Compile Remove="Helpers\AttachedPropertiesBase.cs" />
+    <Compile Remove="Helpers\ChatBubbleTemplateSelector.cs" />
     <Compile Remove="Services\PacketCollectionService.cs" />
+    <Compile Remove="ViewModels\IFlowChatBubbleViewModel.cs" />
+    <Compile Remove="Views\UserControls\FlowChatBubbleView.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,6 +44,7 @@
     <Page Remove="Styles\MyContentDialog.xaml" />
     <Page Remove="Styles\SliderV1.xaml" />
     <Page Remove="Styles\SliderV2.xaml" />
+    <Page Remove="Views\UserControls\FlowChatBubbleView.xaml" />
   </ItemGroup>
 
 
@@ -83,6 +87,9 @@
         <DesignTimeSharedInput>True</DesignTimeSharedInput>
         <AutoGen>True</AutoGen>
         <DependentUpon>Settings.settings</DependentUpon>
+      </Compile>
+      <Compile Update="Views\UserControls\FlowChatBubble.xaml.cs">
+        <SubType>Code</SubType>
       </Compile>
       <Compile Update="Views\UserControls\MatryoshkaBox.xaml.cs">
         <SubType>Code</SubType>

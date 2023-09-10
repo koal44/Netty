@@ -2,7 +2,7 @@
 using System.Windows;
 using Wpf.Ui.Contracts;
 
-namespace Netty;
+namespace Netryoshka;
 
 /// <summary>
 /// Service that provides pages for navigation.

@@ -2,14 +2,14 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace Netty.DesignTime
+namespace Netryoshka.DesignTime
 {
-    public class FlowsPageDesignViewModel : IFlowsPageViewModel
+    public class FlowsPageDesignViewModel
     {
 #pragma warning disable CS0067 // The event 'FlowsPageDesignViewModel.PropertyChanged' is never used
         public event PropertyChangedEventHandler? PropertyChanged;
 #pragma warning restore CS0067 // The event 'FlowsPageDesignViewModel.PropertyChanged' is never used
-        public ObservableCollection<IFlowChatBubbleViewModel> CurrentFlowChatBubbles { get; set; }
+        public ObservableCollection<BubbleData> CurrentFlowChatBubbles { get; set; }
         public ObservableCollection<FlowEndpoint> PivotEndpoints { get; set; }
         public ObservableCollection<FlowEndpoint> OrbitEndpoints { get; set; }
         public FlowEndpoint? SelectedPivotEndpoint { get; set; }
@@ -29,7 +29,7 @@ namespace Netty.DesignTime
 
         public FlowsPageDesignViewModel()
         {
-            CurrentFlowChatBubbles = new ObservableCollection<IFlowChatBubbleViewModel>();
+            CurrentFlowChatBubbles = new ObservableCollection<BubbleData>();
             PivotEndpoints = new ObservableCollection<FlowEndpoint>();
             OrbitEndpoints = new ObservableCollection<FlowEndpoint>();
             PivotProcessInfo = "SystemService";
@@ -39,7 +39,7 @@ namespace Netty.DesignTime
             KeyLogFileName = "path/to/keylogfile.txt";
 
             DateTime? lastTimestamp = null;
-            foreach (var packet in TestData.GetPackets())
+            foreach (var packet in DesignTimeData.GetPackets())
             {
                 var role = packet.Direction == BasicPacket.BPDirection.Incoming
                             ? FlowEndpointRole.Pivot
@@ -48,11 +48,9 @@ namespace Netty.DesignTime
                             ? packet.Timestamp - lastTimestamp.Value
                             : TimeSpan.Zero;
                 CurrentFlowChatBubbles.Add(
-                    new FlowChatBubbleViewModel(packet, role, this)
-                    //new FlowChatBubbleDesignViewModel(this)
-                    {
-                        PacketInterval = packetInterval
-                    });
+                    //new FlowChatBubbleDesignViewModel()
+                    new BubbleData(packet, role, packetInterval)
+                );
 
                 //CurrentFlowChatBubbles.Add(
                 //    new FlowChatBubbleDesignViewModel().Build(packet, role, packetInterval, this));

@@ -1,10 +1,10 @@
 ﻿using Microsoft.Win32;
-using Netty.Services;
+using Netryoshka.Services;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Netty
+namespace Netryoshka
 {
     public class FileDialogService : IFileDialogService
     {

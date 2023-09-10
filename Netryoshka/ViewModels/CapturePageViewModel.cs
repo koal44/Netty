@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using Netty.Services;
-using Netty.Views;
-using Netty.Views.Dialogs;
+using Netryoshka.Services;
+using Netryoshka.Views;
+using Netryoshka.Views.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +18,7 @@ using System.Windows.Input;
 using Wpf.Ui.Contracts;
 using Wpf.Ui.Controls;
 
-namespace Netty.ViewModels
+namespace Netryoshka.ViewModels
 {
     public partial class CapturePageViewModel : ObservableObject
 	{

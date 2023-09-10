@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Netty
+namespace Netryoshka
 {
-    public class FlowBubbleChatMaxWidthConverter : BaseMultiValueConverter<FlowBubbleChatMaxWidthConverter>
+    public class FlowChatBubbleMaxWidthConverter : BaseMultiValueConverter<FlowChatBubbleMaxWidthConverter>
     {
         public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {

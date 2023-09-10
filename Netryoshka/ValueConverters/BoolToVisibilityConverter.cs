@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows;
 
-namespace Netty
+namespace Netryoshka
 {
     public class BoolToVisibilityConverter : BaseValueConverter<BoolToVisibilityConverter>
     {

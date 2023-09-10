@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Markup;
 using Wpf.Ui.Appearance;
 
-namespace Netty
+namespace Netryoshka
 {
     /// <summary>
     /// Provides a dictionary implementation that contains <c>WPF UI</c> theme resources used by components and other elements of a WPF application.

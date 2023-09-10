@@ -1,5 +1,5 @@
 ﻿using PacketDotNet;
-using Netty.Models;
+using Netryoshka.Models;
 using SharpPcap;
 using SharpPcap.WinDivert;
 using System;
@@ -11,9 +11,9 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
-using static Netty.BasicPacket;
+using static Netryoshka.BasicPacket;
 
-namespace Netty.Services
+namespace Netryoshka.Services
 {
     public class CaptureWindowsService : ICaptureService
     {

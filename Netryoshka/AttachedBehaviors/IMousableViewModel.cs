@@ -1,4 +1,4 @@
-﻿namespace Netty
+﻿namespace Netryoshka
 {
     /*
     WARNING: This class is deprecated and should NOT be used.

@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace Netty
+namespace Netryoshka
 {
     public class DynamicResourceBindingExtension : MarkupExtension
     {

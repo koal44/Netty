@@ -1,11 +1,11 @@
-﻿using Netty.Utils;
-using Netty.ViewModels;
+﻿using Netryoshka.Utils;
+using Netryoshka.ViewModels;
 using System;
 using System.Windows.Input;
 using Wpf.Ui.Contracts;
 using Wpf.Ui.Controls;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class CapturePage //: INavigableView<ViewModels.CapturePageViewModel>
     {

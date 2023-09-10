@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.NetworkInformation;
 
-namespace Netty
+namespace Netryoshka
 {
     /// <summary>
     /// This class provides access an IPv4 TCP connection addresses and ports and its

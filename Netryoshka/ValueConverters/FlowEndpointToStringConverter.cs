@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Netty
+namespace Netryoshka
 {
     public class FlowEndpointToStringConverter : BaseValueConverter<FlowEndpointToStringConverter>
     {

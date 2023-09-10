@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Windows;
 
-namespace Netty
+namespace Netryoshka
 {
     public interface IFlowChatBubbleViewModel
     {
-        string? Content { get; set; }
-        FlowEndpointRole EndPointRole { get; set; }
-        TimeSpan PacketInterval { get; set; }
-        string TcpHeadersDisplay { get; set; }
-        string MacHeadersDisplay { get; set; }
-        IFlowsPageViewModel ParentViewModel { get; }
+        BasicPacket BasicPacket { get; }
+        FlowEndpointRole EndPointRole { get; }
+        TimeSpan? PacketInterval { get; }
+        string? HeaderContent { get; set; }
+        string? BodyContent { get; set; }
+        string? FooterContent { get; set; }
+        DataTemplate CurrentDataTemplate { get; set; }
     }
 }

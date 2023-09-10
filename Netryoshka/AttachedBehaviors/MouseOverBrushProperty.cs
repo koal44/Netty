@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media;
 
-namespace Netty
+namespace Netryoshka
 {
     public class MouseOverBrushProperty : AttachedPropertyBase<MouseOverBrushProperty, Brush> { }
 }

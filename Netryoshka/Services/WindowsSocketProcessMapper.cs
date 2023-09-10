@@ -6,7 +6,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class WindowsSocketProcessMapper : ISocketProcessMapperService
     {

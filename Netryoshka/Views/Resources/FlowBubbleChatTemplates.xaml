@@ -1,0 +1,40 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Netryoshka">
+  <DataTemplate x:Key="AppNullDataTemplate">
+    <local:FlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppHttpDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppHttpsDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppLengthPrefixDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="TcpHexDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="TcpAsciiDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="IpDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="EthDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="FrameDataTemplate">
+    <local:TcpFlowChatBubble />
+  </DataTemplate>
+  <!--<local:ChatBubbleTemplateSelector x:Key="ChatBubbleSelector"
+                                    AppHttpDataTemplate="{StaticResource AppHttpDataTemplate}"
+                                    AppHttpsDataTemplate="{StaticResource AppHttpsDataTemplate}"
+                                    AppLengthPrefixDataTemplate="{StaticResource AppLengthPrefixDataTemplate}"
+                                    EthDataTemplate="{StaticResource EthDataTemplate}"
+                                    FrameDataTemplate="{StaticResource FrameDataTemplate}"
+                                    IpDataTemplate="{StaticResource IpDataTemplate}"
+                                    TcpAsciiDataTemplate="{StaticResource TcpAsciiDataTemplate}"
+                                    TcpHexDataTemplate="{StaticResource TcpHexDataTemplate}" />-->
+</ResourceDictionary>

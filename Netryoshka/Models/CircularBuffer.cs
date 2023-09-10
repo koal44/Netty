@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Netty.Models
+namespace Netryoshka.Models
 {
     /// <summary>
     /// A FIFO queue where elements at the end of the queue are dropped when max size has been reached.

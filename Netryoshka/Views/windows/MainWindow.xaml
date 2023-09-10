@@ -1,8 +1,8 @@
-﻿<ui:FluentWindow x:Class="Netty.MainWindow"
+﻿<ui:FluentWindow x:Class="Netryoshka.MainWindow"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:local="clr-namespace:Netty"
+                 xmlns:local="clr-namespace:Netryoshka"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  Title="Netty"
@@ -38,11 +38,11 @@
                  Grid.Column="0"
                  Grid.ColumnSpan="99"
                  Margin="0,0,0,0"
-                 Padding="10,-10,5,5"
-                 >
-      <!-- Icon="{local:PathToImageSource /Assets/netty.png}" -->
+                 Padding="10,-10,5,5">
+      <!--  Icon="{local:PathToImageSource /Assets/netty.png}"  -->
       <ui:TitleBar.Icon>
-        <ui:ImageIcon Source="/Assets/netty.png" Margin="0 2 -5 2"/>
+        <ui:ImageIcon Margin="0,2,-5,2"
+                      Source="/Assets/netty.png" />
       </ui:TitleBar.Icon>
       <ui:TitleBar.Header>
         <StackPanel Orientation="Horizontal">
@@ -67,7 +67,8 @@
                        PaneDisplayMode="Top">
 
       <ui:NavigationView.Resources>
-        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
+        <Style BasedOn="{StaticResource {x:Type ui:Button}}"
+               TargetType="ui:Button">
           <Setter Property="FontSize" Value="16" />
           <Setter Property="Margin" Value="0,0,10,0" />
           <Setter Property="Width" Value="100" />
@@ -78,10 +79,14 @@
       </ui:NavigationView.Resources>
 
       <ui:NavigationView.MenuItems>
-        <ui:NavigationViewItem Content="Capture" TargetPageType="{x:Type local:CapturePage}" />
-        <ui:NavigationViewItem Content="Flows" TargetPageType="{x:Type local:FlowsPage}" />
-        <ui:NavigationViewItem Content="Inspect" TargetPageType="{x:Type local:DissectPage}" />
-        <ui:NavigationViewItem Content="Dev" TargetPageType="{x:Type local:DevPage}" />
+        <ui:NavigationViewItem Content="Capture"
+                               TargetPageType="{x:Type local:CapturePage}" />
+        <ui:NavigationViewItem Content="Flows"
+                               TargetPageType="{x:Type local:FlowsPage}" />
+        <ui:NavigationViewItem Content="Inspect"
+                               TargetPageType="{x:Type local:DissectPage}" />
+        <ui:NavigationViewItem Content="Dev"
+                               TargetPageType="{x:Type local:DevPage}" />
       </ui:NavigationView.MenuItems>
 
       <ui:NavigationView.Header>

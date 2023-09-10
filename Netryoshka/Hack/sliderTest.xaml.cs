@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class SliderTest : UserControl
     {

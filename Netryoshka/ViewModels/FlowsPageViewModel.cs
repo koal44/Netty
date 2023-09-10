@@ -1,15 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using Netty.Services;
+using Netryoshka.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using static Netty.BasicPacket;
+using static Netryoshka.BasicPacket;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class FlowsPageViewModel : ObservableRecipient, IFlowsPageViewModel
     {
@@ -26,7 +26,7 @@ namespace Netty
         private ObservableCollection<FlowEndpoint> _orbitEndpoints;
 
         [ObservableProperty]
-        private ObservableCollection<IFlowChatBubbleViewModel> _currentFlowChatBubbles;
+        private ObservableCollection<BubbleData> _currentFlowChatBubbles;
 
         private FlowEndpoint? _selectedPivotEndpoint;
         public FlowEndpoint? SelectedPivotEndpoint
@@ -46,7 +46,7 @@ namespace Netty
             set
             {
                 SetProperty(ref _selectedOrbitEndpoint, value);
-                UpdateChatBubbles();
+                UpdateCurrentChatBubbles();
             }
         }
 
@@ -67,28 +67,25 @@ namespace Netty
             }
         }
 
-
         [ObservableProperty]
         private bool _isSeriousBotSelected;
         [ObservableProperty]
         private bool _isDitzyBotSelected;
-
         
+        // these properties control the display of the chat bubbles
         [ObservableProperty]
         private NetworkLayer _selectedNetworkLayer;
         [ObservableProperty]
         private TcpEncoding _selectedTcpEncoding;
         [ObservableProperty]
         private DeframeMethod? _selectedDeframeMethod;
-
-        public static IEnumerable<DeframeMethod> DeframeMethods 
-            => Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
-
         [ObservableProperty]
         private int _messagePrefixLength;
         [ObservableProperty]
         private int _messageTypeLength;
 
+
+        public static IEnumerable<DeframeMethod> DeframeMethods => Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
         [ObservableProperty]
         private string? _keyLogFileName;
 
@@ -111,9 +108,28 @@ namespace Netty
 
             // sets off a chain of side reactions which updates orbit, updating flowmessages.
             UpdatePivotEndpoints();
+
+
+            //CurrentFlowChatBubbles.CollectionChanged += OnCurrentFlowChatBubblesChanged;
         }
 
-
+        //private void OnCurrentFlowChatBubblesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        //{
+        //    if (e.NewItems != null)
+        //    {
+        //        foreach (BubbleData newItem in e.NewItems)
+        //        {
+        //            newItem.RefreshTemplate += OnRefreshTemplateRequested;
+        //        }
+        //    }
+        //    else if (e.Action == NotifyCollectionChangedAction.Remove)
+        //    {
+        //        foreach (BubbleData oldItem in e.OldItems)
+        //        {
+        //            oldItem.RefreshTemplate -= OnRefreshTemplateRequested;
+        //        }
+        //    }
+        //}
 
         private void UpdatePivotEndpoints()
         {
@@ -202,7 +218,7 @@ namespace Netty
                 CurrentFlowKey = new FlowKey(SelectedPivotEndpoint, SelectedOrbitEndpoint);
             }
 
-            UpdateChatBubbles();
+            UpdateCurrentChatBubbles();
             UpdatePivotProcessInfo();
         }
 
@@ -228,7 +244,7 @@ namespace Netty
 
         }
 
-        private void UpdateChatBubbles()
+        private void UpdateCurrentChatBubbles()
         {
             CurrentFlowChatBubbles.Clear();
 
@@ -246,16 +262,14 @@ namespace Netty
                             : FlowEndpointRole.Orbit;
                     var packetInterval = lastTimestamp.HasValue
                             ? packet.Timestamp - lastTimestamp.Value
-                            : TimeSpan.Zero;
+                            : (TimeSpan?)null;
 
-                    CurrentFlowChatBubbles.Add(new FlowChatBubbleViewModel(packet, endPointRole, this, packetInterval));
+                    CurrentFlowChatBubbles.Add(new BubbleData(packet, endPointRole, packetInterval));
 
                     lastTimestamp = packet.Timestamp;
                 }
             }
         }
-
-
 
         [RelayCommand]
         public void SelectFrameEndpoint(FlowEndpointRole endpointRole)
@@ -268,8 +282,6 @@ namespace Netty
             };
         }
 
-
-
         [RelayCommand]
         public void ToggleDataDisplayMode()
         {
@@ -279,9 +291,6 @@ namespace Netty
 
             SelectedTcpEncoding = values[nextIndex];
         }
-
-        
-        
 
         [RelayCommand]
         private void LoadKeyLogFileWizard()
@@ -300,6 +309,7 @@ namespace Netty
                 KeyLogFileName = openFileDialog.FileName;
             }
         }
+
 
 
 

@@ -1,7 +1,7 @@
-﻿using Netty.ViewModels;
+﻿using Netryoshka.ViewModels;
 using System.Windows.Controls;
 
-namespace Netty
+namespace Netryoshka
 {
     /// <summary>
     /// Interaction logic for DissectPage.xaml

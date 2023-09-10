@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Netty.Services
+namespace Netryoshka.Services
 {
     public interface IFileDialogService
     {

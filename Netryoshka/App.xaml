@@ -1,7 +1,7 @@
-﻿<Application x:Class="Netty.App"
+﻿<Application x:Class="Netryoshka.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Netty"
+             xmlns:local="clr-namespace:Netryoshka"
              xmlns:shell="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Startup="OnStartup">
@@ -16,6 +16,8 @@
         <!--<ResourceDictionary Source="/Skins/Dark.xaml"/>-->
         <ResourceDictionary Source="/Styles/Scrollbar.xaml" />
         <ResourceDictionary Source="/Styles/SliderV3.xaml" />
+        <ResourceDictionary Source="/Views/Resources/FlowBubbleChatTemplates.xaml" />
+
         <!--<ResourceDictionary Source="/Styles/MyContentDialog.xaml" />-->
         <ResourceDictionary Source="/Assets/VectorImages.xaml" />
       </ResourceDictionary.MergedDictionaries>

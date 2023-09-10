@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Netty.Services
+namespace Netryoshka.Services
 {
     public interface ILogger
     {

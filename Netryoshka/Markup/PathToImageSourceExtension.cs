@@ -5,7 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Wpf.Ui.Controls;
 
-namespace Netty
+namespace Netryoshka
 {
 
     public class PathToImageSourceExtension : MarkupExtension

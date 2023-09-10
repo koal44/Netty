@@ -1,5 +1,5 @@
 ﻿using Wpf.Ui.Contracts;
-namespace Netty;
+namespace Netryoshka;
 
 public partial class MainWindow // : MainWindow // : Window
 {

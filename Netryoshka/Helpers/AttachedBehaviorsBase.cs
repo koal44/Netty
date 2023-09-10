@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Netty
+namespace Netryoshka
 {
     public abstract class AttachedBehaviorsBase<TOwner, TSelf>
         where TOwner : FrameworkElement

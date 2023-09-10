@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.NetworkInformation;
 
-namespace Netty
+namespace Netryoshka
 {
     public record FlowEndpoint(IPAddress IpAddress, ushort Port, PhysicalAddress MacAddress)
     {

@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Globalization;
 
-namespace Netty.Utils
+namespace Netryoshka.Utils
 {
     public static class JsonUtil
     {

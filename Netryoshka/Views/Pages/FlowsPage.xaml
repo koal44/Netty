@@ -1,10 +1,10 @@
-﻿<Page x:Class="Netty.FlowsPage"
+﻿<Page x:Class="Netryoshka.FlowsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:design="clr-namespace:Netty.DesignTime"
+      xmlns:design="clr-namespace:Netryoshka.DesignTime"
       xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
-      xmlns:local="clr-namespace:Netty"
+      xmlns:local="clr-namespace:Netryoshka"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       Title="PacketPage"
@@ -20,7 +20,9 @@
       ScrollViewer.IsDeferredScrollingEnabled="False"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       mc:Ignorable="d">
-
+  <Page.Resources>
+    
+  </Page.Resources>
 
   <Grid>
     <Grid.RowDefinitions>
@@ -284,12 +286,21 @@
 
 
         <!--  ItemsSource="{Binding CurrentFlowMessages}"  -->
-        <ListBox Grid.Row="1"
+        <ListBox x:Name="FlowChatListBox"
+                 Grid.Row="1"
                  ItemContainerStyle="{DynamicResource FlowChatItemContainerStyle}"
                  ItemsSource="{Binding CurrentFlowChatBubbles}"
                  ScrollViewer.CanContentScroll="True"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+          <!--<ListBox.ItemTemplateSelector>
+            <StaticResource ResourceKey="ChatBubbleSelector" />
+          </ListBox.ItemTemplateSelector>-->
+          <!--  ItemTemplateSelector="{StaticResource ChatBubbleSelector}"  -->
+          <!--  DataContextChanged="FlowChatListBoxDataContextChanged"  -->
           <ListBox.Resources>
+
+
             <Style x:Key="FlowChatItemContainerStyle"
                    TargetType="{x:Type ListBoxItem}">
               <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
@@ -317,11 +328,18 @@
             </Style>
           </ListBox.Resources>
 
+          <!--<ContentControl ContentTemplate="{StaticResource AppNullDataTemplate}" />-->
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <local:FlowChatBubbleView BubbleScale="0.8" />
+              <ContentControl Content="{Binding}" ContentTemplate="{Binding Template}" />
             </DataTemplate>
           </ListBox.ItemTemplate>
+
+          <!--<ListBox.ItemTemplate>
+            <DataTemplate>
+              <local:FlowChatBubble BubbleScale="0.8" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>-->
         </ListBox>
 
       </Grid>

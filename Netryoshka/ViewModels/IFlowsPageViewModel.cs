@@ -1,13 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace Netty
+namespace Netryoshka
 {
     public interface IFlowsPageViewModel
     {
         ObservableCollection<FlowEndpoint> PivotEndpoints { get; }
         ObservableCollection<FlowEndpoint> OrbitEndpoints { get; }
-        ObservableCollection<IFlowChatBubbleViewModel> CurrentFlowChatBubbles { get; }
+        ObservableCollection<BubbleData> CurrentFlowChatBubbles { get; }
 
         FlowEndpoint? SelectedPivotEndpoint { get; set; }
         FlowEndpoint? SelectedOrbitEndpoint { get; set; }

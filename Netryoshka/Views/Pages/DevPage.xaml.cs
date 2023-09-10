@@ -7,7 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Xml;
 
-namespace Netty
+namespace Netryoshka
 {
     public partial class DevPage
     {

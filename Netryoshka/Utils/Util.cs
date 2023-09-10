@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Netty.Utils
+namespace Netryoshka.Utils
 {
     public static class Util
     {

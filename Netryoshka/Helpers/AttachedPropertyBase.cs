@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace Netty
+namespace Netryoshka
 {
     public abstract class AttachedPropertyBase<TOwner, TValue>
     where TOwner : AttachedPropertyBase<TOwner, TValue>, new()

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace Netty.Services
+namespace Netryoshka.Services
 {
     public class SimpleLogger : ILogger
     {
