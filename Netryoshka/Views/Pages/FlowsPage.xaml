@@ -290,7 +290,7 @@
                  Grid.Row="1"
                  ItemContainerStyle="{DynamicResource FlowChatItemContainerStyle}"
                  ItemsSource="{Binding CurrentFlowChatBubbles}"
-                 ScrollViewer.CanContentScroll="True"
+                 ScrollViewer.CanContentScroll="False"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
           <!--<ListBox.ItemTemplateSelector>

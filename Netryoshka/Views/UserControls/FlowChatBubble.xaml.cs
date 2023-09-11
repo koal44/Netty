@@ -1,14 +1,11 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 
 namespace Netryoshka
 {
     public partial class FlowChatBubble
     {
-
         public FlowChatBubble()
         {
-            //DataContext = this;
             InitializeComponent();
         }
 

@@ -4,26 +4,16 @@ using System.Windows;
 
 namespace Netryoshka
 {
-    public partial class BubbleData
+    public partial class BubbleData : ObservableObject
     {
-        public BasicPacket BasicPacket { get;}
-        public FlowEndpointRole EndPointRole { get; }
-        public TimeSpan? PacketInterval { get; }
-        public DataTemplate Template { get; set; }
-
-        //[ObservableProperty]
-        //private string? _headerContent;
-        //[ObservableProperty]
-        //private string? _bodyContent;
-        //[ObservableProperty]
-        //private string? _footerContent;
-        //[ObservableProperty]
-        //private Template _currentDataTemplate;
-
-        //private string? _hexContent;
-        //public string? HexContent => _hexContent ??= Convert.ToHexString(BasicPacket.Payload);
-        //private string? _asciiContent;
-        //public string? AsciiContent => _asciiContent ??= Utils.Util.BytesToAscii(BasicPacket.Payload);
+        [ObservableProperty]
+        private BasicPacket _basicPacket;
+        [ObservableProperty]
+        private FlowEndpointRole _endPointRole;
+        [ObservableProperty] 
+        private TimeSpan? _packetInterval;
+        [ObservableProperty]
+        private DataTemplate _template;
 
         public BubbleData(BasicPacket packet, FlowEndpointRole endPointRole, TimeSpan? packetInterval)
         {

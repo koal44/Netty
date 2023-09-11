@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows;
-using Wpf.Ui.Contracts;
+using Wpf.Ui;
 
 namespace Netryoshka;
 

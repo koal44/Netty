@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace Netryoshka
 {
@@ -18,6 +16,7 @@ namespace Netryoshka
         {
             ViewModel = viewModel;
             DataContext = viewModel;
+            ViewModel.PropertyChanged += OnViewModelPropertyChanged;
             InitializeComponent();
 
             FlowChatBubbleTemplatesByName = new Dictionary<string, DataTemplate>
@@ -65,11 +64,6 @@ namespace Netryoshka
 
             if (FlowChatListBox.ItemsSource is not ObservableCollection<BubbleData> flowChatBubbles)
                 throw new InvalidOperationException("Unexpected FlowChatListBox.ItemsSource type.");
-
-            //if (FlowChatListBox.ItemsSource is not ObservableCollection<IFlowChatBubbleViewModel> flowChatBubbles)
-            //    throw new InvalidOperationException(
-            //$"Unexpected FlowChatListBox.ItemsSource type. Expected: ObservableCollection<BubbleData>, " +
-            //$"Actual: {FlowChatListBox.ItemsSource?.GetType().FullName ?? "null"}");
 
             foreach (var item in flowChatBubbles)
             {

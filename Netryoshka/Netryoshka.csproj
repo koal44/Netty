@@ -26,6 +26,7 @@
     <Compile Remove="Helpers\AttachedPropertiesBase.cs" />
     <Compile Remove="Helpers\ChatBubbleTemplateSelector.cs" />
     <Compile Remove="Services\PacketCollectionService.cs" />
+    <Compile Remove="Styles\ScrollViewerPatch.xaml.cs" />
     <Compile Remove="ViewModels\IFlowChatBubbleViewModel.cs" />
     <Compile Remove="Views\UserControls\FlowChatBubbleView.xaml.cs" />
   </ItemGroup>
@@ -42,6 +43,7 @@
     <Page Remove="Skins\Skin.Light.xaml" />
     <Page Remove="Styles\Dictionary1.xaml" />
     <Page Remove="Styles\MyContentDialog.xaml" />
+    <Page Remove="Styles\ScrollViewerPatch.xaml" />
     <Page Remove="Styles\SliderV1.xaml" />
     <Page Remove="Styles\SliderV2.xaml" />
     <Page Remove="Views\UserControls\FlowChatBubbleView.xaml" />
@@ -83,10 +85,24 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Update="Properties\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
       <Compile Update="Properties\Settings.Designer.cs">
         <DesignTimeSharedInput>True</DesignTimeSharedInput>
         <AutoGen>True</AutoGen>
         <DependentUpon>Settings.settings</DependentUpon>
+      </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\FrameFlowChatBubble.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\EthFlowChatBubble.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\TcpAsciiFlowChatBubble.xaml.cs">
+        <SubType>Code</SubType>
       </Compile>
       <Compile Update="Views\UserControls\FlowChatBubble.xaml.cs">
         <SubType>Code</SubType>
@@ -94,6 +110,13 @@
       <Compile Update="Views\UserControls\MatryoshkaBox.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Properties\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>

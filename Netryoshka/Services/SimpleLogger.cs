@@ -23,7 +23,7 @@ namespace Netryoshka.Services
 
             if (_logToPopup)
             {
-                MessageBox.Show(message, "Log FlowChatBubble", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(message, "Log Info", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -36,7 +36,7 @@ namespace Netryoshka.Services
 
             if (_logToPopup)
             {
-                MessageBox.Show(message, "Log FlowChatBubble", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(message, "Log Warn", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -50,7 +50,7 @@ namespace Netryoshka.Services
 
             if (_logToPopup)
             {
-                MessageBox.Show(message, "Log FlowChatBubble", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(message, "Log Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

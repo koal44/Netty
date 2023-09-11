@@ -2,7 +2,7 @@
 using Netryoshka.ViewModels;
 using System;
 using System.Windows.Input;
-using Wpf.Ui.Contracts;
+using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace Netryoshka

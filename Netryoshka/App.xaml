@@ -1,62 +1,40 @@
-﻿<Application x:Class="Netryoshka.App"
+﻿<!--
+  TODO: Update namespaces according to new structure:
+  xmlns:vm="clr-namespace:Metryoshka.ViewModels"
+  xmlns:view="clr-namespace:Metryoshka.Views"
+  xmlns:conv="clr-namespace:Metryoshka.Converters"
+  xmlns:bhv="clr-namespace:Metryoshka.Behaviors"
+  xmlns:cmd="clr-namespace:Metryoshka.Commands"
+  xmlns:ctrl="clr-namespace:Metryoshka.Controls"
+  xmlns:ext="clr-namespace:Metryoshka.MarkupExtensions"
+  xmlns:svc="clr-namespace:Metryoshka.Services"
+  xmlns:theme="clr-namespace:Metryoshka.Themes"
+  xmlns:helpers="clr-namespace:Metryoshka.Helpers"
+  ** subfolders **
+  xmlns:dt="clr-namespace:Metryoshka.DesignTime"
+  xmlns:dial="clr-namespace:Metryoshka.Views.Dialogs"
+  xmlns:page="clr-namespace:Metryoshka.Views.Pages"
+-->
+
+<Application x:Class="Netryoshka.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Netryoshka"
-             xmlns:shell="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Startup="OnStartup">
-  <!--  StartupUri="Views/MainWindow.xaml"  -->
   <Application.Resources>
-
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ui:ThemesDictionary ApplicationTheme="Dark" />
+        <ui:ThemesDictionary Theme="Dark" />
         <ui:ControlsDictionary />
         <local:MyThemesDictionary ApplicationTheme="Dark" />
-        <!--<ResourceDictionary Source="/Skins/Dark.xaml"/>-->
         <ResourceDictionary Source="/Styles/Scrollbar.xaml" />
         <ResourceDictionary Source="/Styles/SliderV3.xaml" />
+        <ResourceDictionary Source="/Styles/TreeView.xaml" />
+        <ResourceDictionary Source="/Styles/TreeViewItem.xaml" />
         <ResourceDictionary Source="/Views/Resources/FlowBubbleChatTemplates.xaml" />
-
-        <!--<ResourceDictionary Source="/Styles/MyContentDialog.xaml" />-->
         <ResourceDictionary Source="/Assets/VectorImages.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>
-
-
-  <!--<Style x:Key="StandardStyle" TargetType="{x:Type local:MainWindow}">
-                <Setter Property="shell:WindowChrome.WindowChrome">
-                    <Setter.Value>
-                        <shell:WindowChrome />
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type local:MainWindow}">
-                            <Grid>
-                                <Border Background="Orange"
-                            Margin="{Binding Source={x:Static shell:SystemParameters.WindowNonClientFrameThickness}}">
-                                    <ContentPresenter Content="{TemplateBinding Content}" />
-                                </Border>
-                                <TextBlock Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Title}"
-                               VerticalAlignment="Top" HorizontalAlignment="Left"
-                               Margin="36,8,0,0"/>
-                                <Image Source="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Icon}"
-                           VerticalAlignment="Top" HorizontalAlignment="Left"
-                           Margin="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(shell:WindowChrome.WindowChrome).ResizeBorderThickness}"
-                           Width="{Binding Source={x:Static shell:SystemParameters.SmallIconWidth}}"
-                           shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
-                            </Grid>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>-->
-
-
-
-
-
-
-
 </Application>

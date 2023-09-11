@@ -2,10 +2,11 @@
 using Netryoshka.Services;
 using Netryoshka.ViewModels;
 using System;
+using System.Diagnostics;
 using System.Windows;
+using Wpf.Ui;
 using Wpf.Ui.Appearance;
-using Wpf.Ui.Contracts;
-using Wpf.Ui.Services;
+using static Netryoshka.Services.ConfigurableLogger;
 
 namespace Netryoshka;
 
@@ -38,14 +39,11 @@ public partial class App : Application
         Application.Current.DispatcherUnhandledException += (sender, eArgs) =>
         {
 
-            // Logger.Error(e.Exception);
             Logger.Error(eArgs.Exception.Message);
+            //Logger.Error(eArgs.Exception.Message, eArgs.Exception);
 
             // Prevent default unhandled exception processing
-            eArgs.Handled = true;
-
-            // Terminate the app if you think it's in an unstable state
-            // Application.Current.Shutdown();
+            //eArgs.Handled = true;
 
         };
 
@@ -55,6 +53,7 @@ public partial class App : Application
         };
 
         //base.OnStartup(e);
+        PresentationTraceSources.RoutedEventSource.Switch.Level = SourceLevels.Verbose;
     }
 
     private static void UpdateProtonTheme(ApplicationTheme applicationTheme)
@@ -81,25 +80,16 @@ public partial class App : Application
         appDictionaries.UpdateDictionary(themeSpace, newResourceUri);
     }
 
-    /*private void ConfigureTheme()
-    {
-        //const Theme processTheme = Theme.Auto;
-        //IDarkNet darkNet = DarkNet.Instance;
-        //darkNet.SetCurrentProcessTheme(processTheme);
-        //Logger?.Info($"Process theme is {processTheme}");
-        //Logger?.Info($"System theme is {(darkNet.UserDefaultAppThemeIsDark ? "Dark" : "Light")}");
-        //Logger?.Info($"Taskbar theme {(darkNet.UserTaskbarThemeIsDark ? "Dark" : "Light")}");
-
-        //new SkinManager().RegisterSkins(new Uri("Skins/Skin.Light.xaml", UriKind.Relative), new Uri("Skins/Skin.Dark.xaml", UriKind.Relative));
-
-        //DarkNet.Instance.UserDefaultAppThemeIsDarkChanged += (_, isSystemDarkTheme) => { Console.WriteLine($"System theme is {(isSystemDarkTheme ? "Dark" : "Light")}"); };
-        //DarkNet.Instance.UserTaskbarThemeIsDarkChanged += (_, isTaskbarDarkTheme) => { Console.WriteLine($"Taskbar theme is {(isTaskbarDarkTheme ? "Dark" : "Light")}"); };
-    }*/
-
     private static void ConfigureServices(IServiceCollection services)
     {
         // core services
-        services.AddSingleton<ILogger, SimpleLogger>(provider => new SimpleLogger(logToConsole: true, logToPopup: true));
+        //services.AddSingleton<ILogger, SimpleLogger>(provider => new SimpleLogger(logToConsole: true, logToPopup: true));
+        services.AddSingleton<ILogger, ConfigurableLogger>(provider 
+            => new ConfigurableLogger(new LoggerConfiguration
+            {
+                InfoTarget = LogTarget.Console,
+                ErrorTarget = LogTarget.Console | LogTarget.Popup
+            }));
         services.AddSingleton<FlowManager>();
         services.AddTransient<ICaptureService, CaptureWindowsService>();
         services.AddSingleton<ISocketProcessMapperService, WindowsSocketProcessMapper>();
