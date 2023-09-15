@@ -87,6 +87,8 @@
                                TargetPageType="{x:Type local:DissectPage}" />
         <ui:NavigationViewItem Content="Dev"
                                TargetPageType="{x:Type local:DevPage}" />
+        <ui:NavigationViewItem Content="Test"
+                               TargetPageType="{x:Type local:TestPage}" />
       </ui:NavigationView.MenuItems>
 
       <ui:NavigationView.Header>

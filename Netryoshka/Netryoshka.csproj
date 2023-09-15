@@ -95,6 +95,9 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Settings.settings</DependentUpon>
       </Compile>
+      <Compile Update="Views\Pages\TestPage.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
       <Compile Update="Views\UserControls\ChatBubbles\FrameFlowChatBubble.xaml.cs">
         <SubType>Code</SubType>
       </Compile>

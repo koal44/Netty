@@ -1,95 +1,82 @@
-﻿using Newtonsoft.Json;
-using System.Collections;
+﻿using Netryoshka.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Net;
+using System.Net.NetworkInformation;
 
 namespace Netryoshka
 {
     public class TreeNode
     {
-        // https://michaelscodingspot.com/displaying-any-net-object-in-a-wpf-treeview/
+        public string? PropertyName { get; set; }
+        public string? PropertyValue { get; set; }
+        public ObservableCollection<TreeNode>? Children { get; set; }
 
-        public string? Name { get; set; }
-        public string? Value { get; set; }
-        public List<TreeNode> Children { get; set; } = new();
+        public TreeNode() { }
 
-        public static TreeNode CreateTree(object obj)
+
+        public static TreeNode BuildFromJson(string json)
         {
-            //JavaScriptSerializer jss = new JavaScriptSerializer();
-            //Dictionary<string, object> deserializedDict = jss.Deserialize<Dictionary<string, object>>(serialized);
+            var jObject = JObject.Parse(json);
+            return CreateTreeNodeFromJToken(jObject);
+        }
 
+        public static TreeNode BuildFromObject(object obj)
+        {
+            var jObject = SerializeToJObject(obj);
+            return CreateTreeNodeFromJToken(jObject);
+        }
+
+        private static JObject SerializeToJObject(object obj)
+        {
             var settings = new JsonSerializerSettings
             {
+                Converters = new List<JsonConverter>
+                {
+                    new ToStringConverter(new List<Type>
+                    {
+                        typeof(PhysicalAddress),
+                        typeof(IPAddress),
+                    })
+                },
                 Error = (sender, args) =>
                 {
                     args.ErrorContext.Handled = true;
-
-                    // Replace the value causing error with the name of its type.
-                    //args.CurrentObject = args.CurrentObject?.GetType().Name ?? "Unknown Object";
                 }
-
-
-
             };
 
-            var serialized = JsonConvert.SerializeObject(obj, settings);
-            var deserializedDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(serialized);
-            var root = new TreeNode
-            {
-                Name = "Root"
-            };
-            if (deserializedDict != null)
-            {
-                BuildTree(deserializedDict, root);
-            }
-            return root;
+            var jObject = JObject.FromObject(obj, JsonSerializer.CreateDefault(settings));
+            return jObject;
         }
 
-        private static void BuildTree(object item, TreeNode node)
+
+        private static TreeNode CreateTreeNodeFromJToken(JToken token)
         {
-            if (item is KeyValuePair<string, object> kv)
+            var propName = string.Empty;
+
+            if (token is JProperty prop)
             {
-                var keyValueNode = new TreeNode()
-                {
-                    Name = kv.Key,
-                    Value = GetValueAsString(kv.Value)
-                };
-                node.Children.Add(keyValueNode);
-                BuildTree(kv.Value, keyValueNode);
+                propName = prop.Name;
+                token = prop.Value;
             }
-            else if (item is ArrayList list)
+
+            var node = new TreeNode()
             {
-                int index = 0;
-                foreach (object value in list)
-                {
-                    var arrayItem = new TreeNode
-                    {
-                        Name = $"[{index}]",
-                        Value = ""
-                    };
-                    node.Children.Add(arrayItem);
-                    BuildTree(value, arrayItem);
-                    index++;
-                }
-            }
-            else if (item is Dictionary<string, object> dictionary)
+                PropertyName = propName,
+                PropertyValue = token is JValue value ? $"{value}" : null,
+                Children = token is JObject or JArray ? new ObservableCollection<TreeNode>() : null
+            };
+
+            foreach (var child in token.Children())
             {
-                foreach (KeyValuePair<string, object> d in dictionary)
-                {
-                    BuildTree(d, node);
-                }
+                node.Children?.Add(CreateTreeNodeFromJToken(child));
             }
+
+            return node;
         }
 
-        private static string GetValueAsString(object value)
-        {
-            return value switch
-            {
-                null => "null",
-                ArrayList arr => $"[{arr.Count}]",
-                _ when value.GetType().IsArray => "[]",
-                _ when value.GetType().IsGenericType => "{}",
-                _ => $"{value}"
-            };
-        }
     }
 }

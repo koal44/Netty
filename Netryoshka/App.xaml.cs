@@ -83,7 +83,6 @@ public partial class App : Application
     private static void ConfigureServices(IServiceCollection services)
     {
         // core services
-        //services.AddSingleton<ILogger, SimpleLogger>(provider => new SimpleLogger(logToConsole: true, logToPopup: true));
         services.AddSingleton<ILogger, ConfigurableLogger>(provider 
             => new ConfigurableLogger(new LoggerConfiguration
             {
@@ -113,6 +112,8 @@ public partial class App : Application
 
         // debug
         services.AddTransient<DevPage>();
+        services.AddTransient<TestPage>();
+        services.AddTransient<TestPageViewModel>();
     }
 
 }

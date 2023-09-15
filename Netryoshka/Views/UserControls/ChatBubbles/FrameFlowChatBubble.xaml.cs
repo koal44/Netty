@@ -18,6 +18,7 @@ namespace Netryoshka
             if (e.NewValue is BubbleData bubbleData)
             {
                 ViewModel = new FrameChatBubbleViewModel(bubbleData);
+                DataContext = ViewModel;
             }
         }
 

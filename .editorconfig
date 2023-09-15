@@ -1,4 +1,9 @@
-﻿[*.cs]
+﻿[*.xaml]
+tab_width = 2
+indent_size = 2
+
+
+[*.cs]
 
 # IDE0079: Remove unnecessary suppression
 dotnet_diagnostic.IDE0079.severity = silent
@@ -18,6 +23,7 @@ csharp_style_expression_bodied_accessors = true:silent
 csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
 csharp_indent_labels = one_less_than_current
+csharp_space_around_binary_operators = before_and_after
 
 [*.{cs,vb}]
 #### Naming styles ####

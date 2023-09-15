@@ -1,8 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Netryoshka.DesignTime;
-using Netryoshka.Extensions;
-using Netryoshka.Helpers;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 
@@ -15,25 +14,25 @@ namespace Netryoshka
         [ObservableProperty]
         private FlowEndpointRole _endPointRole;
         [ObservableProperty]
-        private BasicPacket? _basicPacket;
-        [ObservableProperty]
         private string? _footerContent;
+        [ObservableProperty]
+        private ObservableCollection<TreeNode> _treeNodes = new();
 
         public FrameChatBubbleViewModel()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
                 var packet = DesignTimeData.GetPackets()[0];
+                TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(packet) };
                 EndPointRole = FlowEndpointRole.Pivot;
-                BasicPacket = packet;
                 FooterContent = TimeSpan.Zero.ToString("mm\\.ss\\.ffff");
             }
         }
 
         public FrameChatBubbleViewModel(BubbleData data)
         {
+            TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(data.BasicPacket) };
             EndPointRole = data.EndPointRole;
-            BasicPacket = data.BasicPacket;
             FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
         }
 

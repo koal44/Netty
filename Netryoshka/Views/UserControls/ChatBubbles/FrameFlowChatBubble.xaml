@@ -42,8 +42,20 @@
         </Style>
       </Border.Style>
 
-      <StackPanel>
-        <local:TreeObject ObjectToVisualize="{Binding BasicPacket}" />
+      <StackPanel Width="100"
+                  Height="100">
+        <StackPanel.Resources>
+          <Style TargetType="{x:Type TreeView}" />
+          <Style TargetType="{x:Type TreeViewItem}" />
+        </StackPanel.Resources>
+        <TreeView ItemsSource="{Binding TreeNodes}">
+          <TreeView.ItemTemplate>
+            <HierarchicalDataTemplate DataType="{x:Type local:TreeNode}"
+                                      ItemsSource="{Binding Children}">
+              <TextBlock Text="{Binding Converter={local:JsonNodeToStringConverter}}" />
+            </HierarchicalDataTemplate>
+          </TreeView.ItemTemplate>
+        </TreeView>
       </StackPanel>
     </Border>
 

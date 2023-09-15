@@ -16,10 +16,15 @@
             Content="{StaticResource Netty}" />-->
     <Button Margin="0,50,0,20"
             HorizontalAlignment="Center"
-            Click="PrintTemplateClickHandler"
-            Content="Print Template" />
-    <RichTextBox x:Name="OutputRichTextBox"
+            Click="ButtonClickHandler"
+            Content="Click Me" />
+    <!--<RichTextBox x:Name="OutputRichTextBox"
                  MinHeight="200"
-                 Margin="50,0,50,0" />
+                 Margin="50,0,50,0" />-->
+    <TextBox x:Name="TextBox"
+             MinWidth="400"
+             MinHeight="200"
+             Margin="50,0,50,0"
+             TextWrapping="Wrap" />
   </StackPanel>
 </Page>
