@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Netryoshka
 {
-    public partial class FrameChatBubbleViewModel : ObservableObject
+    public partial class FrameBubbleViewModel : ObservableObject
     {
         [ObservableProperty]
         private double _bubbleScale = 0.8;
@@ -18,7 +18,7 @@ namespace Netryoshka
         [ObservableProperty]
         private ObservableCollection<TreeNode> _treeNodes = new();
 
-        public FrameChatBubbleViewModel()
+        public FrameBubbleViewModel()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
@@ -29,7 +29,7 @@ namespace Netryoshka
             }
         }
 
-        public FrameChatBubbleViewModel(BubbleData data)
+        public FrameBubbleViewModel(BubbleData data)
         {
             TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(data.BasicPacket) };
             EndPointRole = data.EndPointRole;

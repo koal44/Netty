@@ -3,9 +3,9 @@ using System.Windows;
 
 namespace Netryoshka
 {
-    public partial class EthFlowChatBubble
+    public partial class EthernetBubble
     {
-        public EthFlowChatBubble()
+        public EthernetBubble()
         {
             DataContextChanged += OnDataContextChanged;
             InitializeComponent();
@@ -15,19 +15,19 @@ namespace Netryoshka
         {
             if (e.NewValue is BubbleData bubbleData)
             {
-                DataContext = new EthChatBubbleViewModel(bubbleData);
+                DataContext = new EthernetBubbleViewModel(bubbleData);
             }
             else if (e.NewValue is null)
             {
                 throw new InvalidOperationException("DataContext cannot be null");
             }
-            else if (e.NewValue is EthChatBubbleViewModel)
+            else if (e.NewValue is EthernetBubbleViewModel)
             {
                 // It's already the type we want, so do nothing.
             }
             else
             {
-                throw new InvalidOperationException($"Unexpected DataContext type. Expected: BubbleData or EthChatBubbleViewModel, Actual: {e.NewValue.GetType().FullName}");
+                throw new InvalidOperationException($"Unexpected DataContext type. Expected: BubbleData or EthernetBubbleViewModel, Actual: {e.NewValue.GetType().FullName}");
             }
         }
 

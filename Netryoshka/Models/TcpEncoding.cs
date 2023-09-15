@@ -5,5 +5,4 @@
         Hex,
         Ascii
     }
-
 }

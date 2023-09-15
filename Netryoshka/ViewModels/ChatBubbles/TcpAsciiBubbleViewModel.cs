@@ -3,7 +3,7 @@ using Netryoshka.Helpers;
 
 namespace Netryoshka
 {
-    public partial class TcpAsciiChatBubbleViewModel : ObservableObject
+    public partial class TcpAsciiBubbleViewModel : ObservableObject
     {
 
         [ObservableProperty]
@@ -15,12 +15,12 @@ namespace Netryoshka
         [ObservableProperty]
         private string? _footerContent;
 
-        public TcpAsciiChatBubbleViewModel()
+        public TcpAsciiBubbleViewModel()
         {
 
         }
 
-        public TcpAsciiChatBubbleViewModel(BubbleData data)
+        public TcpAsciiBubbleViewModel(BubbleData data)
         {
             EndPointRole = data.EndPointRole;
             HeaderContent = BubbleDataHelper.BuildTcpHeaderContent(data);

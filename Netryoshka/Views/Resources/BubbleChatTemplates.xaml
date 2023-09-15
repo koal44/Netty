@@ -1,0 +1,124 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Netryoshka">
+
+  <!--<DataTemplate DataType="{x:Type local:AppNullBubbleViewModel}">
+    <local:AppNullBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:AppHttpBubbleViewModel}">
+    <local:AppHttpBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:AppHttpsBubbleViewModel}">
+    <local:AppHttpsBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:AppLengthPrefixBubbleViewModel}">
+    <local:AppLengthPrefixBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:TcpHexBubbleViewModel}">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:TcpAsciiBubbleViewModel}">
+    <local:TcpAsciiBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:IpBubbleViewModel}">
+    <local:IpBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:EthernetBubbleViewModel}">
+    <local:EthernetBubble />
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type local:FrameBubbleViewModel}">
+    <local:FrameBubble />
+  </DataTemplate>-->
+
+
+  <DataTemplate x:Key="AppNullDataTemplate"
+                DataType="{x:Type local:TcpHexBubbleViewModel}">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppHttpDataTemplate"
+                DataType="{x:Type local:TcpHexBubbleViewModel}">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppHttpsDataTemplate"
+                DataType="{x:Type local:TcpHexBubbleViewModel}">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppLengthPrefixDataTemplate"
+                DataType="{x:Type local:TcpHexBubbleViewModel}">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="TcpHexDataTemplate"
+                DataType="{x:Type local:TcpHexBubbleViewModel}">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="TcpAsciiDataTemplate"
+                DataType="{x:Type local:TcpAsciiBubbleViewModel}">
+    <local:TcpAsciiBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="IpDataTemplate"
+                DataType="{x:Type local:TcpHexBubbleViewModel}">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="EthernetDataTemplate"
+                DataType="{x:Type local:EthernetBubbleViewModel}">
+    <local:EthernetBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="FrameDataTemplate"
+                DataType="{x:Type local:FrameBubbleViewModel}">
+    <local:FrameBubble />
+  </DataTemplate>
+
+
+  <local:BubbleTemplateSelector x:Key="ChatBubbleSelector"
+                                AppHttpBubbleTemplate="{StaticResource AppHttpDataTemplate}"
+                                AppHttpsBubbleTemplate="{StaticResource AppHttpsDataTemplate}"
+                                AppLengthPrefixBubbleTemplate="{StaticResource AppLengthPrefixDataTemplate}"
+                                AppNullBubbleTemplate="{StaticResource AppNullDataTemplate}"
+                                EthernetBubbleTemplate="{StaticResource EthernetDataTemplate}"
+                                FrameBubbleTemplate="{StaticResource FrameDataTemplate}"
+                                IpBubbleTemplate="{StaticResource IpDataTemplate}"
+                                TcpAsciiBubbleTemplate="{StaticResource TcpAsciiDataTemplate}"
+                                TcpHexBubbleTemplate="{StaticResource TcpHexDataTemplate}" />
+
+
+
+
+
+  <!--<DataTemplate x:Key="AppNullDataTemplate">
+    <local:FlowChatBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppHttpDataTemplate">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppHttpsDataTemplate">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="AppLengthPrefixDataTemplate">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="TcpHexDataTemplate">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="TcpAsciiDataTemplate">
+    <local:TcpAsciiBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="IpDataTemplate">
+    <local:TcpHexBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="EthDataTemplate">
+    <local:EthernetBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="FrameDataTemplate">
+    <local:FrameBubble />
+  </DataTemplate>-->
+
+  <!--<local:ChatBubbleTemplateSelector x:Key="ChatBubbleSelector"
+                                    AppHttpDataTemplate="{StaticResource AppHttpDataTemplate}"
+                                    AppHttpsDataTemplate="{StaticResource AppHttpsDataTemplate}"
+                                    AppLengthPrefixDataTemplate="{StaticResource AppLengthPrefixDataTemplate}"
+                                    EthDataTemplate="{StaticResource EthDataTemplate}"
+                                    FrameDataTemplate="{StaticResource FrameDataTemplate}"
+                                    IpDataTemplate="{StaticResource IpDataTemplate}"
+                                    TcpAsciiDataTemplate="{StaticResource TcpAsciiDataTemplate}"
+                                    TcpHexDataTemplate="{StaticResource TcpHexDataTemplate}" />-->
+</ResourceDictionary>

@@ -7,7 +7,7 @@ namespace Netryoshka
     {
         ObservableCollection<FlowEndpoint> PivotEndpoints { get; }
         ObservableCollection<FlowEndpoint> OrbitEndpoints { get; }
-        ObservableCollection<BubbleData> CurrentFlowChatBubbles { get; }
+        ObservableCollection<BubbleData> CurrentBubbleDataCollection { get; }
 
         FlowEndpoint? SelectedPivotEndpoint { get; set; }
         FlowEndpoint? SelectedOrbitEndpoint { get; set; }

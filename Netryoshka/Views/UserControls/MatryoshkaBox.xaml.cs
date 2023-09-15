@@ -37,34 +37,6 @@ namespace Netryoshka
             ViewModel.CurrentLayerOnDisplay = $"{parentViewModel?.SelectedNetworkLayer}";
         }
 
-
-
-        //public static readonly DependencyProperty TextProperty =
-        //    DependencyProperty.Register("Text", typeof(string), typeof(MyUserControl),
-        //        new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-
-        //public string Text
-        //{
-        //    get { return (string)GetValue(TextProperty); }
-        //    set { SetValue(TextProperty, value); }
-        //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public void SetLayerOnMouseEnter(object sender, MouseEventArgs e)
         {
             if (sender is Button button && button.Tag is string tag)

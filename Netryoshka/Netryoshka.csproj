@@ -98,10 +98,13 @@
       <Compile Update="Views\Pages\TestPage.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\FrameSharkJsonChatBubble.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
       <Compile Update="Views\UserControls\ChatBubbles\FrameFlowChatBubble.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\EthFlowChatBubble.xaml.cs">
+      <Compile Update="Views\UserControls\ChatBubbles\EthernetBubble.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
       <Compile Update="Views\UserControls\ChatBubbles\TcpAsciiFlowChatBubble.xaml.cs">

@@ -3,12 +3,12 @@ using System.Windows;
 
 namespace Netryoshka
 {
-    public partial class FrameFlowChatBubble
+    public partial class FrameBubble
     {
-        public FrameChatBubbleViewModel ViewModel { get; set; }
-        public FrameFlowChatBubble()
+        public FrameBubbleViewModel ViewModel { get; set; }
+        public FrameBubble()
         {
-            ViewModel = new FrameChatBubbleViewModel();
+            ViewModel = new FrameBubbleViewModel();
             DataContextChanged += OnDataContextChanged;
             InitializeComponent();
         }
@@ -17,7 +17,7 @@ namespace Netryoshka
         {
             if (e.NewValue is BubbleData bubbleData)
             {
-                ViewModel = new FrameChatBubbleViewModel(bubbleData);
+                ViewModel = new FrameBubbleViewModel(bubbleData);
                 DataContext = ViewModel;
             }
         }

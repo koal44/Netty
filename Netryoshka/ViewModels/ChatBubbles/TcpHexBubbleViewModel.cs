@@ -1,13 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Netryoshka.DesignTime;
 using Netryoshka.Helpers;
-using System;
 using System.ComponentModel;
 using System.Windows;
 
 namespace Netryoshka
 {
-    public partial class TcpHexChatBubbleViewModel : ObservableObject
+    public partial class TcpHexBubbleViewModel : ObservableObject
     {
 
         [ObservableProperty]
@@ -19,7 +18,7 @@ namespace Netryoshka
         [ObservableProperty]
         private string? _footerContent;
 
-        public TcpHexChatBubbleViewModel()
+        public TcpHexBubbleViewModel()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
@@ -31,7 +30,7 @@ namespace Netryoshka
             }
         }
 
-        public TcpHexChatBubbleViewModel(BubbleData data)
+        public TcpHexBubbleViewModel(BubbleData data)
         {
             EndPointRole = data.EndPointRole;
             HeaderContent = BubbleDataHelper.BuildTcpHeaderContent(data);

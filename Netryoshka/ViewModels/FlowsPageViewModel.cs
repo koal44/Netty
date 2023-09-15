@@ -7,7 +7,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows;
 using static Netryoshka.BasicPacket;
+using System.ComponentModel;
 
 namespace Netryoshka
 {
@@ -25,8 +28,20 @@ namespace Netryoshka
         [ObservableProperty]
         private ObservableCollection<FlowEndpoint> _orbitEndpoints;
 
+        private ObservableCollection<BubbleData> _currentBubbleDataCollection;
+
+        public ObservableCollection<BubbleData> CurrentBubbleDataCollection
+        {
+            get => _currentBubbleDataCollection;
+            set
+            {
+                SetProperty(ref _currentBubbleDataCollection, value);
+                UpdateBubbleItemsViewModels();
+            }
+        }
+
         [ObservableProperty]
-        private ObservableCollection<BubbleData> _currentFlowChatBubbles;
+        private ObservableCollection<object> _currentItemViewModelCollecion;
 
         private FlowEndpoint? _selectedPivotEndpoint;
         public FlowEndpoint? SelectedPivotEndpoint
@@ -46,7 +61,7 @@ namespace Netryoshka
             set
             {
                 SetProperty(ref _selectedOrbitEndpoint, value);
-                UpdateCurrentChatBubbles();
+                //UpdateCurrentChatBubbles();
             }
         }
 
@@ -76,6 +91,8 @@ namespace Netryoshka
         [ObservableProperty]
         private NetworkLayer _selectedNetworkLayer;
         [ObservableProperty]
+        private FrameDisplay _selectedFrameDisplay;
+        [ObservableProperty]
         private TcpEncoding _selectedTcpEncoding;
         [ObservableProperty]
         private DeframeMethod? _selectedDeframeMethod;
@@ -84,12 +101,9 @@ namespace Netryoshka
         [ObservableProperty]
         private int _messageTypeLength;
 
-
         public static IEnumerable<DeframeMethod> DeframeMethods => Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
         [ObservableProperty]
         private string? _keyLogFileName;
-
-
 
         public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService)
         {
@@ -99,37 +113,72 @@ namespace Netryoshka
             _allFlows = _flowManager.GetAllFlows();
             _pivotEndpoints = new();
             _orbitEndpoints = new();
-            _currentFlowChatBubbles = new();
+            _currentBubbleDataCollection = new();
             _pivotProcessInfo = string.Empty;
             _isSeriousBotSelected = false;
             _isDitzyBotSelected = false;
             _selectedNetworkLayer = NetworkLayer.Tcp;
+            _selectedFrameDisplay = FrameDisplay.NoShark;
             _selectedTcpEncoding = TcpEncoding.Hex;
+            _selectedDeframeMethod = null;
+            _currentItemViewModelCollecion = new();
+            PropertyChanged += OnDisplayControlsPropertyChanged;
 
             // sets off a chain of side reactions which updates orbit, updating flowmessages.
             UpdatePivotEndpoints();
 
 
-            //CurrentFlowChatBubbles.CollectionChanged += OnCurrentFlowChatBubblesChanged;
+            //CurrentBubbleDataCollection.CollectionChanged += OnCurrentFlowChatBubblesChanged;
         }
 
-        //private void OnCurrentFlowChatBubblesChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        //{
-        //    if (e.NewItems != null)
-        //    {
-        //        foreach (BubbleData newItem in e.NewItems)
-        //        {
-        //            newItem.RefreshTemplate += OnRefreshTemplateRequested;
-        //        }
-        //    }
-        //    else if (e.Action == NotifyCollectionChangedAction.Remove)
-        //    {
-        //        foreach (BubbleData oldItem in e.OldItems)
-        //        {
-        //            oldItem.RefreshTemplate -= OnRefreshTemplateRequested;
-        //        }
-        //    }
-        //}
+        private void OnDisplayControlsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(SelectedNetworkLayer):
+                case nameof(SelectedTcpEncoding):
+                case nameof(SelectedDeframeMethod):
+                case nameof(MessagePrefixLength):
+                case nameof(MessageTypeLength):
+                    UpdateBubbleItemsViewModels();
+                    break;
+            }
+        }
+
+        private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
+        {
+            //{ "AppNull", typeof(AppNullBubbleViewModel) },
+            //{ "AppHttp", typeof(AppHttpBubbleViewModel) },
+            //{ "AppHttps", typeof(AppHttpsBubbleViewModel) },
+            //{ "AppLengthPrefix", typeof(AppLengthPrefixBubbleViewModel) },
+            { "TcpHex", typeof(TcpHexBubbleViewModel) },
+            { "TcpAscii", typeof(TcpAsciiBubbleViewModel) },
+            //{ "Ip", typeof(IpBubbleViewModel) },
+            { "Eth", typeof(EthernetBubbleViewModel) },
+            { "Frame", typeof(FrameBubbleViewModel) }
+        };
+
+        private void UpdateBubbleItemsViewModels()
+        {
+            string key = SelectedNetworkLayer switch
+            {
+                NetworkLayer.App => $"App{(SelectedDeframeMethod.HasValue ? SelectedDeframeMethod : "Null")}",
+                NetworkLayer.Tcp => $"Tcp{SelectedTcpEncoding}",
+                _ => $"{SelectedNetworkLayer}"
+            };
+
+            BubbleViewModelsByName.TryGetValue(key, out var viewModelType);
+            if (viewModelType is null)
+                throw new InvalidOperationException($"Could not select a suitable view model for key '{key}'");
+
+            CurrentItemViewModelCollecion.Clear();
+            foreach (var bubbleData in CurrentBubbleDataCollection)
+            {
+                var viewModel = Activator.CreateInstance(viewModelType, bubbleData)
+                    ?? throw new InvalidOperationException($"Could not create a view model of type '{viewModelType}'");
+                CurrentItemViewModelCollecion.Add(viewModel);
+            }
+        }
 
         private void UpdatePivotEndpoints()
         {
@@ -246,7 +295,7 @@ namespace Netryoshka
 
         private void UpdateCurrentChatBubbles()
         {
-            CurrentFlowChatBubbles.Clear();
+            CurrentBubbleDataCollection.Clear();
 
             if (CurrentFlowKey != null)
             {
@@ -264,11 +313,12 @@ namespace Netryoshka
                             ? packet.Timestamp - lastTimestamp.Value
                             : (TimeSpan?)null;
 
-                    CurrentFlowChatBubbles.Add(new BubbleData(packet, endPointRole, packetInterval));
+                    CurrentBubbleDataCollection.Add(new BubbleData(packet, endPointRole, packetInterval));
 
                     lastTimestamp = packet.Timestamp;
                 }
             }
+            UpdateBubbleItemsViewModels();
         }
 
         [RelayCommand]
@@ -283,7 +333,7 @@ namespace Netryoshka
         }
 
         [RelayCommand]
-        public void ToggleDataDisplayMode()
+        public void ToggleTcpDisplayMode()
         {
             var values = Enum.GetValues<TcpEncoding>().ToArray();
             var currentIndex = Array.IndexOf(values, SelectedTcpEncoding);
@@ -291,6 +341,18 @@ namespace Netryoshka
 
             SelectedTcpEncoding = values[nextIndex];
         }
+
+        [RelayCommand]
+        public void ToggleEthernetDisplayMode()
+        {
+            var values = Enum.GetValues<FrameDisplay>().ToArray();
+            var currentIndex = Array.IndexOf(values, SelectedFrameDisplay);
+            var nextIndex = (currentIndex + 1) % values.Length;
+
+            SelectedFrameDisplay = values[nextIndex];
+        }
+
+
 
         [RelayCommand]
         private void LoadKeyLogFileWizard()
@@ -313,28 +375,35 @@ namespace Netryoshka
 
 
 
-        internal async Task ParseAsHttpAsync()
+        private async Task UpdateTSharkPacketsAsync()
         {
-            CurrentFlowChatBubbles.Clear();
-
-            if (CurrentFlowKey != null)
-            {
-                var packets = _allFlows[CurrentFlowKey];
-                if (packets == null) return;
-
-                //DateTime? lastTimestamp = null;
-
-                _ = await _tSharkService.ParseHttpPacketsAsync(packets);
-
-            }
+            var packets = CurrentBubbleDataCollection.Select(bd => bd.BasicPacket).ToList();
+            var sharkPacket = await _tSharkService.ParseHttpPacketsAsync(packets);
         }
-
-
-
-
-
-
     }
 
+    public class BubbleTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate AppNullBubbleTemplate { get; set; }
+        public DataTemplate AppHttpBubbleTemplate { get; set; }
+        public DataTemplate AppHttpsBubbleTemplate { get; set; }
+        public DataTemplate AppLengthPrefixBubbleTemplate { get; set; }
+        public DataTemplate TcpHexBubbleTemplate { get; set; }
+        public DataTemplate TcpAsciiBubbleTemplate { get; set; }
+        public DataTemplate IpBubbleTemplate { get; set; }
+        public DataTemplate EthernetBubbleTemplate { get; set; }
+        public DataTemplate FrameBubbleTemplate { get; set; }
 
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            return item switch
+            {
+                EthernetBubbleViewModel => EthernetBubbleTemplate,
+                FrameBubbleViewModel => FrameBubbleTemplate,
+                TcpAsciiBubbleViewModel => TcpAsciiBubbleTemplate,
+                TcpHexBubbleViewModel => TcpHexBubbleTemplate,
+                _ => base.SelectTemplate(item, container),
+            };
+        }
+    }
 }

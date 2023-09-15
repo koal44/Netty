@@ -20,10 +20,6 @@
       ScrollViewer.IsDeferredScrollingEnabled="False"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       mc:Ignorable="d">
-  <Page.Resources>
-    
-  </Page.Resources>
-
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="auto" />
@@ -48,7 +44,6 @@
           <Setter Property="HorizontalAlignment" Value="Stretch" />
           <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
-
         <DataTemplate x:Key="ComboBoxEndpointTemplate">
           <TextBlock d:DataContext="{d:DesignInstance local:FlowEndpoint,
                                                       IsDesignTimeCreatable=False}"
@@ -66,10 +61,6 @@
                 ItemsSource="{Binding OrbitEndpoints}"
                 SelectedItem="{Binding SelectedOrbitEndpoint, Mode=TwoWay}" />
     </Grid>
-
-
-
-
     <Border Grid.Row="1"
             Margin="10"
             Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}"
@@ -79,9 +70,6 @@
           <RowDefinition Height="auto" />
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-
-
-
         <Grid Name="ControlBarGrid"
               Grid.Row="0"
               Height="40"
@@ -140,20 +128,16 @@
                 <TextBlock Text="{Binding PivotProcessInfo}" />
               </StackPanel>
             </StackPanel>
-
           </StackPanel>
-
           <StackPanel Grid.Column="1"
                       Margin="80,0,0,0"
                       Orientation="Horizontal">
-
-
             <StackPanel Margin="0"
                         Orientation="Horizontal">
               <local:MatryoshkaBox x:Name="MatryoshkaBox"
                                    Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight, Converter={local:ScaleConverter Amount=1.5}}"
                                    Margin="0,0,5,0"
-                                   ParentViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:FlowsPage}}, Path=ViewModel}" />
+                                   ParentViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:FlowsPage}}, Path=DataContext}" />
               <StackPanel Width="40"
                           Margin="0,0,5,0"
                           Orientation="Vertical">
@@ -162,9 +146,30 @@
                            Text="{Binding ElementName=MatryoshkaBox, Path=ViewModel.CurrentLayerOnDisplay}" />
               </StackPanel>
             </StackPanel>
-
             <Separator Margin="10,0" />
-
+            <Grid Name="EthernetOptionsGrid"
+                  Visibility="{Binding SelectedNetworkLayer, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:NetworkLayer.Eth}}">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+              </Grid.RowDefinitions>
+              <Button Grid.Row="0"
+                      local:MouseOverBrushProperty.Value="{DynamicResource Blue7Brush}"
+                      Command="{Binding ToggleTcpDisplayModeCommand}"
+                      Style="{StaticResource HoverButton}">
+                <Path Name="WireSharkPath"
+                      Data="{StaticResource WireShark}"
+                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      Stretch="Uniform" />
+              </Button>
+              <TextBlock Name="WireSharkTextBlock"
+                         Grid.Row="1"
+                         Margin="0,3,0,0"
+                         Padding="0"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Bottom"
+                         Text="{Binding Path=SelectedWireSharkDisplay, Converter={local:EnumToStringConverter}}" />
+            </Grid>
             <Grid Name="TcpOptionsGrid"
                   Visibility="{Binding SelectedNetworkLayer, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:NetworkLayer.Tcp}}">
               <Grid.RowDefinitions>
@@ -173,7 +178,7 @@
               </Grid.RowDefinitions>
               <Button Grid.Row="0"
                       local:MouseOverBrushProperty.Value="{DynamicResource Blue7Brush}"
-                      Command="{Binding ToggleDataDisplayModeCommand}"
+                      Command="{Binding ToggleTcpDisplayModeCommand}"
                       Style="{StaticResource HoverButton}">
                 <Path Name="HexAsciiPath"
                       Data="{StaticResource HexAscii}"
@@ -188,11 +193,9 @@
                          VerticalAlignment="Bottom"
                          Text="{Binding Path=SelectedTcpEncoding, Converter={local:EnumToStringConverter}}" />
             </Grid>
-
             <Grid Name="AppOptionsGrid"
                   Visibility="{Binding SelectedNetworkLayer, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:NetworkLayer.App}}">
               <StackPanel Orientation="Horizontal">
-
                 <Grid Margin="0,0,15,0"
                       VerticalAlignment="Center">
                   <ComboBox x:Name="DeframingMethodComboBox"
@@ -208,7 +211,6 @@
                              Text="De-Frame Method"
                              Visibility="{Binding SelectedItem, ElementName=DeframingMethodComboBox, Converter={local:NullToVisibileConverter}}" />
                 </Grid>
-
                 <Grid Name="HttpsOptionsGrid"
                       Visibility="{Binding SelectedDeframeMethod, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:DeframeMethod.Https}}">
                   <StackPanel Orientation="Horizontal">
@@ -223,7 +225,6 @@
                                Text="{Binding KeyLogFileName}" />
                   </StackPanel>
                 </Grid>
-
                 <Grid Name="LengthPrefixedOptionsGrid"
                       Visibility="{Binding SelectedDeframeMethod, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:DeframeMethod.LengthPrefixed}}">
                   <Grid.RowDefinitions>
@@ -249,7 +250,6 @@
                     <TextBlock VerticalAlignment="Center"
                                Text="Prefix Length" />
                   </StackPanel>
-
                   <StackPanel Grid.Row="1"
                               Orientation="Horizontal">
                     <Slider Name="TypeLengthSlider"
@@ -257,24 +257,13 @@
                     <TextBlock VerticalAlignment="Center"
                                Text="Type Length" />
                   </StackPanel>
-
-
                 </Grid>
-
               </StackPanel>
-
-
             </Grid>
-
-
-
           </StackPanel>
-
-
           <StackPanel Grid.Column="2"
                       HorizontalAlignment="Right"
                       Orientation="Horizontal">
-
             <local:BotButton Width="{Binding ElementName=ControlBarGrid, Path=Height}"
                              Height="{Binding ElementName=ControlBarGrid, Path=Height}"
                              BotPadding="7,4,1,3"
@@ -283,23 +272,14 @@
                              PathData="{StaticResource DitzyBotBorderless}" />
           </StackPanel>
         </Grid>
-
-
-        <!--  ItemsSource="{Binding CurrentFlowMessages}"  -->
         <ListBox x:Name="FlowChatListBox"
                  Grid.Row="1"
                  ItemContainerStyle="{DynamicResource FlowChatItemContainerStyle}"
-                 ItemsSource="{Binding CurrentFlowChatBubbles}"
+                 ItemTemplateSelector="{StaticResource ChatBubbleSelector}"
+                 ItemsSource="{Binding CurrentItemViewModelCollecion}"
                  ScrollViewer.CanContentScroll="False"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-
-          <!--<ListBox.ItemTemplateSelector>
-            <StaticResource ResourceKey="ChatBubbleSelector" />
-          </ListBox.ItemTemplateSelector>-->
-          <!--  ItemTemplateSelector="{StaticResource ChatBubbleSelector}"  -->
-          <!--  DataContextChanged="FlowChatListBoxDataContextChanged"  -->
           <ListBox.Resources>
-
 
             <Style x:Key="FlowChatItemContainerStyle"
                    TargetType="{x:Type ListBoxItem}">
@@ -327,23 +307,8 @@
               </Setter>
             </Style>
           </ListBox.Resources>
-
-          <!--<ContentControl ContentTemplate="{StaticResource AppNullDataTemplate}" />-->
-          <ListBox.ItemTemplate>
-            <DataTemplate>
-              <ContentControl Content="{Binding}" ContentTemplate="{Binding Template}" />
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-
-          <!--<ListBox.ItemTemplate>
-            <DataTemplate>
-              <local:FlowChatBubble BubbleScale="0.8" />
-            </DataTemplate>
-          </ListBox.ItemTemplate>-->
         </ListBox>
-
       </Grid>
     </Border>
-
   </Grid>
 </Page>

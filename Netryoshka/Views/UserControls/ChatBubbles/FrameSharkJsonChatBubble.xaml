@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="Netryoshka.FrameBubble"
+﻿<UserControl x:Class="Netryoshka.FrameSharkJsonBubble"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Netryoshka"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DataContext="{d:DesignInstance local:FrameBubbleViewModel,
+             d:DataContext="{d:DesignInstance local:FrameSharkJsonBubbleViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="100"
              d:DesignWidth="200"

@@ -52,7 +52,7 @@ namespace Netryoshka.DesignTime
                     new BubbleData(packet, role, packetInterval)
                 );
 
-                //CurrentFlowChatBubbles.Add(
+                //CurrentBubbleDataCollection.Add(
                 //    new FlowChatBubbleDesignViewModel().Build(packet, role, packetInterval, this));
 
                 lastTimestamp = packet.Timestamp;
