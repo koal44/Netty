@@ -14,10 +14,8 @@ namespace Netryoshka.DesignTime
         public ObservableCollection<FlowEndpoint> OrbitEndpoints { get; set; }
         public FlowEndpoint? SelectedPivotEndpoint { get; set; }
         public FlowEndpoint? SelectedOrbitEndpoint { get; set; }
-        public FlowEndpoint? SelectedFrameEndpoint { get; set; }
+        public FlowEndpointRole? SelectedBotRole { get; set; }
         public string PivotProcessInfo { get; set; }
-        public bool IsSeriousBotSelected { get; set; }
-        public bool IsDitzyBotSelected { get; set; }
         public TcpEncoding SelectedTcpEncoding { get; set; }
         public NetworkLayer SelectedNetworkLayer { get; set; }
         public DeframeMethod? SelectedDeframeMethod { get; set; }

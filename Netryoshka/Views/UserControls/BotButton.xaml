@@ -67,7 +67,7 @@
     <Button Padding="0"
             Background="Transparent"
             BorderThickness="0"
-            Command="{Binding SelectFrameEndpointCommand}"
+            Command="{Binding SelectBotRoleCommand}"
             CommandParameter="{Binding FlowEndpointRole, RelativeSource={RelativeSource AncestorType=UserControl}}">
       <Path Data="{Binding PathData, RelativeSource={RelativeSource AncestorType=UserControl}}"
             Fill="{DynamicResource BotBrush}"

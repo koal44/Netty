@@ -38,11 +38,7 @@ namespace Netryoshka
         [ObservableProperty]
         private string _pivotProcessInfo;
         [ObservableProperty]
-        private FlowEndpoint? _selectedFrameEndpoint;
-        [ObservableProperty]
-        private bool _isPivotBotSelected;
-        [ObservableProperty]
-        private bool _isOrbitBotSelected;
+        private FlowEndpointRole? _selectedBotRole;
         [ObservableProperty]
         private NetworkLayer _selectedNetworkLayer;
         [ObservableProperty]
@@ -57,6 +53,8 @@ namespace Netryoshka
         private int _messageTypeLength;
         [ObservableProperty]
         private string? _keyLogFileName;
+        [ObservableProperty]
+        private IEnumerable<DeframeMethod> _deframeMethods;
 
         private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
         {
@@ -81,13 +79,12 @@ namespace Netryoshka
             _orbitEndpoints = new();
             _currentBubbleDataCollection = new();
             _pivotProcessInfo = string.Empty;
-            _isPivotBotSelected = false;
-            _isOrbitBotSelected = false;
             _selectedNetworkLayer = NetworkLayer.Tcp;
             _selectedFrameDisplay = FrameDisplay.NoShark;
             _selectedTcpEncoding = TcpEncoding.Hex;
             _selectedDeframeMethod = null;
             _currentItemViewModelCollecion = new();
+            _deframeMethods = Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
             PropertyChanged += OnPropertyChanged;
 
             // sets off a chain of side reactions which updates orbit, updating flowmessages.
@@ -110,9 +107,6 @@ namespace Netryoshka
                 case nameof(SelectedOrbitEndpoint):
                     UpdateCurrentChatBubbles();
                     break;
-                case nameof(SelectedFrameEndpoint):
-                    UpdateSelectedBot();
-                    break;
                 // these properties control the display of the chat bubbles
                 case nameof(SelectedNetworkLayer):
                 case nameof(SelectedTcpEncoding):
@@ -122,12 +116,6 @@ namespace Netryoshka
                     UpdateBubbleItemsViewModels();
                     break;
             }
-        }
-
-        private void UpdateSelectedBot()
-        {
-            IsPivotBotSelected = SelectedPivotEndpoint?.Equals(SelectedFrameEndpoint) == true;
-            IsOrbitBotSelected = SelectedOrbitEndpoint?.Equals(SelectedFrameEndpoint) == true;
         }
 
         private void UpdateBubbleItemsViewModels()
@@ -188,7 +176,7 @@ namespace Netryoshka
             }
 
             SelectedPivotEndpoint = PivotEndpoints.FirstOrDefault();
-            SelectedFrameEndpoint ??= SelectedPivotEndpoint;
+            SelectedBotRole ??= PivotEndpoints.Any() ? FlowEndpointRole.Pivot : null;
             UpdateOrbitEndpoints();
         }
 
@@ -291,14 +279,9 @@ namespace Netryoshka
         }
 
         [RelayCommand]
-        public void SelectFrameEndpoint(FlowEndpointRole endpointRole)
+        public void SelectBotRole(FlowEndpointRole endpointRole)
         {
-            SelectedFrameEndpoint = endpointRole switch
-            {
-                FlowEndpointRole.Pivot => SelectedPivotEndpoint,
-                FlowEndpointRole.Orbit => SelectedOrbitEndpoint,
-                _ => null
-            };
+            SelectedBotRole = endpointRole;
         }
 
         [RelayCommand]
@@ -338,9 +321,6 @@ namespace Netryoshka
                 KeyLogFileName = openFileDialog.FileName;
             }
         }
-
-
-
 
         private async Task UpdateTSharkPacketsAsync()
         {

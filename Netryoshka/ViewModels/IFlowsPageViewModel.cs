@@ -11,10 +11,8 @@ namespace Netryoshka
 
         FlowEndpoint? SelectedPivotEndpoint { get; set; }
         FlowEndpoint? SelectedOrbitEndpoint { get; set; }
-        FlowEndpoint? SelectedFrameEndpoint { get; set; }
+        FlowEndpointRole? SelectedBotRole { get; set; }
         string PivotProcessInfo { get; }
-        bool IsPivotBotSelected { get; }
-        bool IsOrbitBotSelected { get; }
         TcpEncoding SelectedTcpEncoding { get; set; }
         NetworkLayer SelectedNetworkLayer { get; set; }
         DeframeMethod? SelectedDeframeMethod { get; set; }

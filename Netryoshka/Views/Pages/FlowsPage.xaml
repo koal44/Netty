@@ -118,7 +118,7 @@
                              Height="{Binding ElementName=ControlBarGrid, Path=Height}"
                              BotPadding="4,1,4,4"
                              FlowEndpointRole="Pivot"
-                             IsSelected="{Binding IsSeriousBotSelected}"
+                             IsSelected="{Binding SelectedBotRole, Converter={local:EnumStringComparisonConverter}, ConverterParameter=Pivot}"
                              PathData="{StaticResource SeriousBotBorderless}" />
             <StackPanel x:Name="PivotPanel"
                         Margin="10,0,0,0"
@@ -268,7 +268,7 @@
                              Height="{Binding ElementName=ControlBarGrid, Path=Height}"
                              BotPadding="7,4,1,3"
                              FlowEndpointRole="Orbit"
-                             IsSelected="{Binding IsDitzyBotSelected}"
+                             IsSelected="{Binding SelectedBotRole, Converter={local:EnumStringComparisonConverter}, ConverterParameter=Orbit}"
                              PathData="{StaticResource DitzyBotBorderless}" />
           </StackPanel>
         </Grid>
