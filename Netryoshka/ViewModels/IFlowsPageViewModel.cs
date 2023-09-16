@@ -13,8 +13,8 @@ namespace Netryoshka
         FlowEndpoint? SelectedOrbitEndpoint { get; set; }
         FlowEndpoint? SelectedFrameEndpoint { get; set; }
         string PivotProcessInfo { get; }
-        bool IsSeriousBotSelected { get; }
-        bool IsDitzyBotSelected { get; }
+        bool IsPivotBotSelected { get; }
+        bool IsOrbitBotSelected { get; }
         TcpEncoding SelectedTcpEncoding { get; set; }
         NetworkLayer SelectedNetworkLayer { get; set; }
         DeframeMethod? SelectedDeframeMethod { get; set; }

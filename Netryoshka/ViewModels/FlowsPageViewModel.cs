@@ -24,70 +24,25 @@ namespace Netryoshka
 
         [ObservableProperty]
         private ObservableCollection<FlowEndpoint> _pivotEndpoints;
-
         [ObservableProperty]
         private ObservableCollection<FlowEndpoint> _orbitEndpoints;
-
+        [ObservableProperty]
         private ObservableCollection<BubbleData> _currentBubbleDataCollection;
-
-        public ObservableCollection<BubbleData> CurrentBubbleDataCollection
-        {
-            get => _currentBubbleDataCollection;
-            set
-            {
-                SetProperty(ref _currentBubbleDataCollection, value);
-                UpdateBubbleItemsViewModels();
-            }
-        }
-
         [ObservableProperty]
         private ObservableCollection<object> _currentItemViewModelCollecion;
-
+        [ObservableProperty] 
         private FlowEndpoint? _selectedPivotEndpoint;
-        public FlowEndpoint? SelectedPivotEndpoint
-        {
-            get => _selectedPivotEndpoint;
-            set
-            {
-                SetProperty(ref _selectedPivotEndpoint, value);
-                UpdateOrbitEndpoints();
-            }
-        }
-
+        [ObservableProperty] 
         private FlowEndpoint? _selectedOrbitEndpoint;
-        public FlowEndpoint? SelectedOrbitEndpoint
-        {
-            get => _selectedOrbitEndpoint;
-            set
-            {
-                SetProperty(ref _selectedOrbitEndpoint, value);
-                //UpdateCurrentChatBubbles();
-            }
-        }
-
-        private FlowKey? CurrentFlowKey { get; set; }
-
+        private FlowKey? _currentFlowKey;
         [ObservableProperty]
         private string _pivotProcessInfo;
-
+        [ObservableProperty]
         private FlowEndpoint? _selectedFrameEndpoint;
-        public FlowEndpoint? SelectedFrameEndpoint
-        {
-            get => _selectedFrameEndpoint;
-            set
-            {
-                SetProperty(ref _selectedFrameEndpoint, value);
-                IsSeriousBotSelected = SelectedPivotEndpoint?.Equals(_selectedFrameEndpoint) == true;
-                IsDitzyBotSelected = SelectedOrbitEndpoint?.Equals(_selectedFrameEndpoint) == true;
-            }
-        }
-
         [ObservableProperty]
-        private bool _isSeriousBotSelected;
+        private bool _isPivotBotSelected;
         [ObservableProperty]
-        private bool _isDitzyBotSelected;
-        
-        // these properties control the display of the chat bubbles
+        private bool _isOrbitBotSelected;
         [ObservableProperty]
         private NetworkLayer _selectedNetworkLayer;
         [ObservableProperty]
@@ -100,50 +55,8 @@ namespace Netryoshka
         private int _messagePrefixLength;
         [ObservableProperty]
         private int _messageTypeLength;
-
-        public static IEnumerable<DeframeMethod> DeframeMethods => Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
         [ObservableProperty]
         private string? _keyLogFileName;
-
-        public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService)
-        {
-            _flowManager = flowManager;
-            _logger = logger;
-            _tSharkService = tSharkService;
-            _allFlows = _flowManager.GetAllFlows();
-            _pivotEndpoints = new();
-            _orbitEndpoints = new();
-            _currentBubbleDataCollection = new();
-            _pivotProcessInfo = string.Empty;
-            _isSeriousBotSelected = false;
-            _isDitzyBotSelected = false;
-            _selectedNetworkLayer = NetworkLayer.Tcp;
-            _selectedFrameDisplay = FrameDisplay.NoShark;
-            _selectedTcpEncoding = TcpEncoding.Hex;
-            _selectedDeframeMethod = null;
-            _currentItemViewModelCollecion = new();
-            PropertyChanged += OnDisplayControlsPropertyChanged;
-
-            // sets off a chain of side reactions which updates orbit, updating flowmessages.
-            UpdatePivotEndpoints();
-
-
-            //CurrentBubbleDataCollection.CollectionChanged += OnCurrentFlowChatBubblesChanged;
-        }
-
-        private void OnDisplayControlsPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(SelectedNetworkLayer):
-                case nameof(SelectedTcpEncoding):
-                case nameof(SelectedDeframeMethod):
-                case nameof(MessagePrefixLength):
-                case nameof(MessageTypeLength):
-                    UpdateBubbleItemsViewModels();
-                    break;
-            }
-        }
 
         private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
         {
@@ -157,6 +70,65 @@ namespace Netryoshka
             { "Eth", typeof(EthernetBubbleViewModel) },
             { "Frame", typeof(FrameBubbleViewModel) }
         };
+
+        public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService)
+        {
+            _flowManager = flowManager;
+            _logger = logger;
+            _tSharkService = tSharkService;
+            _allFlows = _flowManager.GetAllFlows();
+            _pivotEndpoints = new();
+            _orbitEndpoints = new();
+            _currentBubbleDataCollection = new();
+            _pivotProcessInfo = string.Empty;
+            _isPivotBotSelected = false;
+            _isOrbitBotSelected = false;
+            _selectedNetworkLayer = NetworkLayer.Tcp;
+            _selectedFrameDisplay = FrameDisplay.NoShark;
+            _selectedTcpEncoding = TcpEncoding.Hex;
+            _selectedDeframeMethod = null;
+            _currentItemViewModelCollecion = new();
+            PropertyChanged += OnPropertyChanged;
+
+            // sets off a chain of side reactions which updates orbit, updating flowmessages.
+            UpdatePivotEndpoints();
+
+
+            //CurrentBubbleDataCollection.CollectionChanged += OnCurrentBubbleDataCollectionChanged;
+        }
+
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(CurrentBubbleDataCollection):
+                    UpdateBubbleItemsViewModels();
+                    break;
+                case nameof(SelectedPivotEndpoint):
+                    UpdateOrbitEndpoints();
+                    break;
+                case nameof(SelectedOrbitEndpoint):
+                    UpdateCurrentChatBubbles();
+                    break;
+                case nameof(SelectedFrameEndpoint):
+                    UpdateSelectedBot();
+                    break;
+                // these properties control the display of the chat bubbles
+                case nameof(SelectedNetworkLayer):
+                case nameof(SelectedTcpEncoding):
+                case nameof(SelectedDeframeMethod):
+                case nameof(MessagePrefixLength):
+                case nameof(MessageTypeLength):
+                    UpdateBubbleItemsViewModels();
+                    break;
+            }
+        }
+
+        private void UpdateSelectedBot()
+        {
+            IsPivotBotSelected = SelectedPivotEndpoint?.Equals(SelectedFrameEndpoint) == true;
+            IsOrbitBotSelected = SelectedOrbitEndpoint?.Equals(SelectedFrameEndpoint) == true;
+        }
 
         private void UpdateBubbleItemsViewModels()
         {
@@ -216,10 +188,7 @@ namespace Netryoshka
             }
 
             SelectedPivotEndpoint = PivotEndpoints.FirstOrDefault();
-            if (SelectedFrameEndpoint == null && PivotEndpoints.Count > 0)
-            {
-                SelectedFrameEndpoint = PivotEndpoints.First();
-            }
+            SelectedFrameEndpoint ??= SelectedPivotEndpoint;
             UpdateOrbitEndpoints();
         }
 
@@ -260,11 +229,11 @@ namespace Netryoshka
 
         private void UpdateCurrentFlow()
         {
-            CurrentFlowKey = null;
+            _currentFlowKey = null;
 
             if (SelectedPivotEndpoint != null && SelectedOrbitEndpoint != null)
             {
-                CurrentFlowKey = new FlowKey(SelectedPivotEndpoint, SelectedOrbitEndpoint);
+                _currentFlowKey = new FlowKey(SelectedPivotEndpoint, SelectedOrbitEndpoint);
             }
 
             UpdateCurrentChatBubbles();
@@ -275,9 +244,9 @@ namespace Netryoshka
         {
             PivotProcessInfo = string.Empty;
 
-            if (CurrentFlowKey != null)
+            if (_currentFlowKey != null)
             {
-                var packets = _allFlows[CurrentFlowKey];
+                var packets = _allFlows[_currentFlowKey];
                 if (packets == null || packets.Count <= 0) return; // shouldn't happen
 
                 var firstpacket = packets[0];
@@ -297,9 +266,9 @@ namespace Netryoshka
         {
             CurrentBubbleDataCollection.Clear();
 
-            if (CurrentFlowKey != null)
+            if (_currentFlowKey != null)
             {
-                var packets = _allFlows[CurrentFlowKey];
+                var packets = _allFlows[_currentFlowKey];
                 if (packets == null) return;
 
                 DateTime? lastTimestamp = null;
@@ -352,8 +321,6 @@ namespace Netryoshka
             SelectedFrameDisplay = values[nextIndex];
         }
 
-
-
         [RelayCommand]
         private void LoadKeyLogFileWizard()
         {
@@ -384,15 +351,15 @@ namespace Netryoshka
 
     public class BubbleTemplateSelector : DataTemplateSelector
     {
-        public DataTemplate AppNullBubbleTemplate { get; set; }
-        public DataTemplate AppHttpBubbleTemplate { get; set; }
-        public DataTemplate AppHttpsBubbleTemplate { get; set; }
-        public DataTemplate AppLengthPrefixBubbleTemplate { get; set; }
-        public DataTemplate TcpHexBubbleTemplate { get; set; }
-        public DataTemplate TcpAsciiBubbleTemplate { get; set; }
-        public DataTemplate IpBubbleTemplate { get; set; }
-        public DataTemplate EthernetBubbleTemplate { get; set; }
-        public DataTemplate FrameBubbleTemplate { get; set; }
+        public DataTemplate AppNullBubbleTemplate { get; set; } = null!;
+        public DataTemplate AppHttpBubbleTemplate { get; set; } = null!;
+        public DataTemplate AppHttpsBubbleTemplate { get; set; } = null!;
+        public DataTemplate AppLengthPrefixBubbleTemplate { get; set; } = null!;
+        public DataTemplate TcpHexBubbleTemplate { get; set; } = null!;
+        public DataTemplate TcpAsciiBubbleTemplate { get; set; } = null!;
+        public DataTemplate IpBubbleTemplate { get; set; } = null!;
+        public DataTemplate EthernetBubbleTemplate { get; set; } = null!;
+        public DataTemplate FrameBubbleTemplate { get; set; } = null!;
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
