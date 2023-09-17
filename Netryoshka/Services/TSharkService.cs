@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Netryoshka.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Netryoshka.Services
@@ -12,14 +14,16 @@ namespace Netryoshka.Services
     public class TSharkService
     {
         private string TSharkFileName { get; }
-        private ProcessStartInfo psi;
+        private readonly ProcessStartInfo _psi;
         private readonly ICaptureService _captureService;
+        private readonly ILogger _logger;
 
-        public TSharkService(ICaptureService captureService)
+        public TSharkService(ICaptureService captureService, ILogger logger)
         {
             _captureService = captureService;
+            _logger = logger;
             TSharkFileName = @"C:\Users\rando\source\repos\wireshark\wireshark_build\run\RelWithDebInfo\tshark.exe";
-            psi = new ProcessStartInfo
+            _psi = new ProcessStartInfo
             {
                 FileName = TSharkFileName,
                 Arguments = "-i - -T json", //"-Y http",
@@ -32,7 +36,7 @@ namespace Netryoshka.Services
         }
 
         // TODO: write our own binary writer
-        public byte[] GetPcapBytes(List<BasicPacket> packets)
+        private byte[] GetPcapBytes(List<BasicPacket> packets)
         {
             var binFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
             if (!Directory.Exists(binFolderPath)) { Directory.CreateDirectory(binFolderPath); }
@@ -44,14 +48,12 @@ namespace Netryoshka.Services
             return fileBytes;
         }
 
-
-        public string ParseHttpPackets(List<BasicPacket> packets)
+        private string SerializePacketsToJson(List<BasicPacket> packets)
         {
-
             byte[] packetStream = GetPcapBytes(packets);
             string parsedResult;
 
-            using (Process process = new Process { StartInfo = psi })
+            using (Process process = new Process { StartInfo = _psi })
             {
                 process.Start();
 
@@ -65,15 +67,59 @@ namespace Netryoshka.Services
         }
 
 
-
-        public async Task<string> ParseHttpPacketsAsync(List<BasicPacket> packets)
+        public async Task<string> SerializePacketsToJsonAsync(List<BasicPacket> packets, CancellationToken cancellationToken)
         {
             byte[] packetStream = GetPcapBytes(packets);
-            string parsedResult;
-            string errorResult;
-            
+            string json;
 
-            using (Process process = new Process { StartInfo = psi })
+            using (Process process = new() { StartInfo = _psi })
+            {
+                try
+                {
+                    process.Start();
+
+                    using (Stream stdin = process.StandardInput.BaseStream)
+                    using (StreamReader sr = process.StandardOutput)
+                    using (StreamReader serr = process.StandardError)
+                    {
+                        await stdin.WriteAsync(packetStream, cancellationToken).ConfigureAwait(false);
+                        stdin.Close();
+
+                        json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+
+                        var errorResult = await serr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+                        if (!string.IsNullOrEmpty(errorResult))
+                        {
+                            _logger.Info(errorResult);
+                        }
+                    }
+
+                    // Add timeout or cancellation logic?
+                    process.WaitForExit();  
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.Info("Operation was canceled.");
+                    process.Kill();
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error($"An exception occurred: {ex.Message}", ex);
+                    process.Kill();
+                    throw;
+                }
+            }
+
+            return json;
+        }
+
+        public async Task<string> SerializePacketsToJsonAsync(List<BasicPacket> packets)
+        {
+            byte[] packetStream = GetPcapBytes(packets);
+            string json;
+
+            using (Process process = new() { StartInfo = _psi })
             {
                 process.Start();
 
@@ -83,55 +129,46 @@ namespace Netryoshka.Services
                 {
                     await stdin.WriteAsync(packetStream);
                     stdin.Close();
-                    parsedResult = await sr.ReadToEndAsync();
-                    errorResult = await serr.ReadToEndAsync();
+                    json = await sr.ReadToEndAsync();
+
+                    var errorResult = await serr.ReadToEndAsync();
+                    if (!string.IsNullOrEmpty(errorResult))
+                    {
+                        _logger.Info(errorResult);
+                    }
                 }
                 process.WaitForExit();
             }
-            var tSharkPackets = JsonConvert.DeserializeObject<List<TSharkPacket>>(parsedResult);
-            //return tSharkPackets
-            return parsedResult;
+            return json;
         }
 
-        //public async Task<string> ParseHttpPacketsAsync(List<BasicPacket> packets, CancellationToken cancellationToken)
-        //{
-        //    byte[] packetStream = GetPcapBytes(packets);
-        //    string parsedResult;
-        //    string errorResult;
+        public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken cts)
+        {
+            var json = await SerializePacketsToJsonAsync(packets, cts);
 
-        //    using (Process process = new Process { StartInfo = psi })
-        //    {
-        //        process.Start();
+            var jsonList = Util.SplitJsonObjects(json);
+            var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(json) 
+                ?? throw new InvalidOperationException("Failed to deserialize json to WireSharkPacket list");
 
-        //        using (Stream stdin = process.StandardInput.BaseStream)
-        //        using (StreamReader sr = process.StandardOutput)
-        //        using (StreamReader serr = process.StandardError)
-        //        {
-        //            var writeTask = stdin.WriteAsync(packetStream, cancellationToken);
-        //            var readTask = sr.ReadToEndAsync();
-        //            var readErrorTask = serr.ReadToEndAsync();
+            if (packets.Count != jsonList.Count || jsonList.Count != sharkPackets.Count)
+            {
+                throw new InvalidOperationException($"Mismatch in element counts: packets ({packets.Count}), jsonList ({jsonList.Count}), sharkPackets ({sharkPackets.Count})");
+            }
 
-        //            var completedTask = await Task.WhenAny(Task.WhenAll(writeTask, readTask, readErrorTask), Task.Delay(5000));  // 5-second timeout
+            var sharkData = new List<WireSharkData>();
+            for (int i = 0; i < packets.Count; i++)
+            {
+                sharkData.Add(new WireSharkData(jsonList[i], sharkPackets[i]));
+            }
 
-        //            if (completedTask == readTask)
-        //            {
-        //                parsedResult = await readTask;
-        //                errorResult = await readErrorTask;
-        //            }
-        //            else
-        //            {
-        //                cancellationToken.ThrowIfCancellationRequested();
-        //                throw new TimeoutException("Parsing HTTP packets took too long.");
-        //            }
-        //        }
-        //        process.WaitForExit();
-        //    }
-        //    return parsedResult;
-        //}
+            return sharkData;
+        }
 
-
-
-
+        public static List<WireSharkPacket> DeserializeToTSharkPackets(string json)
+        {
+            return JsonConvert.DeserializeObject<List<WireSharkPacket>>(json) ?? new List<WireSharkPacket>();
+        }
+        
     }
 
 }

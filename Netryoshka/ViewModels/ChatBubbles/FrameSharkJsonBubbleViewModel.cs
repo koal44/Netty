@@ -17,6 +17,8 @@ namespace Netryoshka
         private string? _footerContent;
         [ObservableProperty]
         private ObservableCollection<TreeNode> _treeNodes = new();
+        [ObservableProperty]
+        private bool _isExpanded = true;
 
         public FrameSharkJsonBubbleViewModel()
         {
@@ -31,7 +33,7 @@ namespace Netryoshka
 
         public FrameSharkJsonBubbleViewModel(BubbleData data)
         {
-            TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(data.BasicPacket) };
+            TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(data.WireSharkData!.WireSharkPacket.Source!.Layers!) };
             EndPointRole = data.EndPointRole;
             FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
         }

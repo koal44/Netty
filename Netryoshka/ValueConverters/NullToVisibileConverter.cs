@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
@@ -15,7 +16,7 @@ namespace Netryoshka
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException($"{MethodBase.GetCurrentMethod()?.DeclaringType?.Name}.{MethodBase.GetCurrentMethod()?.Name}() is not implemented yet.");
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)

@@ -46,12 +46,12 @@
       <ComboBox Name="DevicesComboBox"
                 MinWidth="150"
                 Padding="2"
-                IsEnabled="{Binding ViewModel.IsCapturing, Converter={local:BooleanNegationConverter}}"
-                ItemsSource="{Binding ViewModel.DeviceNames}"
-                SelectedItem="{Binding ViewModel.SelectedDeviceName}">
+                IsEnabled="{Binding IsCapturing, Converter={local:BooleanNegationConverter}}"
+                ItemsSource="{Binding DeviceNames}"
+                SelectedItem="{Binding SelectedDeviceName}">
         <i:Interaction.Triggers>
           <i:EventTrigger EventName="DropDownOpened">
-            <i:InvokeCommandAction Command="{Binding ViewModel.LoadNetworkDevicesCommand}" />
+            <i:InvokeCommandAction Command="{Binding LoadNetworkDevicesCommand}" />
           </i:EventTrigger>
         </i:Interaction.Triggers>
       </ComboBox>
@@ -78,7 +78,7 @@
               BorderBrush="{DynamicResource SeperatorBrush}"
               BorderThickness="1"
               CornerRadius="10"
-              IsEnabled="{Binding ViewModel.IsCapturing, Converter={local:BooleanNegationConverter}}">
+              IsEnabled="{Binding IsCapturing, Converter={local:BooleanNegationConverter}}">
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
@@ -145,7 +145,7 @@
                        Margin="20,0,0,0"
                        FontStyle="Italic"
                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                       Text="{Binding ViewModel.CustomFilter}" />
+                       Text="{Binding CustomFilter}" />
             <StackPanel Grid.Column="2"
                         HorizontalAlignment="Right"
                         Orientation="Horizontal">
@@ -162,13 +162,13 @@
                   <Setter Property="Filled" Value="True" />
                 </Style>
               </StackPanel.Resources>
-              <ui:Button Command="{Binding ViewModel.OpenProcessSocketDialogCommand}">
+              <ui:Button Command="{Binding OpenProcessSocketDialogCommand}">
                 <ui:Button.Icon>
                   <ui:SymbolIcon Foreground="{DynamicResource Indigo8BBrush}"
                                  Symbol="DeveloperBoardSearch24" />
                 </ui:Button.Icon>
               </ui:Button>
-              <ui:Button Command="{Binding ViewModel.OpenFilterEditorDialogCommand}"
+              <ui:Button Command="{Binding OpenFilterEditorDialogCommand}"
                          CommandParameter="{StaticResource FilterEditorDialogContent}">
                 <ui:Button.Icon>
                   <ui:SymbolIcon Foreground="{DynamicResource Mango6BBrush}"
@@ -177,7 +177,6 @@
               </ui:Button>
             </StackPanel>
           </Grid>
-
           <TextBlock Grid.Row="2"
                      Grid.Column="0"
                      Margin="5,0,5,0"
@@ -187,13 +186,11 @@
                       Orientation="Horizontal">
             <Label Content="Port: " />
             <TextBox Width="50"
-                     Text="{Binding ViewModel.RemotePorts, Mode=TwoWay}" />
+                     Text="{Binding RemotePorts, Mode=TwoWay}" />
             <Label Content="IP: " />
             <TextBox Width="100"
-                     Text="{Binding ViewModel.RemoteIPAddresses}" />
+                     Text="{Binding RemoteIPAddresses}" />
           </StackPanel>
-
-
           <TextBlock Grid.Row="4"
                      Grid.Column="0"
                      Margin="5,0,5,0"
@@ -203,15 +200,15 @@
                       Orientation="Horizontal">
             <Label Content="Port: " />
             <TextBox Width="50"
-                     Text="{Binding ViewModel.LocalPorts}" />
+                     Text="{Binding LocalPorts}" />
 
             <Label Content="PID: " />
             <TextBox Width="45"
-                     Text="{Binding ViewModel.LocalPIDs}" />
+                     Text="{Binding LocalPIDs}" />
 
             <Label Content="Process: " />
             <TextBox Width="120"
-                     Text="{Binding ViewModel.LocalProcessNames}" />
+                     Text="{Binding LocalProcessNames}" />
           </StackPanel>
         </Grid>
       </Border>
@@ -236,16 +233,16 @@
           </Style>
         </StackPanel.Resources>
 
-        <ui:Button Command="{Binding ViewModel.StartOrStopCapturingCommand}">
+        <ui:Button Command="{Binding StartOrStopCapturingCommand}">
           <ui:Button.Resources>
             <Style TargetType="ui:SymbolIcon">
               <Setter Property="Symbol" Value="Play24" />
               <Setter Property="Foreground" Value="{DynamicResource Green6BBrush}" />
               <Style.Triggers>
-                <DataTrigger Binding="{Binding ViewModel.IsCapturing}"
+                <DataTrigger Binding="{Binding IsCapturing}"
                              Value="True">
-                  <Setter Property="Foreground" Value="{DynamicResource Red6BBrush}" />
                   <Setter Property="Symbol" Value="Pause24" />
+                  <Setter Property="Foreground" Value="{DynamicResource Red6BBrush}" />
                 </DataTrigger>
               </Style.Triggers>
             </Style>
@@ -255,7 +252,7 @@
           </ui:Button.Icon>
         </ui:Button>
 
-        <ui:Button Command="{Binding ViewModel.ShowSavePCapDialogCommand}">
+        <ui:Button Command="{Binding ShowSavePCapDialogCommand}">
           <ui:Button.Icon>
             <ui:SymbolIcon Filled="True"
                            Foreground="{DynamicResource Blue7BBrush}"
@@ -263,7 +260,7 @@
           </ui:Button.Icon>
         </ui:Button>
 
-        <ui:Button Command="{Binding ViewModel.ShowLoadPCapDialogCommand}">
+        <ui:Button Command="{Binding ShowLoadPCapDialogCommand}">
           <ui:Button.Icon>
             <ui:SymbolIcon Filled="True"
                            Foreground="{DynamicResource Mango8BBrush}"
@@ -271,7 +268,7 @@
           </ui:Button.Icon>
         </ui:Button>
 
-        <ui:Button Command="{Binding ViewModel.ShowKeylogDialogCommand}">
+        <ui:Button Command="{Binding ShowKeylogDialogCommand}">
           <ui:Button.Icon>
             <ui:SymbolIcon Filled="True"
                            Foreground="{DynamicResource Indigo6BBrush}"

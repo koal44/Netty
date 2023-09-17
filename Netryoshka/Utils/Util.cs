@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Markup;
 using System.Xml;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
@@ -357,6 +358,62 @@ namespace Netryoshka.Utils
             }
             return themeNames;
         }
+
+        /// <summary>
+        /// Splits a JSON array string into a list of top-level JSON object strings.
+        /// E.g., given input "[{}, {}, {}]", it returns a list ["{}", "{}", "{}"].
+        /// </summary>
+        /// <param name="json">The JSON array string to be split. Should be a well-formed JSON array string.</param>
+        /// <returns>A list of individual JSON object strings extracted from the top-level array.</returns>
+        public static List<string> SplitJsonObjects(string json)
+        {
+            var result = new List<string>();
+            int openBraces = 0;
+            int startIndex = 0;
+
+            for (int i = 0; i < json.Length; i++)
+            {
+                char c = json[i];
+
+                switch (c)
+                {
+                    case '{':
+                        if (openBraces == 0)
+                        {
+                            startIndex = i;
+                        }
+                        openBraces++;
+                        break;
+                    case '}':
+                        openBraces--;
+                        break;
+                }
+
+                if (openBraces == 0 && c == '}')
+                {
+                    result.Add(json.Substring(startIndex, i - startIndex + 1));
+                }
+            }
+
+            return result;
+        }
+
+
+        public static void ClearAllBindings(DependencyObject obj)
+        {
+            if (obj == null)
+                return;
+
+            foreach (var child in LogicalTreeHelper.GetChildren(obj))
+            {
+                if (child is not DependencyObject dp)
+                    continue;
+
+                BindingOperations.ClearAllBindings(dp);
+                ClearAllBindings(dp);
+            }
+        }
+
 
     }
 

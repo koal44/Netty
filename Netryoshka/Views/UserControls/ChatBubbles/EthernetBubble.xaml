@@ -12,7 +12,7 @@
 
   <local:FlowChatBubble BodyContent="{Binding BodyContent}"
                         BubbleScale="0.8"
-                        DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        DataContext="{Binding}"
                         EndPointRole="{Binding EndPointRole}"
                         FooterContent="{Binding FooterContent}"
                         HeaderContent="{Binding HeaderContent}" />

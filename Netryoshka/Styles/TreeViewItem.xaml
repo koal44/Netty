@@ -75,8 +75,8 @@
                          Color="{DynamicResource ControlFillColorDefault}" />
       </Setter.Value>
     </Setter>
-    <Setter Property="HorizontalContentAlignment" Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
-    <Setter Property="VerticalContentAlignment" Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+    <!--<Setter Property="HorizontalContentAlignment" Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, FallbackValue=Stretch}" />
+    <Setter Property="VerticalContentAlignment" Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, FallbackValue=Stretch}" />-->
     <Setter Property="Padding" Value="4" />
     <Setter Property="FontSize" Value="{StaticResource TreeViewItemFontSize}" />
     <Setter Property="Border.CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
@@ -201,8 +201,8 @@
                          Color="{DynamicResource ControlFillColorDefault}" />
       </Setter.Value>
     </Setter>
-    <Setter Property="HorizontalContentAlignment" Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
-    <Setter Property="VerticalContentAlignment" Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+    <!--<Setter Property="HorizontalContentAlignment" Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, FallbackValue=Stretch}" />
+    <Setter Property="VerticalContentAlignment" Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, FallbackValue=Stretch}" />-->
     <Setter Property="Padding" Value="4" />
     <Setter Property="FocusVisualStyle" Value="{DynamicResource TreeViewItemFocusVisual}" />
     <Setter Property="OverridesDefaultStyle" Value="True" />

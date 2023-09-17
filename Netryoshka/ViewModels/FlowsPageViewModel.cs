@@ -5,12 +5,13 @@ using Netryoshka.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows;
-using static Netryoshka.BasicPacket;
 using System.ComponentModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using static Netryoshka.BasicPacket;
 
 namespace Netryoshka
 {
@@ -55,6 +56,7 @@ namespace Netryoshka
         private string? _keyLogFileName;
         [ObservableProperty]
         private IEnumerable<DeframeMethod> _deframeMethods;
+        private CancellationTokenSource? _ctsSharkService;
 
         private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
         {
@@ -66,7 +68,9 @@ namespace Netryoshka
             { "TcpAscii", typeof(TcpAsciiBubbleViewModel) },
             //{ "Ip", typeof(IpBubbleViewModel) },
             { "Eth", typeof(EthernetBubbleViewModel) },
-            { "Frame", typeof(FrameBubbleViewModel) }
+            { "FrameNoShark", typeof(FrameNoSharkBubbleViewModel) },
+            { "FrameSharkJson", typeof(FrameSharkJsonBubbleViewModel) },
+            { "FrameSharkText", typeof(FrameSharkTextBubbleViewModel) },
         };
 
         public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService)
@@ -86,26 +90,28 @@ namespace Netryoshka
             _currentItemViewModelCollecion = new();
             _deframeMethods = Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
             PropertyChanged += OnPropertyChanged;
+            //CurrentBubbleDataCollection.CollectionChanged += OnCurrentBubbleDataCollectionChanged;
 
             // sets off a chain of side reactions which updates orbit, updating flowmessages.
             UpdatePivotEndpoints();
-
-
-            //CurrentBubbleDataCollection.CollectionChanged += OnCurrentBubbleDataCollectionChanged;
         }
 
         private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
+                case nameof(SelectedFrameDisplay):
+                    UpdateWireSharkData();
+                    break;
                 case nameof(CurrentBubbleDataCollection):
                     UpdateBubbleItemsViewModels();
-                    break;
-                case nameof(SelectedPivotEndpoint):
-                    UpdateOrbitEndpoints();
+                    SelectedFrameDisplay = FrameDisplay.NoShark;
                     break;
                 case nameof(SelectedOrbitEndpoint):
                     UpdateCurrentChatBubbles();
+                    break;
+                case nameof(SelectedPivotEndpoint):
+                    UpdateOrbitEndpoints();
                     break;
                 // these properties control the display of the chat bubbles
                 case nameof(SelectedNetworkLayer):
@@ -118,11 +124,71 @@ namespace Netryoshka
             }
         }
 
+        private void UpdateWireSharkData()
+        {
+            // If a previous task is still running, cancel it
+            _ctsSharkService?.Cancel();
+
+            if (SelectedFrameDisplay == FrameDisplay.NoShark)
+            {
+                foreach (var bubbleData in CurrentBubbleDataCollection)
+                {
+                    bubbleData.WireSharkData = null;
+                }
+                UpdateBubbleItemsViewModels();
+                return;
+            }
+
+            // Check the first bubble for WireSharkData, if exists then return early
+            if (CurrentBubbleDataCollection.Count <= 0
+                || CurrentBubbleDataCollection.First().WireSharkData != null)
+            {
+                UpdateBubbleItemsViewModels();
+                return;
+            }
+
+            var packets = CurrentBubbleDataCollection.Select(bd => bd.BasicPacket).ToList();
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    _ctsSharkService = new CancellationTokenSource();
+                    var sharkDataList = await _tSharkService.ConvertToWireSharkDataAsync(packets, _ctsSharkService.Token);
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (sharkDataList.Count != CurrentBubbleDataCollection.Count)
+                        {
+                            _logger.Error("Mismatch between sharkDataList and BubbleDataCollection sizes.");
+                            return;
+                        }
+
+                        for (int i = 0; i < CurrentBubbleDataCollection.Count; i++)
+                        {
+                            CurrentBubbleDataCollection[i].WireSharkData = sharkDataList[i];
+                        }
+
+                        UpdateBubbleItemsViewModels();
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.Info("Task was cancelled.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error($"Error in UpdateWireSharkData: {ex.Message}", ex);
+                }
+            });
+        }
+
         private void UpdateBubbleItemsViewModels()
         {
             string key = SelectedNetworkLayer switch
             {
                 NetworkLayer.App => $"App{(SelectedDeframeMethod.HasValue ? SelectedDeframeMethod : "Null")}",
+                NetworkLayer.Frame => $"Frame{SelectedFrameDisplay}",
                 NetworkLayer.Tcp => $"Tcp{SelectedTcpEncoding}",
                 _ => $"{SelectedNetworkLayer}"
             };
@@ -131,13 +197,14 @@ namespace Netryoshka
             if (viewModelType is null)
                 throw new InvalidOperationException($"Could not select a suitable view model for key '{key}'");
 
-            CurrentItemViewModelCollecion.Clear();
+            var newItemViewModelCollecion = new ObservableCollection<object>();
             foreach (var bubbleData in CurrentBubbleDataCollection)
             {
                 var viewModel = Activator.CreateInstance(viewModelType, bubbleData)
                     ?? throw new InvalidOperationException($"Could not create a view model of type '{viewModelType}'");
-                CurrentItemViewModelCollecion.Add(viewModel);
+                newItemViewModelCollecion.Add(viewModel);
             }
+            CurrentItemViewModelCollecion = newItemViewModelCollecion;
         }
 
         private void UpdatePivotEndpoints()
@@ -295,7 +362,7 @@ namespace Netryoshka
         }
 
         [RelayCommand]
-        public void ToggleEthernetDisplayMode()
+        public void ToggleFrameDisplay()
         {
             var values = Enum.GetValues<FrameDisplay>().ToArray();
             var currentIndex = Array.IndexOf(values, SelectedFrameDisplay);
@@ -322,11 +389,6 @@ namespace Netryoshka
             }
         }
 
-        private async Task UpdateTSharkPacketsAsync()
-        {
-            var packets = CurrentBubbleDataCollection.Select(bd => bd.BasicPacket).ToList();
-            var sharkPacket = await _tSharkService.ParseHttpPacketsAsync(packets);
-        }
     }
 
     public class BubbleTemplateSelector : DataTemplateSelector
@@ -339,18 +401,23 @@ namespace Netryoshka
         public DataTemplate TcpAsciiBubbleTemplate { get; set; } = null!;
         public DataTemplate IpBubbleTemplate { get; set; } = null!;
         public DataTemplate EthernetBubbleTemplate { get; set; } = null!;
-        public DataTemplate FrameBubbleTemplate { get; set; } = null!;
+        public DataTemplate FrameNoSharkBubbleTemplate { get; set; } = null!;
+        public DataTemplate FrameSharkJsonBubbleTemplate { get; set; } = null!;
+        public DataTemplate FrameSharkTextBubbleTemplate { get; set; } = null!;
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            return item switch
+            var template = item switch
             {
                 EthernetBubbleViewModel => EthernetBubbleTemplate,
-                FrameBubbleViewModel => FrameBubbleTemplate,
+                FrameNoSharkBubbleViewModel => FrameNoSharkBubbleTemplate,
+                FrameSharkJsonBubbleViewModel => FrameSharkJsonBubbleTemplate,
+                FrameSharkTextBubbleViewModel => FrameSharkTextBubbleTemplate,
                 TcpAsciiBubbleViewModel => TcpAsciiBubbleTemplate,
                 TcpHexBubbleViewModel => TcpHexBubbleTemplate,
                 _ => base.SelectTemplate(item, container),
             };
+            return template;
         }
     }
 }

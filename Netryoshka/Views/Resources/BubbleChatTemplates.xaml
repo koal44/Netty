@@ -63,9 +63,17 @@
                 DataType="{x:Type local:EthernetBubbleViewModel}">
     <local:EthernetBubble />
   </DataTemplate>
-  <DataTemplate x:Key="FrameDataTemplate"
-                DataType="{x:Type local:FrameBubbleViewModel}">
-    <local:FrameBubble />
+  <DataTemplate x:Key="FrameNoSharkDataTemplate"
+                DataType="{x:Type local:FrameNoSharkBubbleViewModel}">
+    <local:FrameNoSharkBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="FrameSharkJsonDataTemplate"
+                DataType="{x:Type local:FrameSharkJsonBubbleViewModel}">
+    <local:FrameSharkJsonBubble />
+  </DataTemplate>
+  <DataTemplate x:Key="FrameSharkTextDataTemplate"
+                DataType="{x:Type local:FrameSharkTextBubbleViewModel}">
+    <local:FrameSharkTextBubble />
   </DataTemplate>
 
 
@@ -75,7 +83,9 @@
                                 AppLengthPrefixBubbleTemplate="{StaticResource AppLengthPrefixDataTemplate}"
                                 AppNullBubbleTemplate="{StaticResource AppNullDataTemplate}"
                                 EthernetBubbleTemplate="{StaticResource EthernetDataTemplate}"
-                                FrameBubbleTemplate="{StaticResource FrameDataTemplate}"
+                                FrameNoSharkBubbleTemplate="{StaticResource FrameNoSharkDataTemplate}"
+                                FrameSharkJsonBubbleTemplate="{StaticResource FrameSharkJsonDataTemplate}"
+                                FrameSharkTextBubbleTemplate="{StaticResource FrameSharkTextDataTemplate}"
                                 IpBubbleTemplate="{StaticResource IpDataTemplate}"
                                 TcpAsciiBubbleTemplate="{StaticResource TcpAsciiDataTemplate}"
                                 TcpHexBubbleTemplate="{StaticResource TcpHexDataTemplate}" />

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.Reflection;
 
 namespace Netryoshka
 {
@@ -29,7 +30,7 @@ namespace Netryoshka
                 "IP" => NetworkLayer.Ip,
                 "TCP" => NetworkLayer.Tcp,
                 "App" => NetworkLayer.App,
-                _ => throw new NotImplementedException()
+                _ => throw new NotImplementedException($"{MethodBase.GetCurrentMethod()?.DeclaringType?.Name}.{MethodBase.GetCurrentMethod()?.Name}() is not implemented yet."),
             };
         }
 

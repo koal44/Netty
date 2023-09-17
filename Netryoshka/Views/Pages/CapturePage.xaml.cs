@@ -14,11 +14,11 @@ namespace Netryoshka
         public CapturePage(CapturePageViewModel viewModel, INavigationService navigationService)
         {
             ViewModel = viewModel;
-            DataContext = this;
+            DataContext = ViewModel;
             InitializeComponent();
 
-            ViewModel.TransmitCaptureDataToView += CapturedPacketReceivedHandler;
-            ViewModel.SendInstructionsToViewToClearCaptureData += ClearCapturedDataHandler;
+            viewModel.TransmitCaptureDataToView += CapturedPacketReceivedHandler;
+            viewModel.SendInstructionsToViewToClearCaptureData += ClearCapturedDataHandler;
             var nav = navigationService.GetNavigationControl();
             nav.Navigated += OnNavigated;
         }
@@ -40,13 +40,11 @@ namespace Netryoshka
             CapturedTextBox.Clear();
         }
 
-
         private void CapturedPacketReceivedHandler(object? sender, CapturePageViewModel.TransmitCapturedDataEventArgs packet)
         {
             CapturedTextBox.AppendText(packet.PacketString + Environment.NewLine + Environment.NewLine);
             CapturedTextScroller.ScrollToEnd();
         }
-
 
         private void CapturedPacketReceivedHandler2(object? sender, CapturePageViewModel.TransmitCapturedDataEventArgs packet)
         {
@@ -66,7 +64,6 @@ namespace Netryoshka
             }
 
         }
-
 
         private void DoubleClickSelectsParagraphBlock(object sender, MouseButtonEventArgs e)
         {
@@ -102,8 +99,6 @@ namespace Netryoshka
             tb.Select(paragraphStart, paragraphEnd - paragraphStart);
             e.Handled = true;
         }
-
-
 
     }
 }

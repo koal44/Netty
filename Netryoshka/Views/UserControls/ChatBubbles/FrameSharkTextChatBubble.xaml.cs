@@ -1,11 +1,10 @@
 ﻿namespace Netryoshka
 {
-    public partial class FrameSharkJsonBubble
+    public partial class FrameSharkTextBubble
     {
-        public FrameSharkJsonBubble()
+        public FrameSharkTextBubble()
         {
             InitializeComponent();
         }
-
     }
 }

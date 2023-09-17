@@ -6,6 +6,7 @@ using Netryoshka.Views.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,7 +14,6 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 
@@ -27,50 +27,48 @@ namespace Netryoshka.ViewModels
         private readonly ISocketProcessMapperService _socketProcessMapperService;
         private readonly IFileDialogService _fileDialogService;
 
+        [ObservableProperty]
+        private ObservableCollection<string> _deviceNames;
+        [ObservableProperty]
+        private string? _selectedDeviceName;
+        [ObservableProperty]
+        private bool _isCapturing;
+
+        [ObservableProperty]
+        private string _customFilter;
+        [ObservableProperty]
+        private string _remotePorts;
+        [ObservableProperty]
+        private string _remoteIPAddresses;
+        [ObservableProperty]
+        private string _localPorts;
+        [ObservableProperty]
+        private string _localPIDs;
+        [ObservableProperty]
+        private string _localProcessNames;
+
         public CapturePageViewModel(ICaptureService captureService, ILogger logger, IContentDialogService contentDialogService, ISocketProcessMapperService socketProcessMapperService, IFileDialogService fileDialogService)
 		{
-			LoadNetworkDevicesCommand = new SimpleRelayCommand(_ => LoadNetworkDevices());
 			_captureService = captureService;
             _logger = logger;
 			_contentDialogService = contentDialogService;
             _socketProcessMapperService = socketProcessMapperService;
             _fileDialogService = fileDialogService;
-            _selectedDeviceName = "Wi-Fi";
 
+            _deviceNames = new ObservableCollection<string>();
+            _selectedDeviceName = "Wi-Fi";
+            _isCapturing = false;
             _remotePorts = "5991";
 			_remoteIPAddresses = "";
 			_localPorts = "";
 			_localPIDs = "";
 			_localProcessNames = "";
 			_customFilter = "";
-
-            _deviceNames = new ObservableCollection<string>();
-
-            StartOrStopCapturingCommand = new RelayCommand(async () => await StartOrStopCapturingAsync(), () => true);
-            //OpenProcessSocketDialogCommand = new RelayCommand(async () => await OpenProcessSocketDialog(), () => true);
-
-
+            
+            PropertyChanged += OnPropertyChanged;
         }
 
-
-		//public event PropertyChangedEventHandler? PropertyChanged;
-		//public DataStreamRepository dataStreamManager = DataStreamRepository.Instance;
-
-
-
-		private ObservableCollection<string> _deviceNames;
-		public ObservableCollection<string> DeviceNames
-		{
-			get => _deviceNames;
-			set => SetProperty(ref _deviceNames, value);
-		}
-
-		[ObservableProperty]
-		private string? _selectedDeviceName;
-
-
-
-		public ICommand LoadNetworkDevicesCommand { get; }
+        [RelayCommand]
 		private void LoadNetworkDevices()
 		{
 			var devices = _captureService.GetDeviceNames();
@@ -80,33 +78,16 @@ namespace Netryoshka.ViewModels
 				: devices.FirstOrDefault(x => x.Contains(SelectedDeviceName));
 		}
 
-
-
-		private bool _isCapturing;
-		public bool IsCapturing
-		{
-			get => _isCapturing;
-			set => SetProperty(ref _isCapturing, value);
-		}
-
-
-		public ICommand StartOrStopCapturingCommand { get; }
-        //public RelayCommand OpenProcessSocketDialogCommand { get; private set; }
-
-        //public ICommand StartCapturingCommand { get; }
-        //public ICommand StopCapturingCommand { get; }
-
-
+        [RelayCommand]
         private async Task StartOrStopCapturingAsync()
 		{
-			if (IsCapturing)
+            if (IsCapturing)
 			{
 				StopCapturing();
 			}
 			else
 			{
 				await StartCapturingAsync();
-				
 			}
 		}
 
@@ -120,7 +101,6 @@ namespace Netryoshka.ViewModels
                 await ShowInvalidCaptureDeviceDialog();
 				return;
             }
-
 
             // validate input
             if (!TryParseIntString(RemotePorts, out var remotePorts))
@@ -301,7 +281,6 @@ namespace Netryoshka.ViewModels
         }
 
 
-
         private void HandlePacketCapture(BasicPacket packet)
 		{
 			if (packet.Payload.Length > 0)
@@ -335,14 +314,11 @@ namespace Netryoshka.ViewModels
 			TransmitCaptureDataToView?.Invoke(this, new TransmitCapturedDataEventArgs(packet));
 		}
 
-
 		public event EventHandler? SendInstructionsToViewToClearCaptureData;
 		private void OnSendInstructionsToViewToClearCaptureData()
 		{
 			SendInstructionsToViewToClearCaptureData?.Invoke(this, EventArgs.Empty);
 		}
-
-
 		
 
 		[RelayCommand]
@@ -382,13 +358,6 @@ namespace Netryoshka.ViewModels
 				default:
 					break;
 			}
-
-			//_ = userSelectionResult switch
-			//{
-			//    ContentDialogResult.Primary => "User saved their work",
-			//    ContentDialogResult.Secondary => "User did not save their work",
-			//    _ => "User cancelled the dialog"
-			//};
 		}
 
 
@@ -405,8 +374,6 @@ namespace Netryoshka.ViewModels
             );
         }
        
-
-
 
 		[RelayCommand]
 		private async Task OnShowLoadPCapDialog()
@@ -453,7 +420,6 @@ namespace Netryoshka.ViewModels
                 }
             );
         }
-
 
 
         [RelayCommand]
@@ -506,117 +472,32 @@ Capture https traffic from MitmProxy, Firefox or Chrome. Restart those apps.",
 
             //var sslKeyLogFile = Environment.GetEnvironmentVariable("SSLKEYLOGFILE", EnvironmentVariableTarget.User);
         }
+       
 
-
-
-        private string _customFilter;
-        public string CustomFilter
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            get => _customFilter;
-            set
+            switch (e.PropertyName)
             {
-				if (value != "")
-				{
-                    RemotePorts = "";
-                    RemoteIPAddresses = "";
-                    LocalPorts = "";
-                    LocalPIDs = "";
-                    LocalProcessNames = "";
-                }
-
-                _customFilter = value;
-                OnPropertyChanged(nameof(CustomFilter));
+                case nameof(CustomFilter):
+                    if (CustomFilter != "") RemotePorts = RemoteIPAddresses = LocalPorts = LocalPIDs = LocalProcessNames = "";
+                    break;
+                case nameof(RemotePorts):
+                    if (RemotePorts != "") CustomFilter = LocalPIDs = LocalProcessNames = "";
+                    break;
+                case nameof(RemoteIPAddresses):
+                    if (RemoteIPAddresses != "") CustomFilter = LocalPIDs = LocalProcessNames = "";
+                    break;
+                case nameof(LocalPorts):
+                    if (LocalPorts != "") CustomFilter = LocalPIDs = LocalProcessNames = "";
+                    break;
+                case nameof(LocalPIDs):
+                    if (LocalPIDs != "") CustomFilter = RemotePorts = RemoteIPAddresses = LocalPorts = "";
+                    break;
+                case nameof(LocalProcessNames):
+                    if (LocalProcessNames != "") CustomFilter = RemotePorts = RemoteIPAddresses = LocalPorts = "";
+                    break;
             }
         }
-
-        private string _remotePorts;
-        public string RemotePorts
-        {
-            get => _remotePorts;
-            set
-            {
-				if (value != "")
-				{
-					CustomFilter = "";
-                    LocalPIDs = "";
-                    LocalProcessNames = "";
-                }
-                _remotePorts = value;
-                OnPropertyChanged(nameof(RemotePorts));
-            }
-        }
-
-        private string _remoteIPAddresses;
-        public string RemoteIPAddresses
-        {
-            get => _remoteIPAddresses;
-            set
-            {
-                if (value != "")
-                {
-                    CustomFilter = "";
-                    LocalPIDs = "";
-                    LocalProcessNames = "";
-                }
-                _remoteIPAddresses = value;
-                OnPropertyChanged(nameof(RemoteIPAddresses));
-            }
-        }
-
-        private string _localPorts;
-        public string LocalPorts
-        {
-            get => _localPorts;
-            set
-            {
-                if (value != "")
-                {
-                    CustomFilter = "";
-                    LocalPIDs = "";
-                    LocalProcessNames = "";
-                }
-                _localPorts = value;
-                OnPropertyChanged(nameof(LocalPorts));
-            }
-        }
-
-        private string _localPIDs;
-        public string LocalPIDs
-        {
-            get => _localPIDs;
-            set
-            {
-                if (value != "")
-                {
-                    CustomFilter = "";
-                    RemotePorts = "";
-                    RemoteIPAddresses = "";
-                    LocalPorts = "";
-                }
-                _localPIDs = value;
-                OnPropertyChanged(nameof(LocalPIDs));
-            }
-        }
-
-        private string _localProcessNames;
-        public string LocalProcessNames
-        {
-            get => _localProcessNames;
-            set
-            {
-                if (value != "")
-                {
-                    CustomFilter = "";
-                    RemotePorts = "";
-                    RemoteIPAddresses = "";
-                    LocalPorts = "";
-                }
-                _localProcessNames = value;
-                OnPropertyChanged(nameof(LocalProcessNames));
-            }
-        }
-
-
 
 
         [RelayCommand]
@@ -677,11 +558,6 @@ Capture https traffic from MitmProxy, Firefox or Chrome. Restart those apps.",
             {
                 case ContentDialogResult.Primary: // User Selected Update
 					CustomFilter = content.CustomFilter;
-					//RemotePorts = "";
-					//RemoteIpAddresses = "";
-					//LocalPorts = "";
-					//LocalPIDs = "";
-					//LocalProcessNames = "";
                     break;
                 case ContentDialogResult.Secondary: // inapplicable
                 case ContentDialogResult.None: // User Canceled
@@ -690,10 +566,6 @@ Capture https traffic from MitmProxy, Firefox or Chrome. Restart those apps.",
             }
         }
 
-
-
     }
-
-
     
 }

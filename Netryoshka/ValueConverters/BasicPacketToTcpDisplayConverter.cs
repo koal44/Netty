@@ -46,7 +46,7 @@ namespace Netryoshka
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("BasicPacketToTcpDisplayConverter.ConvertBack()");
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)

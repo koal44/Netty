@@ -146,16 +146,18 @@
                            Text="{Binding ElementName=MatryoshkaBox, Path=ViewModel.CurrentLayerOnDisplay}" />
               </StackPanel>
             </StackPanel>
-            <Separator Margin="10,0" />
-            <Grid Name="EthernetOptionsGrid"
-                  Visibility="{Binding SelectedNetworkLayer, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:NetworkLayer.Eth}}">
+            <Separator Margin="0,0,5,0" />
+            <Grid Name="FrameOptionsGrid"
+                  MinWidth="40"
+                  Visibility="{Binding SelectedNetworkLayer, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:NetworkLayer.Frame}}">
               <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
               </Grid.RowDefinitions>
               <Button Grid.Row="0"
+                      HorizontalAlignment="Center"
                       local:MouseOverBrushProperty.Value="{DynamicResource Blue7Brush}"
-                      Command="{Binding ToggleTcpDisplayModeCommand}"
+                      Command="{Binding ToggleFrameDisplayCommand}"
                       Style="{StaticResource HoverButton}">
                 <Path Name="WireSharkPath"
                       Data="{StaticResource WireShark}"
@@ -168,7 +170,7 @@
                          Padding="0"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Bottom"
-                         Text="{Binding Path=SelectedWireSharkDisplay, Converter={local:EnumToStringConverter}}" />
+                         Text="{Binding Path=SelectedFrameDisplay, Converter={local:EnumToStringConverter}}" />
             </Grid>
             <Grid Name="TcpOptionsGrid"
                   Visibility="{Binding SelectedNetworkLayer, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:NetworkLayer.Tcp}}">
@@ -280,7 +282,6 @@
                  ScrollViewer.CanContentScroll="False"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.Resources>
-
             <Style x:Key="FlowChatItemContainerStyle"
                    TargetType="{x:Type ListBoxItem}">
               <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />

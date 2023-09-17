@@ -10,7 +10,7 @@ using static Netryoshka.TSharkHttp;
 
 namespace Netryoshka
 {
-    public class TSharkPacket
+    public class WireSharkPacket
     {
         //[JsonProperty("_index")]
         //public string Index { get; set; }
@@ -481,7 +481,8 @@ namespace Netryoshka
 
             public override void WriteJson(JsonWriter writer, string? value, JsonSerializer serializer)
             {
-                throw new NotImplementedException();
+                writer.WriteValue(value);
+                //throw new NotImplementedException("StatusToDescriptionConverter.WriteJson()");
             }
         }
     }
@@ -579,7 +580,8 @@ namespace Netryoshka
 
         public override void WriteJson(JsonWriter writer, TSharkHttp? value, JsonSerializer serializer)
         {
-            throw new NotImplementedException("This is a one-way read of tshark's json output. There is no need at this time to write json.");
+            writer.WriteValue(value);
+            //throw new NotImplementedException("This is a one-way read of tshark's json output. There is no need at this time to write json.");
         }
 
     }

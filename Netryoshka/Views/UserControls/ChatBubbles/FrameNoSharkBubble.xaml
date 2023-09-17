@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="Netryoshka.FrameBubble"
+﻿<UserControl x:Class="Netryoshka.FrameNoSharkBubble"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Netryoshka"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DataContext="{d:DesignInstance local:FrameBubbleViewModel,
+             d:DataContext="{d:DesignInstance local:FrameNoSharkBubbleViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="100"
              d:DesignWidth="200"
@@ -47,12 +47,18 @@
           <Style TargetType="{x:Type TreeView}" />
           <Style TargetType="{x:Type TreeViewItem}" />
         </StackPanel.Resources>-->
-        <TreeView FontSize="9"
+        <TreeView FontSize="11"
                   ItemsSource="{Binding TreeNodes}">
+          <TreeView.Resources>
+            <Style BasedOn="{StaticResource {x:Type TreeViewItem}}"
+                   TargetType="{x:Type TreeViewItem}">
+              <Setter Property="IsExpanded" Value="True" />
+            </Style>
+          </TreeView.Resources>
           <TreeView.ItemTemplate>
             <HierarchicalDataTemplate DataType="{x:Type local:TreeNode}"
                                       ItemsSource="{Binding Children}">
-              <TextBlock FontSize="10"
+              <TextBlock FontSize="11"
                          Text="{Binding Converter={local:JsonNodeToStringConverter}}" />
             </HierarchicalDataTemplate>
           </TreeView.ItemTemplate>

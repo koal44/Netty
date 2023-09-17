@@ -31,7 +31,7 @@ namespace Netryoshka.DesignTime
             PivotEndpoints = new ObservableCollection<FlowEndpoint>();
             OrbitEndpoints = new ObservableCollection<FlowEndpoint>();
             PivotProcessInfo = "SystemService";
-            SelectedNetworkLayer = NetworkLayer.App;
+            SelectedNetworkLayer = NetworkLayer.Frame;
             SelectedTcpEncoding = TcpEncoding.Hex;
             SelectedDeframeMethod = DeframeMethod.Https;
             KeyLogFileName = "path/to/keylogfile.txt";
