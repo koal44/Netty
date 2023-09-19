@@ -98,6 +98,18 @@
       <Compile Update="Views\Pages\TestPage.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\AppLengthPrefixBubble.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\AppHttpBubble.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\AppHttpsBubble.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\UserControls\ChatBubbles\IpBubble.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
       <Compile Update="Views\UserControls\ChatBubbles\FrameSharkTextChatBubble.xaml.cs">
         <SubType>Code</SubType>
       </Compile>

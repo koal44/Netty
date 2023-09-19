@@ -7,11 +7,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
 using System.Xml;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace Netryoshka.Utils
 {
@@ -365,7 +363,7 @@ namespace Netryoshka.Utils
         /// </summary>
         /// <param name="json">The JSON array string to be split. Should be a well-formed JSON array string.</param>
         /// <returns>A list of individual JSON object strings extracted from the top-level array.</returns>
-        public static List<string> SplitJsonObjects(string json)
+        public static List<string> SplitJsonObjects2(string json)
         {
             var result = new List<string>();
             int openBraces = 0;
@@ -396,6 +394,86 @@ namespace Netryoshka.Utils
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Splits a JSON array string into a list of top-level JSON object strings.
+        /// E.g., given input "[{}, {}, {}]", it returns a list ["{}", "{}", "{}"].
+        /// </summary>
+        /// <param name="json">The JSON array string to be split. Should be a well-formed JSON array string.</param>
+        /// <returns>A list of individual JSON object strings extracted from the top-level array.</returns>
+        public static List<string> SplitJsonObjects(string json)
+        {
+            var result = new List<string>();
+            int index = 0;
+
+            while (index < json.Length)
+            {
+                var (startIndex, endIndex) = FindJsonObjectBoundaries(json, index);
+
+                if (startIndex == -1)
+                {
+                    break;
+                }
+
+                result.Add(json.Substring(startIndex, endIndex - startIndex + 1));
+                index = endIndex + 1;
+            }
+
+            return result;
+        }
+
+        public static string? ExtractHttpJsonObject(string json)
+        {
+            int httpIndex = json.IndexOf("\"http\": {");
+            if (httpIndex == -1)
+            {
+                return null;
+            }
+
+            var (startIndex, endIndex) = FindJsonObjectBoundaries(json, httpIndex);
+            return startIndex != -1 ? json.Substring(startIndex, endIndex - startIndex + 1) : null;
+        }
+
+        private static (int Start, int End) FindJsonObjectBoundaries(string json, int startingIndex)
+        {
+            int openBraces = 0;
+            int startIndex = 0;
+            int endIndex = 0;
+            bool foundObject = false;
+
+            for (int i = startingIndex; i < json.Length; i++)
+            {
+                char c = json[i];
+
+                switch (c)
+                {
+                    case '{':
+                        if (!foundObject)
+                        {
+                            startIndex = i;
+                            foundObject = true;
+                        }
+                        openBraces++;
+                        break;
+                    case '}':
+                        openBraces--;
+                        break;
+                }
+
+                if (foundObject && openBraces == 0)
+                {
+                    endIndex = i;
+                    break;
+                }
+            }
+
+            if (foundObject && endIndex > startIndex)
+            {
+                return (startIndex, endIndex);
+            }
+
+            return (-1, -1); // Couldn't find object
         }
 
 

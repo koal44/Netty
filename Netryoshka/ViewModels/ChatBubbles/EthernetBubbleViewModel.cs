@@ -44,7 +44,7 @@ namespace Netryoshka
             string srcAddress = packet.SrcEndpoint.MacAddress.ToFormattedString(MacAddressFormat.ColonSeparated);
             string dstAddress = packet.DstEndpoint.MacAddress.ToFormattedString(MacAddressFormat.ColonSeparated);
 
-            return @$"MAC: {srcAddress} ⟶ MAC: {dstAddress}";
+            return @$"MAC: {srcAddress} ⟶ {dstAddress}";
         }
     }
 }

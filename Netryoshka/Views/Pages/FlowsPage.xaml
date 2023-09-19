@@ -228,7 +228,7 @@
                   </StackPanel>
                 </Grid>
                 <Grid Name="LengthPrefixedOptionsGrid"
-                      Visibility="{Binding SelectedDeframeMethod, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:DeframeMethod.LengthPrefixed}}">
+                      Visibility="{Binding SelectedDeframeMethod, Converter={local:EnumToVisibileOrCollapsedConverter}, ConverterParameter={x:Static local:DeframeMethod.LengthPrefix}}">
                   <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />

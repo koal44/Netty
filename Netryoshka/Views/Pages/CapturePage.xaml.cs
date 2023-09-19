@@ -42,7 +42,7 @@ namespace Netryoshka
 
         private void CapturedPacketReceivedHandler(object? sender, CapturePageViewModel.TransmitCapturedDataEventArgs packet)
         {
-            CapturedTextBox.AppendText(packet.PacketString + Environment.NewLine + Environment.NewLine);
+            //CapturedTextBox.AppendText(packet.PacketString + Environment.NewLine + Environment.NewLine);
             CapturedTextScroller.ScrollToEnd();
         }
 

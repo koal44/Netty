@@ -4,8 +4,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 
 namespace Netryoshka
 {
@@ -15,7 +17,10 @@ namespace Netryoshka
         public string? PropertyValue { get; set; }
         public ObservableCollection<TreeNode>? Children { get; set; }
 
-        public TreeNode() { }
+        public TreeNode()
+        {
+
+        }
 
 
         public static TreeNode BuildFromJson(string json)
@@ -42,8 +47,10 @@ namespace Netryoshka
                         typeof(IPAddress),
                     })
                 },
+                NullValueHandling = NullValueHandling.Ignore,
                 Error = (sender, args) =>
                 {
+                    Debug.Print(args.ErrorContext.Error.Message);
                     args.ErrorContext.Handled = true;
                 }
             };
@@ -66,7 +73,12 @@ namespace Netryoshka
             var node = new TreeNode()
             {
                 PropertyName = propName,
-                PropertyValue = token is JValue value ? $"{value}" : null,
+                PropertyValue = token is JValue value
+                    ? value.Type == JTokenType.String
+                        //? $"\"{(value.ToString().Replace("\r", "\\r").Replace("\n", "\\n"))}\""
+                        ? $"\"{(value.ToString().Replace("\r\n", ""))}\""
+                        : $"{value}"
+                    : null,
                 Children = token is JObject or JArray ? new ObservableCollection<TreeNode>() : null
             };
 

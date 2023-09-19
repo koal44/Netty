@@ -578,10 +578,38 @@ namespace Netryoshka
             return TSharkHttpFactory.CreateFromJson(jsonObject);
         }
 
+        // Use the default serialization
+        // public override bool CanWrite => false; 
+
         public override void WriteJson(JsonWriter writer, TSharkHttp? value, JsonSerializer serializer)
         {
-            writer.WriteValue(value);
-            //throw new NotImplementedException("This is a one-way read of tshark's json output. There is no need at this time to write json.");
+            //throw new InvalidOperationException("WriteJson should not be called.");
+
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+
+            writer.WriteStartObject();
+
+            // Serialize Declaration
+            writer.WritePropertyName("Declaration");
+            serializer.Serialize(writer, value.Declaration);
+
+            // Serialize Lines
+            writer.WritePropertyName("Lines");
+            serializer.Serialize(writer, value.Lines);
+
+            // Serialize Request
+            writer.WritePropertyName("Request");
+            serializer.Serialize(writer, value.Request);
+
+            // Serialize Response
+            writer.WritePropertyName("Response");
+            serializer.Serialize(writer, value.Response);
+
+            writer.WriteEndObject();
         }
 
     }

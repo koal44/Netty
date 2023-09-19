@@ -18,7 +18,7 @@ namespace Netryoshka.DesignTime
         public string PivotProcessInfo { get; set; }
         public TcpEncoding SelectedTcpEncoding { get; set; }
         public NetworkLayer SelectedNetworkLayer { get; set; }
-        public DeframeMethod? SelectedDeframeMethod { get; set; }
+        public DeframeMethod SelectedDeframeMethod { get; set; }
         public int MessagePrefixLength { get; set; }
         public int MessageTypeLength { get; set; }
         public string KeyLogFileName { get; set; }

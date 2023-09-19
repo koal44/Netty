@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Netryoshka
@@ -7,15 +8,14 @@ namespace Netryoshka
     {
         ObservableCollection<FlowEndpoint> PivotEndpoints { get; }
         ObservableCollection<FlowEndpoint> OrbitEndpoints { get; }
-        ObservableCollection<BubbleData> CurrentBubbleDataCollection { get; }
-
+        List<BubbleData> CurrentBubbleDataList { get; }
         FlowEndpoint? SelectedPivotEndpoint { get; set; }
         FlowEndpoint? SelectedOrbitEndpoint { get; set; }
         FlowEndpointRole? SelectedBotRole { get; set; }
         string PivotProcessInfo { get; }
         TcpEncoding SelectedTcpEncoding { get; set; }
         NetworkLayer SelectedNetworkLayer { get; set; }
-        DeframeMethod? SelectedDeframeMethod { get; set; }
+        DeframeMethod SelectedDeframeMethod { get; set; }
         int MessagePrefixLength { get; set; }
         int MessageTypeLength { get; set; }
 

@@ -28,7 +28,7 @@ namespace Netryoshka
         [ObservableProperty]
         private ObservableCollection<FlowEndpoint> _orbitEndpoints;
         [ObservableProperty]
-        private ObservableCollection<BubbleData> _currentBubbleDataCollection;
+        private List<BubbleData> _currentBubbleDataList;
         [ObservableProperty]
         private ObservableCollection<object> _currentItemViewModelCollecion;
         [ObservableProperty] 
@@ -47,7 +47,7 @@ namespace Netryoshka
         [ObservableProperty]
         private TcpEncoding _selectedTcpEncoding;
         [ObservableProperty]
-        private DeframeMethod? _selectedDeframeMethod;
+        private DeframeMethod _selectedDeframeMethod;
         [ObservableProperty]
         private int _messagePrefixLength;
         [ObservableProperty]
@@ -60,17 +60,24 @@ namespace Netryoshka
 
         private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
         {
-            //{ "AppNull", typeof(AppNullBubbleViewModel) },
-            //{ "AppHttp", typeof(AppHttpBubbleViewModel) },
-            //{ "AppHttps", typeof(AppHttpsBubbleViewModel) },
-            //{ "AppLengthPrefix", typeof(AppLengthPrefixBubbleViewModel) },
+            { "AppHttp", typeof(AppHttpBubbleViewModel) },
+            { "AppHttps", typeof(AppHttpsBubbleViewModel) },
+            { "AppLengthPrefix", typeof(AppLengthPrefixBubbleViewModel) },
             { "TcpHex", typeof(TcpHexBubbleViewModel) },
             { "TcpAscii", typeof(TcpAsciiBubbleViewModel) },
-            //{ "Ip", typeof(IpBubbleViewModel) },
+            { "Ip", typeof(IpBubbleViewModel) },
             { "Eth", typeof(EthernetBubbleViewModel) },
             { "FrameNoShark", typeof(FrameNoSharkBubbleViewModel) },
             { "FrameSharkJson", typeof(FrameSharkJsonBubbleViewModel) },
             { "FrameSharkText", typeof(FrameSharkTextBubbleViewModel) },
+        };
+
+        private readonly List<Type> WireSharkViewModelTypes = new()
+        {
+            typeof(AppHttpBubbleViewModel),
+            typeof(AppHttpsBubbleViewModel),
+            typeof(FrameSharkJsonBubbleViewModel),
+            typeof(FrameSharkTextBubbleViewModel),
         };
 
         public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService)
@@ -81,16 +88,15 @@ namespace Netryoshka
             _allFlows = _flowManager.GetAllFlows();
             _pivotEndpoints = new();
             _orbitEndpoints = new();
-            _currentBubbleDataCollection = new();
+            _currentBubbleDataList = new();
             _pivotProcessInfo = string.Empty;
             _selectedNetworkLayer = NetworkLayer.Tcp;
             _selectedFrameDisplay = FrameDisplay.NoShark;
             _selectedTcpEncoding = TcpEncoding.Hex;
-            _selectedDeframeMethod = null;
+            _selectedDeframeMethod = DeframeMethod.LengthPrefix;
             _currentItemViewModelCollecion = new();
             _deframeMethods = Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
             PropertyChanged += OnPropertyChanged;
-            //CurrentBubbleDataCollection.CollectionChanged += OnCurrentBubbleDataCollectionChanged;
 
             // sets off a chain of side reactions which updates orbit, updating flowmessages.
             UpdatePivotEndpoints();
@@ -100,27 +106,21 @@ namespace Netryoshka
         {
             switch (e.PropertyName)
             {
-                case nameof(SelectedFrameDisplay):
-                    UpdateWireSharkData();
-                    break;
-                case nameof(CurrentBubbleDataCollection):
-                    UpdateBubbleItemsViewModels();
-                    SelectedFrameDisplay = FrameDisplay.NoShark;
-                    break;
-                case nameof(SelectedOrbitEndpoint):
-                    UpdateCurrentChatBubbles();
-                    break;
                 case nameof(SelectedPivotEndpoint):
                     UpdateOrbitEndpoints();
                     break;
-                // these properties control the display of the chat bubbles
+                case nameof(SelectedOrbitEndpoint):
+                    UpdateCurrentFlow();
+                    break;
                 case nameof(SelectedNetworkLayer):
+                case nameof(SelectedFrameDisplay):
                 case nameof(SelectedTcpEncoding):
                 case nameof(SelectedDeframeMethod):
-                case nameof(MessagePrefixLength):
-                case nameof(MessageTypeLength):
+                case nameof(CurrentBubbleDataList):
                     UpdateBubbleItemsViewModels();
                     break;
+                //case nameof(MessagePrefixLength):
+                //case nameof(MessageTypeLength):
             }
         }
 
@@ -129,25 +129,15 @@ namespace Netryoshka
             // If a previous task is still running, cancel it
             _ctsSharkService?.Cancel();
 
-            if (SelectedFrameDisplay == FrameDisplay.NoShark)
-            {
-                foreach (var bubbleData in CurrentBubbleDataCollection)
-                {
-                    bubbleData.WireSharkData = null;
-                }
-                UpdateBubbleItemsViewModels();
-                return;
-            }
+            //// Check the first bubble for WireSharkData, if exists then return early
+            //if (CurrentBubbleDataCollection.Count <= 0
+            //    || CurrentBubbleDataCollection.First().WireSharkData != null)
+            //{
+            //    UpdateBubbleItemsViewModels();
+            //    return;
+            //}
 
-            // Check the first bubble for WireSharkData, if exists then return early
-            if (CurrentBubbleDataCollection.Count <= 0
-                || CurrentBubbleDataCollection.First().WireSharkData != null)
-            {
-                UpdateBubbleItemsViewModels();
-                return;
-            }
-
-            var packets = CurrentBubbleDataCollection.Select(bd => bd.BasicPacket).ToList();
+            var packets = CurrentBubbleDataList.Select(bd => bd.BasicPacket).ToList();
 
             _ = Task.Run(async () =>
             {
@@ -158,15 +148,15 @@ namespace Netryoshka
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        if (sharkDataList.Count != CurrentBubbleDataCollection.Count)
+                        if (sharkDataList.Count != CurrentBubbleDataList.Count)
                         {
                             _logger.Error("Mismatch between sharkDataList and BubbleDataCollection sizes.");
                             return;
                         }
 
-                        for (int i = 0; i < CurrentBubbleDataCollection.Count; i++)
+                        for (int i = 0; i < CurrentBubbleDataList.Count; i++)
                         {
-                            CurrentBubbleDataCollection[i].WireSharkData = sharkDataList[i];
+                            CurrentBubbleDataList[i].WireSharkData = sharkDataList[i];
                         }
 
                         UpdateBubbleItemsViewModels();
@@ -178,7 +168,7 @@ namespace Netryoshka
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error($"Error in UpdateWireSharkData: {ex.Message}", ex);
+                    _logger.Error($"Error in UpdateFrameData: {ex.Message}", ex);
                 }
             });
         }
@@ -187,7 +177,7 @@ namespace Netryoshka
         {
             string key = SelectedNetworkLayer switch
             {
-                NetworkLayer.App => $"App{(SelectedDeframeMethod.HasValue ? SelectedDeframeMethod : "Null")}",
+                NetworkLayer.App => $"App{SelectedDeframeMethod}",
                 NetworkLayer.Frame => $"Frame{SelectedFrameDisplay}",
                 NetworkLayer.Tcp => $"Tcp{SelectedTcpEncoding}",
                 _ => $"{SelectedNetworkLayer}"
@@ -197,8 +187,18 @@ namespace Netryoshka
             if (viewModelType is null)
                 throw new InvalidOperationException($"Could not select a suitable view model for key '{key}'");
 
+            // if it's a WireSharkViewModel and the first bubble doesn't have WireSharkData, then update it
+            // UpdateWireSharkData() will call UpdateBubbleItemsViewModels() when it's done
+            if (WireSharkViewModelTypes.Contains(viewModelType) 
+                && CurrentBubbleDataList.Count > 0 
+                && CurrentBubbleDataList.First().WireSharkData == null)
+            {
+                UpdateWireSharkData();
+                return;
+            }
+
             var newItemViewModelCollecion = new ObservableCollection<object>();
-            foreach (var bubbleData in CurrentBubbleDataCollection)
+            foreach (var bubbleData in CurrentBubbleDataList)
             {
                 var viewModel = Activator.CreateInstance(viewModelType, bubbleData)
                     ?? throw new InvalidOperationException($"Could not create a view model of type '{viewModelType}'");
@@ -209,7 +209,7 @@ namespace Netryoshka
 
         private void UpdatePivotEndpoints()
         {
-            SelectedPivotEndpoint = null;
+            //SelectedPivotEndpoint = null;
             PivotEndpoints.Clear();
 
             var uniquePivots = new HashSet<FlowEndpoint>();
@@ -244,7 +244,7 @@ namespace Netryoshka
 
             SelectedPivotEndpoint = PivotEndpoints.FirstOrDefault();
             SelectedBotRole ??= PivotEndpoints.Any() ? FlowEndpointRole.Pivot : null;
-            UpdateOrbitEndpoints();
+            //UpdateOrbitEndpoints();
         }
 
         private void UpdateOrbitEndpoints()
@@ -278,8 +278,6 @@ namespace Netryoshka
                     _logger.Error("OrbitEndpoints is empty. FlowManager should have both endpoints.");
                 }
             }
-
-            UpdateCurrentFlow();
         }
 
         private void UpdateCurrentFlow()
@@ -291,8 +289,8 @@ namespace Netryoshka
                 _currentFlowKey = new FlowKey(SelectedPivotEndpoint, SelectedOrbitEndpoint);
             }
 
-            UpdateCurrentChatBubbles();
             UpdatePivotProcessInfo();
+            UpdateCurrentChatBubbles();
         }
 
         private void UpdatePivotProcessInfo()
@@ -319,8 +317,6 @@ namespace Netryoshka
 
         private void UpdateCurrentChatBubbles()
         {
-            CurrentBubbleDataCollection.Clear();
-
             if (_currentFlowKey != null)
             {
                 var packets = _allFlows[_currentFlowKey];
@@ -328,6 +324,7 @@ namespace Netryoshka
 
                 DateTime? lastTimestamp = null;
 
+                var newBubbleDataList = new List<BubbleData>();
                 foreach (var packet in packets)
                 {
                     var endPointRole = packet.FlowKey.Endpoint1 == SelectedPivotEndpoint
@@ -337,12 +334,13 @@ namespace Netryoshka
                             ? packet.Timestamp - lastTimestamp.Value
                             : (TimeSpan?)null;
 
-                    CurrentBubbleDataCollection.Add(new BubbleData(packet, endPointRole, packetInterval));
+                    newBubbleDataList.Add(new BubbleData(packet, endPointRole, packetInterval));
+                    CurrentBubbleDataList.Add(new BubbleData(packet, endPointRole, packetInterval));
 
                     lastTimestamp = packet.Timestamp;
                 }
+                CurrentBubbleDataList = newBubbleDataList;
             }
-            UpdateBubbleItemsViewModels();
         }
 
         [RelayCommand]
@@ -393,10 +391,9 @@ namespace Netryoshka
 
     public class BubbleTemplateSelector : DataTemplateSelector
     {
-        public DataTemplate AppNullBubbleTemplate { get; set; } = null!;
+        public DataTemplate AppLengthPrefixBubbleTemplate { get; set; } = null!;
         public DataTemplate AppHttpBubbleTemplate { get; set; } = null!;
         public DataTemplate AppHttpsBubbleTemplate { get; set; } = null!;
-        public DataTemplate AppLengthPrefixBubbleTemplate { get; set; } = null!;
         public DataTemplate TcpHexBubbleTemplate { get; set; } = null!;
         public DataTemplate TcpAsciiBubbleTemplate { get; set; } = null!;
         public DataTemplate IpBubbleTemplate { get; set; } = null!;
@@ -409,12 +406,16 @@ namespace Netryoshka
         {
             var template = item switch
             {
-                EthernetBubbleViewModel => EthernetBubbleTemplate,
                 FrameNoSharkBubbleViewModel => FrameNoSharkBubbleTemplate,
                 FrameSharkJsonBubbleViewModel => FrameSharkJsonBubbleTemplate,
                 FrameSharkTextBubbleViewModel => FrameSharkTextBubbleTemplate,
+                EthernetBubbleViewModel => EthernetBubbleTemplate,
+                IpBubbleViewModel => IpBubbleTemplate,
                 TcpAsciiBubbleViewModel => TcpAsciiBubbleTemplate,
                 TcpHexBubbleViewModel => TcpHexBubbleTemplate,
+                AppLengthPrefixBubbleViewModel => AppLengthPrefixBubbleTemplate,
+                AppHttpBubbleViewModel => AppHttpBubbleTemplate,
+                AppHttpsBubbleViewModel => AppHttpsBubbleTemplate,
                 _ => base.SelectTemplate(item, container),
             };
             return template;
