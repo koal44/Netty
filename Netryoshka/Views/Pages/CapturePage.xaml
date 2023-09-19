@@ -283,14 +283,44 @@
                   Grid.Row="2"
                   Grid.Column="1"
                   VerticalScrollBarVisibility="Auto">
+      <ListBox Name="CapturedTextListBox"
+               ItemsSource="{Binding CapturedTextCollection}"
+               ScrollViewer.CanContentScroll="False"
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+               ScrollViewer.VerticalScrollBarVisibility="Disabled"
+               VirtualizingStackPanel.IsVirtualizing="True"
+               VirtualizingStackPanel.VirtualizationMode="Recycling">
+        <ListBox.ItemsPanel>
+          <ItemsPanelTemplate>
+            <VirtualizingStackPanel />
+          </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding}"
+                       TextWrapping="Wrap" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </ScrollViewer>
+
+
+    <!--<ScrollViewer Name="CapturedTextScroller"
+                  Grid.Row="2"
+                  Grid.Column="1"
+                  VerticalScrollBarVisibility="Auto">
+
+
       <TextBox x:Name="CapturedTextBox"
                Margin="0,0,0,0"
                HorizontalScrollBarVisibility="Disabled"
                IsReadOnly="True"
                PreviewMouseDoubleClick="DoubleClickSelectsParagraphBlock"
                TextWrapping="Wrap" />
-      <!--  local:CapturesPacketsBehavior.AttachedBehavior="True"  -->
-    </ScrollViewer>
+    -->
+    <!--  local:CapturesPacketsBehavior.AttachedBehavior="True"  -->
+    <!--
+    </ScrollViewer>-->
 
   </Grid>
 </Page>

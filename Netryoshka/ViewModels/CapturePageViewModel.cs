@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Netryoshka.Models;
 using Netryoshka.Services;
 using Netryoshka.Views;
 using Netryoshka.Views.Dialogs;
@@ -13,6 +14,7 @@ using System.Net;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
@@ -33,6 +35,7 @@ namespace Netryoshka.ViewModels
         private string? _selectedDeviceName;
         [ObservableProperty]
         private bool _isCapturing;
+        
 
         [ObservableProperty]
         private string _customFilter;
@@ -64,7 +67,15 @@ namespace Netryoshka.ViewModels
 			_localPIDs = "";
 			_localProcessNames = "";
 			_customFilter = "";
-            
+            _capturedTextCollection = new CircularBuffer<string>(1000);
+
+            _timer = new Timer(1000)
+            {
+                Interval = 1000,
+                AutoReset = false
+            };
+            _timer.Elapsed += (sender, e) => FlushBuffer();
+
             PropertyChanged += OnPropertyChanged;
         }
 
@@ -146,7 +157,8 @@ namespace Netryoshka.ViewModels
             }
 
             IsCapturing = true;
-			OnSendInstructionsToViewToClearCaptureData();
+			//OnSendInstructionsToViewToClearCaptureData();
+            CapturedTextCollection.Clear();
 
             var filterData = new FilterData(remotePorts: remotePorts, remoteIPAddresses: remoteIPAddresses, localPorts: localPorts, localPIDs: localPIDs, localProcessNames: localProcessNames, CustomFilter);
             await _captureService.StartCaptureAsync(HandlePacketCapture, filterData, SelectedDeviceName ?? "Wi-Fi", false);
@@ -287,7 +299,8 @@ namespace Netryoshka.ViewModels
 			{
 				Application.Current.Dispatcher.Invoke(() =>
 				{
-					OnTransmitCaptureDataToView(Convert.ToHexString(packet.Payload));
+                    AddCapturedTextToBuffer(Convert.ToHexString(packet.Payload));
+					//OnTransmitCaptureDataToView(Convert.ToHexString(packet.Payload));
 				});
 			}
 		}
@@ -564,6 +577,56 @@ Capture https traffic from MitmProxy, Firefox or Chrome. Restart those apps.",
                 default:
                     break;
             }
+        }
+
+
+
+        private Timer _timer;
+        private readonly object _timerLock = new();
+        private readonly object _bufferLock = new();
+        [ObservableProperty]
+        private CircularBuffer<string> _capturedTextCollection;
+        private readonly List<string> _capturedTextBuffer = new();
+
+        public void AddCapturedTextToBuffer(string newText)
+        {
+            _capturedTextBuffer.Add(newText);
+            StartTimer();
+        }
+
+        private void StartTimer()
+        {
+            lock (_timerLock)
+            {
+                if (!_timer.Enabled)
+                {
+                    _timer.Start();
+                }
+            }
+        }
+
+        private void FlushBuffer()
+        {
+            lock (_bufferLock)
+            {
+                lock (_timerLock)
+                {
+                    _timer.Stop();
+                }
+
+                var tempData = new CircularBuffer<string>(CapturedTextCollection, CapturedTextCollection.Capacity);
+                tempData.AddRange(_capturedTextBuffer);
+                _capturedTextBuffer.Clear();
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    CapturedTextCollection = tempData;
+                });
+               
+            }
+
+            
+
         }
 
     }

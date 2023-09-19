@@ -1,6 +1,7 @@
 ﻿using Netryoshka.Utils;
 using Netryoshka.ViewModels;
 using System;
+using System.ComponentModel;
 using System.Windows.Input;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
@@ -21,6 +22,17 @@ namespace Netryoshka
             viewModel.SendInstructionsToViewToClearCaptureData += ClearCapturedDataHandler;
             var nav = navigationService.GetNavigationControl();
             nav.Navigated += OnNavigated;
+            viewModel.PropertyChanged += CapturedTextChangedHandler;
+        }
+
+        private void CapturedTextChangedHandler(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ViewModel.CapturedTextCollection))
+            {
+                //CapturedTextListBox.Items.MoveCurrentToLast();
+                //CapturedTextListBox.ScrollIntoView(CapturedTextListBox.Items.CurrentItem);
+                CapturedTextScroller.ScrollToEnd();
+            }
         }
 
         private void OnNavigated(object sender, NavigatedEventArgs e)
@@ -37,7 +49,7 @@ namespace Netryoshka
 
         private void ClearCapturedDataHandler(object? sender, EventArgs e)
         {
-            CapturedTextBox.Clear();
+            //CapturedTextBox.Clear();
         }
 
         private void CapturedPacketReceivedHandler(object? sender, CapturePageViewModel.TransmitCapturedDataEventArgs packet)
@@ -58,7 +70,7 @@ namespace Netryoshka
                 {
                     var accessKey = HexFun.GetAccessKeyFromHexMessage(hex);
                     string txt = $"{id}{Environment.NewLine}{Environment.NewLine}{accessKey}{Environment.NewLine}{Environment.NewLine}";
-                    CapturedTextBox.AppendText(txt);
+                    //CapturedTextBox.AppendText(txt);
                     CapturedTextScroller.ScrollToEnd();
                 }
             }

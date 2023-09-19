@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,34 +9,37 @@ namespace Netryoshka.Models
     /// A FIFO queue where elements at the end of the queue are dropped when max size has been reached.
     /// </summary>
     /// <typeparam name="T">The type of items in the queue.</typeparam>
-    public class CircularBuffer<T>
+    public class CircularBuffer<T> : IEnumerable<T>
     {
         private readonly Queue<T> _queue;
-        private readonly int _maxSize;
+        public int Capacity { get; }
 
-        public CircularBuffer(int maxSize)
+        public CircularBuffer(int capacity)
         {
-            _queue = new Queue<T>(maxSize);
-            _maxSize = maxSize;
+            Capacity = capacity;
+            _queue = new Queue<T>(Capacity);
         }
+
+        public CircularBuffer(IEnumerable<T> items, int capacity)
+        {
+            Capacity = capacity;
+            _queue = new Queue<T>(Capacity);
+            AddRange(items);
+        }
+
+        public IEnumerator<T> GetEnumerator() => _queue.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public int Count => _queue.Count;
 
         public void Clear() => _queue.Clear();
 
-        public bool Any() { return _queue.Any(); }
+        public bool Any() => _queue.Any();
 
-        public IEnumerable<T> GetAll() { return _queue.Any() ? _queue.AsEnumerable() : Enumerable.Empty<T>(); }
+        public IEnumerable<T> GetAll() => _queue.Any() ? _queue.AsEnumerable() : Enumerable.Empty<T>();
 
-        public T Peek()
-        {
-            if (!Any())
-            {
-                throw new InvalidOperationException("Cannot peek an empty CircularBuffer.");
-            }
-
-            return _queue.Peek();
-        }
+        public T Peek() => _queue.Peek();
 
         /// <summary>
         /// Adds an item to the buffer. If the buffer is full, the oldest item will be dropped.
@@ -43,7 +47,7 @@ namespace Netryoshka.Models
         /// <param name="item">The item to be added.</param>
         public void Add(T item)
         {
-            if (_queue.Count == _maxSize)
+            if (_queue.Count == Capacity)
             {
                 _queue.Dequeue();  // Remove oldest item if we've reached max size
             }
@@ -61,7 +65,6 @@ namespace Netryoshka.Models
                 Add(item);
             }
         }
-
 
 
     }
