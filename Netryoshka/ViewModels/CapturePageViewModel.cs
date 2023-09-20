@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Netryoshka.Models;
 using Netryoshka.Services;
+using Netryoshka.Utils;
 using Netryoshka.Views;
 using Netryoshka.Views.Dialogs;
 using System;
@@ -14,8 +15,8 @@ using System.Net;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows;
+using System.Windows.Threading;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 
@@ -23,11 +24,16 @@ namespace Netryoshka.ViewModels
 {
     public partial class CapturePageViewModel : ObservableObject
 	{
-		private readonly ICaptureService _captureService;
+        public bool AccessKeyHack { get; private set; } = false;
+
+        private readonly ICaptureService _captureService;
 		private readonly ILogger _logger;
 		private readonly IContentDialogService _contentDialogService;
         private readonly ISocketProcessMapperService _socketProcessMapperService;
         private readonly IFileDialogService _fileDialogService;
+
+        private readonly DispatcherTimer _timer;
+        private readonly List<string> _capturedTextBuffer = new();
 
         [ObservableProperty]
         private ObservableCollection<string> _deviceNames;
@@ -35,7 +41,8 @@ namespace Netryoshka.ViewModels
         private string? _selectedDeviceName;
         [ObservableProperty]
         private bool _isCapturing;
-        
+        [ObservableProperty]
+        private CircularBuffer<string> _capturedTextCollection;
 
         [ObservableProperty]
         private string _customFilter;
@@ -69,12 +76,12 @@ namespace Netryoshka.ViewModels
 			_customFilter = "";
             _capturedTextCollection = new CircularBuffer<string>(1000);
 
-            _timer = new Timer(1000)
+            _timer = new DispatcherTimer()
             {
-                Interval = 1000,
-                AutoReset = false
+                Interval = TimeSpan.FromSeconds(1),
+                IsEnabled = false,
             };
-            _timer.Elapsed += (sender, e) => FlushBuffer();
+            _timer.Tick += (sender, e) => FlushCapturedTextToCollection();
 
             PropertyChanged += OnPropertyChanged;
         }
@@ -157,7 +164,6 @@ namespace Netryoshka.ViewModels
             }
 
             IsCapturing = true;
-			//OnSendInstructionsToViewToClearCaptureData();
             CapturedTextCollection.Clear();
 
             var filterData = new FilterData(remotePorts: remotePorts, remoteIPAddresses: remoteIPAddresses, localPorts: localPorts, localPIDs: localPIDs, localProcessNames: localProcessNames, CustomFilter);
@@ -190,7 +196,6 @@ namespace Netryoshka.ViewModels
                 CloseButtonText = "Ok",
             };
 
-            // userSelectionResult 
             _ = await _contentDialogService.ShowSimpleDialogAsync(dialogOptions);
         }
 
@@ -203,7 +208,6 @@ namespace Netryoshka.ViewModels
                 CloseButtonText = "Ok",
             };
 
-            // userSelectionResult 
             _ = await _contentDialogService.ShowSimpleDialogAsync(dialogOptions);
         }
 
@@ -216,7 +220,6 @@ namespace Netryoshka.ViewModels
                 CloseButtonText = "Ok",
             };
 
-            // userSelectionResult 
             _ = await _contentDialogService.ShowSimpleDialogAsync(dialogOptions);
         }
 
@@ -252,7 +255,6 @@ namespace Netryoshka.ViewModels
 
             return true;
         }
-
 
         private static bool TryParseIPString(string csvString, out HashSet<IPAddress> outList)
         {
@@ -299,9 +301,18 @@ namespace Netryoshka.ViewModels
 			{
 				Application.Current.Dispatcher.Invoke(() =>
 				{
+                    if (AccessKeyHack)
+                    {
+                        var (id, key) = HexFun.GetDataFromAccessKeyPacket(Convert.ToHexString(packet.Payload));
+                        if (id != "" && key != "")
+                        {
+                            AddCapturedTextToBuffer($"{id}{Environment.NewLine}{Environment.NewLine}{key}");
+                        }
+                        return;
+                    }
+
                     AddCapturedTextToBuffer(Convert.ToHexString(packet.Payload));
-					//OnTransmitCaptureDataToView(Convert.ToHexString(packet.Payload));
-				});
+                });
 			}
 		}
 
@@ -311,28 +322,6 @@ namespace Netryoshka.ViewModels
 			_captureService.StopCapture();
 		}
 
-		public class TransmitCapturedDataEventArgs : EventArgs
-		{
-			public string PacketString { get; }
-
-			public TransmitCapturedDataEventArgs(string captureData)
-			{
-				PacketString = captureData;
-			}
-		}
-
-		public event EventHandler<TransmitCapturedDataEventArgs>? TransmitCaptureDataToView;
-		private void OnTransmitCaptureDataToView(string packet)
-		{
-			TransmitCaptureDataToView?.Invoke(this, new TransmitCapturedDataEventArgs(packet));
-		}
-
-		public event EventHandler? SendInstructionsToViewToClearCaptureData;
-		private void OnSendInstructionsToViewToClearCaptureData()
-		{
-			SendInstructionsToViewToClearCaptureData?.Invoke(this, EventArgs.Empty);
-		}
-		
 
 		[RelayCommand]
 		private async Task OnShowSavePCapDialog()
@@ -358,7 +347,6 @@ namespace Netryoshka.ViewModels
 				dialogOptions.PrimaryButtonText = "Save";
 			}
 
-			//object content = new TextBlock() { Text = "foo" };
 			var userSelectionResult = await _contentDialogService.ShowSimpleDialogAsync(dialogOptions);
 
 			switch (userSelectionResult)
@@ -579,54 +567,29 @@ Capture https traffic from MitmProxy, Firefox or Chrome. Restart those apps.",
             }
         }
 
-
-
-        private Timer _timer;
-        private readonly object _timerLock = new();
-        private readonly object _bufferLock = new();
-        [ObservableProperty]
-        private CircularBuffer<string> _capturedTextCollection;
-        private readonly List<string> _capturedTextBuffer = new();
-
         public void AddCapturedTextToBuffer(string newText)
         {
             _capturedTextBuffer.Add(newText);
-            StartTimer();
-        }
-
-        private void StartTimer()
-        {
-            lock (_timerLock)
+            if (!_timer.IsEnabled)
             {
-                if (!_timer.Enabled)
-                {
-                    _timer.Start();
-                }
+                _timer.Start();
             }
         }
 
-        private void FlushBuffer()
+        private void FlushCapturedTextToCollection()
         {
-            lock (_bufferLock)
+            if (!IsCapturing)
             {
-                lock (_timerLock)
-                {
-                    _timer.Stop();
-                }
-
-                var tempData = new CircularBuffer<string>(CapturedTextCollection, CapturedTextCollection.Capacity);
-                tempData.AddRange(_capturedTextBuffer);
+                _timer.Stop();
                 _capturedTextBuffer.Clear();
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    CapturedTextCollection = tempData;
-                });
-               
+                return;
             }
 
-            
-
+            var tempData = new CircularBuffer<string>(CapturedTextCollection, CapturedTextCollection.Capacity);
+            tempData.AddRange(_capturedTextBuffer);
+            CapturedTextCollection = tempData;
+            _capturedTextBuffer.Clear();
+            _timer.Stop();
         }
 
     }

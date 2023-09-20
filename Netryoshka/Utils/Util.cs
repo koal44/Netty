@@ -8,7 +8,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Markup;
+using System.Windows.Media;
 using System.Xml;
 
 namespace Netryoshka.Utils
@@ -490,6 +492,78 @@ namespace Netryoshka.Utils
                 BindingOperations.ClearAllBindings(dp);
                 ClearAllBindings(dp);
             }
+        }
+
+
+        /// <summary>
+        /// Finds the first child of a given type in the Visual Tree.
+        /// </summary>
+        /// <typeparam name="T">The type of the child to find.</typeparam>
+        /// <param name="depObj">The root dependency object where the search starts.</param>
+        /// <returns>The first child of the specified type, or null if no children of that type are found.</returns>
+        public static T? FindVisualChild<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                if (child is T t)
+                {
+                    return t;
+                }
+
+                T? childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null)
+                {
+                    return childOfChild;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Handles the MouseDoubleClick event for a WPF TextBox. Selects the entire paragraph where the double-click occurs.
+        /// </summary>
+        /// <param name="sender">The TextBox control that raised the event.</param>
+        /// <param name="e">The MouseButtonEventArgs containing the event data.</param>
+        /// <remarks>
+        /// A paragraph is defined as a block of text separated by blank lines. 
+        /// The method marks the event as handled by setting e.Handled to true.
+        /// </remarks>
+        public static void DoubleClickSelectsParagraphBlock(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not System.Windows.Controls.TextBox tb) return;
+
+            int caretLineIndex = tb.GetLineIndexFromCharacterIndex(tb.CaretIndex);
+            int paragraphLineStartIndex = caretLineIndex;
+            int paragraphLineEndIndex = caretLineIndex;
+
+            // Find the start of the paragraph
+            while (paragraphLineStartIndex >= 0 && !string.IsNullOrWhiteSpace(tb.GetLineText(paragraphLineStartIndex)))
+            {
+                paragraphLineStartIndex--;
+            }
+
+            // If we moved up, adjust the start index to the first line of the paragraph
+            if (paragraphLineStartIndex != caretLineIndex)
+                paragraphLineStartIndex++;
+
+            // Find the end of the paragraph
+            while (paragraphLineEndIndex < tb.LineCount && !string.IsNullOrWhiteSpace(tb.GetLineText(paragraphLineEndIndex)))
+            {
+                paragraphLineEndIndex++;
+            }
+
+            // If we moved down, adjust the end index to the last line of the paragraph
+            if (paragraphLineEndIndex != caretLineIndex)
+                paragraphLineEndIndex--;
+
+            int paragraphStart = tb.GetCharacterIndexFromLineIndex(paragraphLineStartIndex);
+            int paragraphEnd = tb.GetCharacterIndexFromLineIndex(paragraphLineEndIndex) + tb.GetLineText(paragraphLineEndIndex).TrimEnd('\r', '\n').Length;
+
+            tb.Select(paragraphStart, paragraphEnd - paragraphStart);
+            e.Handled = true;
         }
 
 

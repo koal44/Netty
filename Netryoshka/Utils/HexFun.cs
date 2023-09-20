@@ -98,5 +98,22 @@ namespace Netryoshka.Utils
         }
 
 
+        public static (string id, string accessKey) GetDataFromAccessKeyPacket(string tcpPayload)
+        {
+            var hex = tcpPayload;
+
+            if (TryRead2Bytes(hex, out var messageType) && messageType == 1044)
+            {
+                if (TryRead4Bytes(hex, out var id))
+                {
+                    var accessKey = GetAccessKeyFromHexMessage(hex);
+                    return (id: $"{id}", accessKey);
+                }
+            }
+
+            return (id: "", accessKey: "");
+        }
+
+
     }
 }
