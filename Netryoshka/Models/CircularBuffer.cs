@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,6 +11,8 @@ namespace Netryoshka.Models
     public class CircularBuffer<T> : IEnumerable<T>
     {
         private readonly Queue<T> _queue;
+        private readonly object _lock = new();
+
         public int Capacity { get; }
 
         public CircularBuffer(int capacity)
@@ -27,19 +28,29 @@ namespace Netryoshka.Models
             AddRange(items);
         }
 
-        public IEnumerator<T> GetEnumerator() => _queue.GetEnumerator();
+        public IEnumerator<T> GetEnumerator()
+        {
+            lock (_lock)
+            {
+                return _queue.ToList().GetEnumerator();
+            }
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-        public int Count => _queue.Count;
-
-        public void Clear() => _queue.Clear();
-
-        public bool Any() => _queue.Any();
-
-        public IEnumerable<T> GetAll() => _queue.Any() ? _queue.AsEnumerable() : Enumerable.Empty<T>();
-
-        public T Peek() => _queue.Peek();
+        public int Count
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _queue.Count;
+                }
+            }
+        }
 
         /// <summary>
         /// Adds an item to the buffer. If the buffer is full, the oldest item will be dropped.
@@ -47,11 +58,14 @@ namespace Netryoshka.Models
         /// <param name="item">The item to be added.</param>
         public void Add(T item)
         {
-            if (_queue.Count == Capacity)
+            lock (_lock)
             {
-                _queue.Dequeue();  // Remove oldest item if we've reached max size
+                if (_queue.Count == Capacity)
+                {
+                    _queue.Dequeue();
+                }
+                _queue.Enqueue(item);
             }
-            _queue.Enqueue(item);
         }
 
         /// <summary>
@@ -60,12 +74,50 @@ namespace Netryoshka.Models
         /// <param name="items">The items to be added to the buffer.</param>
         public void AddRange(IEnumerable<T> items)
         {
-            foreach (var item in items)
+            lock (_lock)
             {
-                Add(item);
+                foreach (var item in items)
+                {
+                    if (_queue.Count == Capacity)
+                    {
+                        _queue.Dequeue();
+                    }
+                    _queue.Enqueue(item);
+                }
             }
         }
 
+        public void Clear()
+        {
+            lock (_lock)
+            {
+                _queue.Clear();
+            }
+        }
 
+        public bool Any()
+        {
+            lock (_lock)
+            {
+                return _queue.Any();
+            }
+        }
+
+        public IEnumerable<T> GetAll()
+        {
+            lock (_lock)
+            {
+                return _queue.ToList();
+            }
+        }
+
+        public T Peek()
+        {
+            lock (_lock)
+            {
+                return _queue.Peek();
+            }
+        }
     }
+
 }
