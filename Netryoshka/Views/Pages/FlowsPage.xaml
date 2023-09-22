@@ -279,8 +279,13 @@
                  ItemContainerStyle="{DynamicResource FlowChatItemContainerStyle}"
                  ItemTemplateSelector="{StaticResource ChatBubbleSelector}"
                  ItemsSource="{Binding CurrentItemViewModelCollecion}"
-                 ScrollViewer.CanContentScroll="False"
+                 ScrollViewer.CanContentScroll="{Binding CanContentScroll}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
           <ListBox.Resources>
             <Style x:Key="FlowChatItemContainerStyle"
                    TargetType="{x:Type ListBoxItem}">

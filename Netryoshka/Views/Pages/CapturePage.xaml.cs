@@ -3,7 +3,6 @@ using Netryoshka.ViewModels;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace Netryoshka
@@ -13,9 +12,10 @@ namespace Netryoshka
         public CapturePageViewModel ViewModel { get; }
         private ScrollViewer? _capturedScrollViewer;
 
-        public CapturePage(CapturePageViewModel viewModel, INavigationService navigationService)
+        public CapturePage(CapturePageViewModel viewModel)
         {
-            ViewModel = viewModel;
+            ViewModel = viewModel
+                ?? throw new System.ArgumentNullException(nameof(viewModel));
             DataContext = ViewModel;
             InitializeComponent();
 

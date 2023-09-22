@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Markup;
@@ -153,7 +155,7 @@ namespace Netryoshka.Utils
                     }
                 }
 
-                // ASCII control characters are from 0x00 to 0x1F
+                // ASCII controlStyle characters are from 0x00 to 0x1F
                 //sb.Append(c >= 0x00 && c <= 0x1F ? '.' : c);
 
                 // Only append printable ASCII characters, replace anything else with '.'
@@ -183,7 +185,7 @@ namespace Netryoshka.Utils
         //            }
         //        }
 
-        //        // ASCII control characters are from 0x00 to 0x1F
+        //        // ASCII controlStyle characters are from 0x00 to 0x1F
         //        sb.Append(c >= 0x00 && c <= 0x1F
         //            ? '.'
         //            : c);
@@ -201,31 +203,89 @@ namespace Netryoshka.Utils
                 sb.Append('.');
             }*/
 
-
-        public static string GetXmlTemplateString(Type controlType)
+        /// <summary>
+        /// Finds the base type where a particular property is declared.
+        /// </summary>
+        /// <param name="type">The type to start searching from.</param>
+        /// <param name="propName">The name of the property to find.</param>
+        /// <returns>The base type where the property is declared, or <c>null</c> if the property is not found.</returns>
+        /// <example>
+        /// <code>
+        /// Type? declaringType = GetDeclaringBaseTypeOfProperty(typeof(TreeView), "ThemeStyle");
+        /// </code>
+        /// </example>
+        public static Type? GetDeclaringBaseTypeOfProperty(Type? type, string propName)
         {
-            var control = Application.Current.FindResource(controlType);
+            Type? lastTypeWherePropertyExists = null;
 
+            while (type != null)
+            {
+                var propInfo = type.GetProperty(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (propInfo != null)
+                {
+                    lastTypeWherePropertyExists = type;
+                }
+                else
+                {
+                    break;
+                }
+
+                type = type.BaseType;
+            }
+
+            return lastTypeWherePropertyExists;
+        }
+
+
+        /// <summary>
+        /// Retrieves a non-public property of a given type from a specified object. 
+        /// This method will traverse the inheritance chain to find the property if not present in the given object's type.
+        /// </summary>
+        /// <typeparam name="PropType">The expected type of the property to retrieve.</typeparam>
+        /// <param name="obj">The object from which to retrieve the property.</param>
+        /// <param name="propName">The name of the non-public property to retrieve.</param>
+        /// <returns>The value of the specified non-public property, cast to the given type.</returns>
+        /// <exception cref="Exception">Thrown when the specified property is not found or is not of the expected type.</exception>
+        public static PropType GetNonPublicProperty<PropType>(object obj, string propName)
+        {
+            Type? type = obj.GetType();
+            var propInfo = type.GetProperty(propName, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (propInfo != null)
+            {
+                object? value = propInfo.GetValue(obj);
+                if (value is PropType prop)
+                {
+                    return prop;
+                }
+            }
+            throw new Exception($"Could not get {propName} property");
+        }
+
+        public static Style GetStyleFromType(Type controlType)
+        {
+            var controlStyle = Application.Current.FindResource(controlType);
+            return (Style)controlStyle;
+        }
+
+        public static string GetXmlStyle(Style style)
+        {
             var stringBuilder = new StringBuilder();
             var settings = new XmlWriterSettings
             {
                 Indent = true,
                 OmitXmlDeclaration = true
-
             };
 
             using (var xmlWriter = XmlWriter.Create(stringBuilder, settings))
             {
-                XamlWriter.Save(control, xmlWriter);
+                XamlWriter.Save(style, xmlWriter);
             }
 
             return stringBuilder.ToString();
         }
 
-        public static string GetCleanXmlTemplateString(Type controlType)
+        public static string GetCleanXml(string xmlString)
         {
-            var xmlString = GetXmlTemplateString(controlType);
-
             string[] lines = xmlString.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             var stringBuilder = new StringBuilder();
 
@@ -295,6 +355,8 @@ namespace Netryoshka.Utils
                         // `{DynamicResource DefaultControlFocusVisualStyle}`
                         valueMatch = Regex.Match(nextLine2, @"DynamicResource ResourceKey=""([^""]+)""");
                         if (valueMatch.Success) value = "{DynamicResource " + $"{valueMatch.Groups[1].Value}" + "}";
+
+                        if (nextLine2.Contains("<x:Null />")) value = "{x:Null}";
 
                         if (string.IsNullOrEmpty(value))
                         {
@@ -525,7 +587,7 @@ namespace Netryoshka.Utils
         /// <summary>
         /// Handles the MouseDoubleClick event for a WPF TextBox. Selects the entire paragraph where the double-click occurs.
         /// </summary>
-        /// <param name="sender">The TextBox control that raised the event.</param>
+        /// <param name="sender">The TextBox controlStyle that raised the event.</param>
         /// <param name="e">The MouseButtonEventArgs containing the event data.</param>
         /// <remarks>
         /// A paragraph is defined as a block of text separated by blank lines. 

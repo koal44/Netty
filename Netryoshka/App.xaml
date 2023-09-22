@@ -31,8 +31,6 @@
         <local:MyThemesDictionary ApplicationTheme="Dark" />
         <ResourceDictionary Source="/Styles/Scrollbar.xaml" />
         <ResourceDictionary Source="/Styles/SliderV3.xaml" />
-        <ResourceDictionary Source="/Styles/TreeView.xaml" />
-        <ResourceDictionary Source="/Styles/TreeViewItem.xaml" />
         <ResourceDictionary Source="/Views/Resources/BubbleChatTemplates.xaml" />
         <ResourceDictionary Source="/Assets/VectorImages.xaml" />
 

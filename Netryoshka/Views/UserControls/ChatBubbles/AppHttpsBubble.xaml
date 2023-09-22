@@ -12,7 +12,7 @@
 
   <StackPanel Orientation="Vertical">
     <Border MinWidth="100"
-            Padding="12,2"
+            Padding="2,2"
             CornerRadius="5">
       <Border.MaxWidth>
         <MultiBinding Converter="{local:FlowChatBubbleMaxWidthConverter}">

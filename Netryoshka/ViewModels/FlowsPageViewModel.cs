@@ -57,6 +57,10 @@ namespace Netryoshka
         [ObservableProperty]
         private IEnumerable<DeframeMethod> _deframeMethods;
         private CancellationTokenSource? _ctsSharkService;
+        [ObservableProperty]
+        private bool _canContentScroll;
+        [ObservableProperty]
+        private Type? _viewModelItemType;
 
         private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
         {
@@ -80,6 +84,8 @@ namespace Netryoshka
             typeof(FrameSharkTextBubbleViewModel),
         };
 
+        
+
         public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService)
         {
             _flowManager = flowManager;
@@ -96,6 +102,7 @@ namespace Netryoshka
             _selectedDeframeMethod = DeframeMethod.LengthPrefix;
             _currentItemViewModelCollecion = new();
             _deframeMethods = Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
+            _canContentScroll = true;
             PropertyChanged += OnPropertyChanged;
 
             // sets off a chain of side reactions which updates orbit, updating flowmessages.
@@ -106,6 +113,22 @@ namespace Netryoshka
         {
             switch (e.PropertyName)
             {
+                case nameof(ViewModelItemType):
+                    CanContentScroll = ViewModelItemType switch
+                    {
+                        //var type when type == typeof(AppHttpBubbleViewModel) => false,
+                        var type when type == typeof(AppHttpsBubbleViewModel) => false,
+                        //var type when type == typeof(AppLengthPrefixBubbleViewModel) => false,
+                        //var type when type == typeof(TcpHexBubbleViewModel) => false,
+                        //var type when type == typeof(TcpAsciiBubbleViewModel) => false,
+                        //var type when type == typeof(IpBubbleViewModel) => false,
+                        //var type when type == typeof(EthernetBubbleViewModel) => false,
+                        //var type when type == typeof(FrameNoSharkBubbleViewModel) => false,
+                        var type when type == typeof(FrameSharkJsonBubbleViewModel) => false,
+                        var type when type == typeof(FrameSharkTextBubbleViewModel) => false,
+                        _ => true
+                    };
+                    break;
                 case nameof(SelectedPivotEndpoint):
                     UpdateOrbitEndpoints();
                     break;
@@ -128,14 +151,6 @@ namespace Netryoshka
         {
             // If a previous task is still running, cancel it
             _ctsSharkService?.Cancel();
-
-            //// Check the first bubble for WireSharkData, if exists then return early
-            //if (CurrentBubbleDataCollection.Count <= 0
-            //    || CurrentBubbleDataCollection.First().WireSharkData != null)
-            //{
-            //    UpdateBubbleItemsViewModels();
-            //    return;
-            //}
 
             var packets = CurrentBubbleDataList.Select(bd => bd.BasicPacket).ToList();
 
@@ -186,6 +201,8 @@ namespace Netryoshka
             BubbleViewModelsByName.TryGetValue(key, out var viewModelType);
             if (viewModelType is null)
                 throw new InvalidOperationException($"Could not select a suitable view model for key '{key}'");
+
+            ViewModelItemType = viewModelType;
 
             // if it's a WireSharkViewModel and the first bubble doesn't have WireSharkData, then update it
             // UpdateWireSharkData() will call UpdateBubbleItemsViewModels() when it's done

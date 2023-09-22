@@ -1,11 +1,15 @@
 ﻿using Netryoshka.Utils;
 using Newtonsoft.Json;
+using PacketDotNet.Lldp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Netryoshka.Services
 {
@@ -13,19 +17,64 @@ namespace Netryoshka.Services
 
     public class TSharkService
     {
-        private string TSharkFileName { get; }
-        private readonly ProcessStartInfo _psi;
         private readonly ICaptureService _captureService;
         private readonly ILogger _logger;
+        private readonly string _pcapFilePath;
+        private readonly string _pcapngFilePath;
+        private readonly string _foundKeysFilePath;
+
+        public string TSharkExecutable { get; set; }
+        public string EditCapExecutable { get; set; }
+        public string KeysFile { get; set; }
+
 
         public TSharkService(ICaptureService captureService, ILogger logger)
         {
             _captureService = captureService;
             _logger = logger;
-            TSharkFileName = @"C:\Users\rando\source\repos\wireshark\wireshark_build\run\RelWithDebInfo\tshark.exe";
-            _psi = new ProcessStartInfo
+
+            var tempFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
+            if (!Directory.Exists(tempFolderPath)) { Directory.CreateDirectory(tempFolderPath); }
+            _pcapFilePath = Path.Combine(tempFolderPath, "tshark_dummy_file.pcap");
+            _pcapngFilePath = Path.Combine(tempFolderPath, "tshark_dummy_file.pcapng");
+            _foundKeysFilePath = Path.Combine(tempFolderPath, "found_keys_dummy_file.txt");
+
+            // TODO: make this configurable
+            TSharkExecutable = @"C:\Users\rando\source\repos\wireshark\wireshark_build\run\RelWithDebInfo\tshark.exe";
+            EditCapExecutable = @"C:\Users\rando\source\repos\wireshark\wireshark_build\run\RelWithDebInfo\editcap.exe";
+            KeysFile = Environment.GetEnvironmentVariable("SSLKEYLOGFILE", EnvironmentVariableTarget.User) ?? "";
+        }
+
+        // TODO: write our own binary writer
+        private async Task<byte[]> GetPcapBytesAsync(List<BasicPacket> packets, CancellationToken ct)
+        {
+            _captureService.WritePacketsToFile(_pcapFilePath, packets);
+
+            var randoms = await GetTlsHandshakeRandomsAsync(ct);
+            var keys = GetKeysFromRandoms(randoms);
+            CheckKeyAndRandomCounts(randoms, keys);
+
+            if (keys.Count > 0)
             {
-                FileName = TSharkFileName,
+                await WritePcapngWithKeys(keys, ct);
+                if (File.Exists(_pcapngFilePath))
+                {
+                    return File.ReadAllBytes(_pcapngFilePath);
+                }
+            }
+
+            return File.ReadAllBytes(_pcapFilePath);
+        }
+
+
+        public async Task<string> SerializePacketsToJsonAsync(List<BasicPacket> packets, CancellationToken ct)
+        {
+            byte[] packetStream = await GetPcapBytesAsync(packets, ct);
+            string json;
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = TSharkExecutable,
                 Arguments = "-i - -T json", //"-Y http",
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
@@ -33,46 +82,13 @@ namespace Netryoshka.Services
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
-        }
 
-        // TODO: write our own binary writer
-        private byte[] GetPcapBytes(List<BasicPacket> packets)
-        {
-            var binFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-            if (!Directory.Exists(binFolderPath)) { Directory.CreateDirectory(binFolderPath); }
-            var dummyFilePath = Path.Combine(binFolderPath, "tshark_dummy_file.pcap");
-
-            _captureService.WritePacketsToFile(dummyFilePath, packets);
-
-            byte[] fileBytes = File.ReadAllBytes(dummyFilePath);
-            return fileBytes;
-        }
-
-        private string SerializePacketsToJson(List<BasicPacket> packets)
-        {
-            byte[] packetStream = GetPcapBytes(packets);
-            string parsedResult;
-
-            using (Process process = new Process { StartInfo = _psi })
+            if (!File.Exists(TSharkExecutable))
             {
-                process.Start();
-
-                using Stream stdin = process.StandardInput.BaseStream;
-                using StreamReader sr = process.StandardOutput;
-
-                stdin.Write(packetStream, 0, packetStream.Length);
-                parsedResult = sr.ReadToEnd();
+                throw new FileNotFoundException($"TShark executable not found: {TSharkExecutable}");
             }
-            return parsedResult;
-        }
 
-
-        public async Task<string> SerializePacketsToJsonAsync(List<BasicPacket> packets, CancellationToken cancellationToken)
-        {
-            byte[] packetStream = GetPcapBytes(packets);
-            string json;
-
-            using (Process process = new() { StartInfo = _psi })
+            using (Process process = new() { StartInfo = psi })
             {
                 try
                 {
@@ -82,12 +98,12 @@ namespace Netryoshka.Services
                     using (StreamReader sr = process.StandardOutput)
                     using (StreamReader serr = process.StandardError)
                     {
-                        await stdin.WriteAsync(packetStream, cancellationToken).ConfigureAwait(false);
+                        await stdin.WriteAsync(packetStream, ct).ConfigureAwait(false);
                         stdin.Close();
 
-                        json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+                        json = await sr.ReadToEndAsync(ct).ConfigureAwait(false);
 
-                        var errorResult = await serr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+                        var errorResult = await serr.ReadToEndAsync(ct).ConfigureAwait(false);
                         if (!string.IsNullOrEmpty(errorResult))
                         {
                             _logger.Info(errorResult);
@@ -114,37 +130,10 @@ namespace Netryoshka.Services
             return json;
         }
 
-        public async Task<string> SerializePacketsToJsonAsync(List<BasicPacket> packets)
+       
+        public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct)
         {
-            byte[] packetStream = GetPcapBytes(packets);
-            string json;
-
-            using (Process process = new() { StartInfo = _psi })
-            {
-                process.Start();
-
-                using (Stream stdin = process.StandardInput.BaseStream)
-                using (StreamReader sr = process.StandardOutput)
-                using (StreamReader serr = process.StandardError)
-                {
-                    await stdin.WriteAsync(packetStream);
-                    stdin.Close();
-                    json = await sr.ReadToEndAsync();
-
-                    var errorResult = await serr.ReadToEndAsync();
-                    if (!string.IsNullOrEmpty(errorResult))
-                    {
-                        _logger.Info(errorResult);
-                    }
-                }
-                process.WaitForExit();
-            }
-            return json;
-        }
-
-        public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken cts)
-        {
-            var json = await SerializePacketsToJsonAsync(packets, cts);
+            var json = await SerializePacketsToJsonAsync(packets, ct);
 
             var jsonList = Util.SplitJsonObjects(json);
             var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(json) 
@@ -164,11 +153,229 @@ namespace Netryoshka.Services
             return sharkData;
         }
 
-        public static List<WireSharkPacket> DeserializeToTSharkPackets(string json)
+       
+
+        public async Task<List<string>> GetTlsHandshakeRandomsAsync(CancellationToken ct)
         {
-            return JsonConvert.DeserializeObject<List<WireSharkPacket>>(json) ?? new List<WireSharkPacket>();
+            var tlsHandshakeInfoProcess = new ProcessStartInfo
+            {
+                FileName = TSharkExecutable,
+                Arguments = 
+                    $"-otls.keylog_file:{KeysFile} " +  // Set the TLS key log file to decrypt TLS traffic
+                    "-Tfields " +                       // Output format will be custom fields defined by the `-e` options
+                    "-Ytls.handshake.type==1 " +        // Filter packets to only show TLS handshake type 1 (ClientHello)
+                    "-etls.handshake.random " +         // Extract only the 'tls.handshake.random' field
+                    $"-r {_pcapFilePath}",              // Read packet data from the given pcap file
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+
+            var tlsHandshakeRandomList = new List<string>();
+
+            if (!File.Exists(TSharkExecutable))
+            {
+                throw new FileNotFoundException($"TShark executable not found: {TSharkExecutable}");
+            }
+
+            if (!File.Exists(KeysFile))
+            {
+                _logger.Warn($"Keys file not found: {KeysFile}");
+                return tlsHandshakeRandomList;
+            }
+
+            using (Process process = new() { StartInfo = tlsHandshakeInfoProcess })
+            {
+                try
+                {
+                    process.Start();
+
+                    using (StreamReader sr = process.StandardOutput)
+                    using (StreamReader serr = process.StandardError)
+                    {
+
+                        tlsHandshakeRandomList = (await sr.ReadToEndAsync(ct))
+                            .Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                            .ToList();
+
+                        var errorResult = await serr.ReadToEndAsync(ct).ConfigureAwait(false);
+                        if (!string.IsNullOrEmpty(errorResult))
+                        {
+                            _logger.Info(errorResult);
+                        }
+                    }
+
+                    await process.WaitForExitAsync(ct);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.Info("Operation was canceled.");
+                    process.Kill();
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error($"An exception occurred: {ex.Message}", ex);
+                    process.Kill();
+                    throw;
+                }
+            }
+
+            return tlsHandshakeRandomList;
         }
-        
+
+
+        public List<string> GetKeysFromRandoms(List<string> randoms)
+        {
+            if (!File.Exists(KeysFile))
+            {
+                _logger.Error($"Keys file not found: {KeysFile}");
+                return new List<string>();
+            }
+
+            var keys = new List<string>();
+
+            using (FileStream fs = new(KeysFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                using var sr = new StreamReader(fs);
+                string? line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (randoms.Any(random => line.Matches($@"\b{random}\b", RegexOptions.IgnoreCase).Any()))
+                    {
+                        keys.Add(line);
+                    }
+                }
+            }
+
+            return keys;
+        }
+
+        //public List<string> GetKeysFromRandoms(List<string> randoms)
+        //{
+        //    if (!File.Exists(KeysFile))
+        //    {
+        //        _logger.Error($"Keys file not found: {KeysFile}");
+        //        return new List<string>();
+        //    }
+
+        //    var keys = File.ReadLines(KeysFile)
+        //        .Where(line => randoms.Any(random => line.Matches($@"\b{random}\b", RegexOptions.IgnoreCase).Any()))
+        //        .ToList();
+        //    return keys;
+        //}
+
+
+        public void CheckKeyAndRandomCounts(List<string> tlsHandshakeRandoms, List<string> keys)
+        {
+            int nrands = tlsHandshakeRandoms.Count;
+            int nkeys = keys.Count;
+            int nkeys_unique = keys.Distinct().Count();
+
+            var explainMissingSessions = @$"Potential reasons for this:
+ - TLS runs on a custom port. Use 'Decode As' 'TCP Port' -> TLS.
+ - The packet capture was started before keys were captured.
+ - The TLS handshake was not captured, try restarting the connection.";
+
+            var explainMissingKeys = @$"Potential reasons for this: 
+ - The TLS handshake was not completed.
+ - Traffic goes through multiple hosts or programs and are
+   reencrypted (proxied), but keys are captured from the wrong one.";
+
+            if (nrands == 0)
+            {
+                _logger.Warn("No TLS sessions found.");
+                _logger.Info(explainMissingSessions);
+            }
+            else if (nkeys == 0)
+            {
+                _logger.Warn($"No secrets found for {nrands} sessions.");
+                _logger.Info(explainMissingKeys);
+            }
+            else if (nrands > nkeys_unique)
+            {
+                _logger.Warn($"Note: found keys for {nkeys_unique} sessions, but there are more sessions in total ({nrands})");
+                _logger.Info(explainMissingKeys);
+            }
+            else if (nrands < nkeys_unique)
+            {
+                _logger.Warn($"Note: found keys for {nkeys_unique} sessions, but there are fewer sessions in total ({nrands})");
+                _logger.Info(explainMissingSessions);
+            }
+        }
+
+
+        public async Task WritePcapngWithKeys(List<string> keys, CancellationToken ct)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = EditCapExecutable,
+                Arguments = $"--discard-all-secrets --inject-secrets tls,{_foundKeysFilePath} {_pcapFilePath} {_pcapngFilePath}",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+
+            // delete the pcapng file. if something goes wrong, the caller can decide what to do
+            if (File.Exists(_pcapngFilePath))
+            {
+                File.Delete(_pcapngFilePath);
+            }
+
+            try
+            {
+                File.WriteAllLines(_foundKeysFilePath, keys);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"An error occurred while writing keys to {_foundKeysFilePath}: {ex.Message}", ex);
+            }
+
+            if (!File.Exists(EditCapExecutable))
+            {
+                throw new FileNotFoundException($"Editcap executable not found: {EditCapExecutable}");
+            }
+
+            if (!File.Exists(_pcapngFilePath))
+            {
+                File.Create(_pcapngFilePath).Close();
+            }
+
+            using Process process = new() { StartInfo = psi };
+            try
+            {
+                process.Start();
+
+                using (StreamReader sr = process.StandardOutput)
+                using (StreamReader serr = process.StandardError)
+                {
+                    await sr.ReadToEndAsync(ct);
+
+                    var errorResult = await serr.ReadToEndAsync(ct).ConfigureAwait(false);
+                    if (!string.IsNullOrEmpty(errorResult))
+                    {
+                        _logger.Info(errorResult);
+                    }
+                }
+
+                await process.WaitForExitAsync(ct);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.Info("Operation was canceled.");
+                process.Kill();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"An exception occurred: {ex.Message}", ex);
+                process.Kill();
+                throw;
+            }
+        }
+
     }
 
 }
