@@ -12,6 +12,9 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using static Netryoshka.BasicPacket;
+using Kaitai;
+using static Kaitai.DnsPacket;
+using System.Windows.Navigation;
 
 namespace Netryoshka.Services
 {
@@ -30,8 +33,10 @@ namespace Netryoshka.Services
         private bool _isDynamicFiltering;
         private PhysicalAddress _macAddress;
         private readonly FlowManager _flowManager;
-        public Dictionary<string, string> VersionDict { get; private set; }
         private bool _canUpdateWithProcessInfo;
+
+        public Dictionary<string, string> VersionDict { get; private set; }
+        public Dictionary<IPAddress, string> DnsCache { get; private set; }
 
         public CaptureWindowsService(ILogger logger, ISocketProcessMapperService socketProcessMapper, FlowManager packetCollectionService)
         {
@@ -55,6 +60,7 @@ namespace Netryoshka.Services
                 ["Pcap.Version"] = Pcap.Version,
                 ["Pcap.LibpcapVersion"] = Pcap.LibpcapVersion.ToString(),
             };
+            DnsCache = new();
         }
 
         public List<string> GetDeviceNames()
@@ -242,6 +248,14 @@ namespace Netryoshka.Services
                 filterBuilder.Append(')');
             }
 
+            if (filterData.LogDNSLookups)
+            {
+                if (filterBuilder.Length > 0)
+                    filterBuilder.Append(" or ");
+
+                filterBuilder.Append("(udp port 53 or tcp port 53)");
+            }
+
             return Task.FromResult(filterBuilder.ToString());
         }
 
@@ -292,6 +306,14 @@ namespace Netryoshka.Services
                             => BPDirection.Unknown
                     };
 
+                    // handle DNS lookups
+                    if (basicPacket.Protocol == BPProtocol.UDP
+                        && (basicPacket.SrcEndpoint.Port == 53 || basicPacket.DstEndpoint.Port == 53))
+                    {
+                        HandleDnsLookups(basicPacket);
+                        continue; // TODO: And if the user wants to capture DNS lookups?
+                    }
+
                     //basicPacket.BPDirection = _macAddress.Equals(basicPacket.MacEndpointAddresses?.SourceMacAddress)
                     //    ? BPDirection.Outgoing : _macAddress.Equals(basicPacket.MacEndpointAddresses?.DestinationMacAddress)
                     //    ? BPDirection.Incoming
@@ -315,8 +337,6 @@ namespace Netryoshka.Services
                         {
                             // Cross-reference successful; update basicPacket with pid and process name
                             basicPacket.ProcessInfo = processRecord;
-                            //basicPacket.ProcessId = processRecord.ProcessId;
-                            //basicPacket.ProcessName = processRecord.ProcessName;
                         }
                     }
 
@@ -344,7 +364,40 @@ namespace Netryoshka.Services
 
         }
 
+        private void HandleDnsLookups(BasicPacket basicPacket)
+        {
+            var dnsPacket = new DnsPacket(new KaitaiStream(basicPacket.Payload));
+            if (dnsPacket.Answers.Count == 0) return;
+            if (dnsPacket.Queries.Count == 0) throw new Exception("DNS packet has no queries.");
 
+            var queryName = string.Join(".", dnsPacket.Queries[0].Name.Name.Select(label => label.Name));
+            if (string.IsNullOrEmpty(queryName)) return;
+
+            List<IPAddress> ipAddresses = new();
+            foreach (var answer in dnsPacket.Answers)
+            {
+                if (answer is null) { continue; }
+
+                switch (answer.Payload)
+                {
+                    case DnsPacket.DomainName payload:
+                        // var domainName = string.Join(".", payload.Name.Select(label => label.Name));
+                        break;
+                    case DnsPacket.Address payload:
+                        ipAddresses.Add(new IPAddress(payload.Ip));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (ipAddresses.Count == 0) return;
+
+            foreach (var ipAddress in ipAddresses)
+            {
+                DnsCache[ipAddress] = queryName;
+            }
+        }
 
         private static TcpProcessRecord? GetTcpProcessRecord(BasicPacket basicPacket, Dictionary<ushort, TcpProcessRecord> tcpConnectionsByLocalPortDict)
         {
@@ -502,6 +555,14 @@ namespace Netryoshka.Services
                             BPProtocol.TCP, tcpHeaders, sourceMacAddress, destinationMacAddress
                         );
                     }
+                    else if (ipPacket.PayloadPacket is UdpPacket udpPacket)
+                    {
+                        return new BasicPacket(sourceAddress, udpPacket.SourcePort,
+                            destinationAddress, udpPacket.DestinationPort,
+                            udpPacket.PayloadData, rawCapture.Timeval.Date,
+                            BPProtocol.UDP, null, sourceMacAddress, destinationMacAddress
+                        );
+                    }
                     // Check for other protocols if necessary...
                 }
             }
@@ -552,7 +613,6 @@ namespace Netryoshka.Services
                 PayloadPacket = ipPacket
             };
 
-
             // Convert to RawCapture
             var linkLayerType = LinkLayers.Ethernet;
             var rawCapture = new RawCapture(linkLayerType, new PosixTimeval(basicPacket.Timestamp), ethPacket.Bytes);
@@ -560,7 +620,6 @@ namespace Netryoshka.Services
             return rawCapture;
         }
 
-        
 
         public bool RequiresAdminPrivileges(string deviceName)
         {

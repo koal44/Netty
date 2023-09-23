@@ -12,6 +12,7 @@ namespace Netryoshka
         public HashSet<int> LocalPIDs { get; }
         public HashSet<string> LocalProcessNames { get; }
         public string CustomFilter { get; }
+        public bool LogDNSLookups { get; }
 
         public FilterData(
             HashSet<int>? remotePorts = null,
@@ -19,7 +20,8 @@ namespace Netryoshka
             HashSet<int>? localPorts = null,
             HashSet<int>? localPIDs = null,
             HashSet<string>? localProcessNames = null,
-            string? customFilter = null)
+            string? customFilter = null,
+            bool? logDnsLookups = null)
         {
             RemotePorts = remotePorts ?? new HashSet<int>();
             RemoteIpAddresses = remoteIPAddresses ?? new HashSet<IPAddress>();
@@ -27,6 +29,7 @@ namespace Netryoshka
             LocalPIDs = localPIDs ?? new HashSet<int>();
             LocalProcessNames = localProcessNames ?? new HashSet<string>();
             CustomFilter = customFilter ?? string.Empty;
+            LogDNSLookups = logDnsLookups ?? false;
         }
 
         public bool ShouldKeepPacket(BasicPacket packet)

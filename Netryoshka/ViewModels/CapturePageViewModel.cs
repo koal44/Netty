@@ -166,7 +166,7 @@ namespace Netryoshka.ViewModels
             IsCapturing = true;
             CapturedTextCollection.Clear();
 
-            var filterData = new FilterData(remotePorts: remotePorts, remoteIPAddresses: remoteIPAddresses, localPorts: localPorts, localPIDs: localPIDs, localProcessNames: localProcessNames, CustomFilter);
+            var filterData = new FilterData(remotePorts: remotePorts, remoteIPAddresses: remoteIPAddresses, localPorts: localPorts, localPIDs: localPIDs, localProcessNames: localProcessNames, CustomFilter, logDnsLookups: true);
             await _captureService.StartCaptureAsync(HandlePacketCapture, filterData, SelectedDeviceName ?? "Wi-Fi", false);
 		}
 
