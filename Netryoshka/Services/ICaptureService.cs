@@ -11,6 +11,7 @@ namespace Netryoshka.Services
         int CapturedPacketCount { get; }
 
         List<string> GetDeviceNames();
+        string? GetDomainName(IPAddress ipAddress);
         string? GetSelectedDeviceName();
         bool IsValidFilter(string filter, string deviceName);
         void LoadPacketsFromFile(Action<BasicPacket> packetReceivedCallback, string fileName);

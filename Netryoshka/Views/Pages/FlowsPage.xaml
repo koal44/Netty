@@ -44,20 +44,39 @@
           <Setter Property="HorizontalAlignment" Value="Stretch" />
           <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
-        <DataTemplate x:Key="ComboBoxEndpointTemplate">
-          <TextBlock d:DataContext="{d:DesignInstance local:FlowEndpoint,
-                                                      IsDesignTimeCreatable=False}"
-                     Text="{Binding Converter={local:FlowEndpointToStringConverter}}" />
+        <DataTemplate x:Key="PivotComboBoxTemplate">
+          <TextBlock>
+            <TextBlock.Text>
+              <MultiBinding Converter="{local:InteractionEndpointAndModeToTextConverter}">
+                <Binding Path="." />
+                <Binding Path="DataContext.PivotCBDisplayMode"
+                         RelativeSource="{RelativeSource FindAncestor,
+                                                         AncestorType={x:Type ComboBox}}" />
+              </MultiBinding>
+            </TextBlock.Text>
+          </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="OrbitComboBoxTemplate">
+          <TextBlock>
+            <TextBlock.Text>
+              <MultiBinding Converter="{local:InteractionEndpointAndModeToTextConverter}">
+                <Binding Path="." />
+                <Binding Path="DataContext.OrbitCBDisplayMode"
+                         RelativeSource="{RelativeSource FindAncestor,
+                                                         AncestorType={x:Type ComboBox}}" />
+              </MultiBinding>
+            </TextBlock.Text>
+          </TextBlock>
         </DataTemplate>
       </Grid.Resources>
       <ComboBox Grid.Row="0"
                 Grid.Column="0"
-                ItemTemplate="{StaticResource ComboBoxEndpointTemplate}"
+                ItemTemplate="{StaticResource PivotComboBoxTemplate}"
                 ItemsSource="{Binding PivotEndpoints}"
                 SelectedItem="{Binding SelectedPivotEndpoint, Mode=TwoWay}" />
       <ComboBox Grid.Row="0"
                 Grid.Column="1"
-                ItemTemplate="{StaticResource ComboBoxEndpointTemplate}"
+                ItemTemplate="{StaticResource OrbitComboBoxTemplate}"
                 ItemsSource="{Binding OrbitEndpoints}"
                 SelectedItem="{Binding SelectedOrbitEndpoint, Mode=TwoWay}" />
     </Grid>

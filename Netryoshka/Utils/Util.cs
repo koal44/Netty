@@ -505,10 +505,21 @@ namespace Netryoshka.Utils
             int startIndex = 0;
             int endIndex = 0;
             bool foundObject = false;
+            bool insideString = false;
 
             for (int i = startingIndex; i < json.Length; i++)
             {
                 char c = json[i];
+
+                if (c == '"' && (i == 0 || json[i - 1] != '\\')) // Toggle string mode, but ignore escaped quotes
+                {
+                    insideString = !insideString;
+                }
+
+                if (insideString)
+                {
+                    continue; // Skip this iteration if we're inside a string
+                }
 
                 switch (c)
                 {
@@ -539,6 +550,48 @@ namespace Netryoshka.Utils
 
             return (-1, -1); // Couldn't find object
         }
+
+
+        //private static (int Start, int End) FindJsonObjectBoundaries(string json, int startingIndex)
+        //{
+        //    int openBraces = 0;
+        //    int startIndex = 0;
+        //    int endIndex = 0;
+        //    bool foundObject = false;
+
+        //    for (int i = startingIndex; i < json.Length; i++)
+        //    {
+        //        char c = json[i];
+
+        //        switch (c)
+        //        {
+        //            case '{':
+        //                if (!foundObject)
+        //                {
+        //                    startIndex = i;
+        //                    foundObject = true;
+        //                }
+        //                openBraces++;
+        //                break;
+        //            case '}':
+        //                openBraces--;
+        //                break;
+        //        }
+
+        //        if (foundObject && openBraces == 0)
+        //        {
+        //            endIndex = i;
+        //            break;
+        //        }
+        //    }
+
+        //    if (foundObject && endIndex > startIndex)
+        //    {
+        //        return (startIndex, endIndex);
+        //    }
+
+        //    return (-1, -1); // Couldn't find object
+        //}
 
 
         public static void ClearAllBindings(DependencyObject obj)

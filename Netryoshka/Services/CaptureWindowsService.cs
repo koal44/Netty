@@ -1,5 +1,6 @@
-﻿using PacketDotNet;
+﻿using Kaitai;
 using Netryoshka.Models;
+using PacketDotNet;
 using SharpPcap;
 using SharpPcap.WinDivert;
 using System;
@@ -12,9 +13,6 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using static Netryoshka.BasicPacket;
-using Kaitai;
-using static Kaitai.DnsPacket;
-using System.Windows.Navigation;
 
 namespace Netryoshka.Services
 {
@@ -651,8 +649,12 @@ namespace Netryoshka.Services
             }
         }
 
-
-
+        public string? GetDomainName(IPAddress ipAddress)
+        {
+            return DnsCache.TryGetValue(ipAddress, out string? domainName)
+                ? domainName
+                : null;
+        }
     }
 
 }

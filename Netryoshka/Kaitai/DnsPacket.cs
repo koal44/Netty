@@ -13,6 +13,7 @@ namespace Kaitai
     // After that, one can get various attributes from the structure by accessing properties like:
     // data.TransactionId // => ID to keep track of request/responces
 
+#pragma warning disable CS8625, CS8618
     public partial class DnsPacket : KaitaiStruct
     {
         public static DnsPacket FromFile(string fileName)
@@ -833,4 +834,5 @@ namespace Kaitai
         public DnsPacket M_Root { get { return m_root; } }
         public KaitaiStruct M_Parent { get { return m_parent; } }
     }
+#pragma warning restore CS8625, CS8618
 }

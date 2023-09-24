@@ -6,11 +6,11 @@ namespace Netryoshka
 {
     public interface IFlowsPageViewModel
     {
-        ObservableCollection<FlowEndpoint> PivotEndpoints { get; }
-        ObservableCollection<FlowEndpoint> OrbitEndpoints { get; }
+        ObservableCollection<InteractionEndpoint> PivotEndpoints { get; }
+        ObservableCollection<InteractionEndpoint> OrbitEndpoints { get; }
         List<BubbleData> CurrentBubbleDataList { get; }
-        FlowEndpoint? SelectedPivotEndpoint { get; set; }
-        FlowEndpoint? SelectedOrbitEndpoint { get; set; }
+        InteractionEndpoint? SelectedPivotEndpoint { get; set; }
+        InteractionEndpoint? SelectedOrbitEndpoint { get; set; }
         FlowEndpointRole? SelectedBotRole { get; set; }
         string PivotProcessInfo { get; }
         TcpEncoding SelectedTcpEncoding { get; set; }

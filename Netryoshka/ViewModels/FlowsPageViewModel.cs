@@ -21,20 +21,21 @@ namespace Netryoshka
         private readonly FlowManager _flowManager;
         private readonly ILogger _logger;
         private readonly TSharkService _tSharkService;
+        private readonly ICaptureService _captureService;
         private readonly Dictionary<FlowKey, List<BasicPacket>> _allFlows;
 
         [ObservableProperty]
-        private ObservableCollection<FlowEndpoint> _pivotEndpoints;
+        private ObservableCollection<InteractionEndpoint> _pivotEndpoints;
         [ObservableProperty]
-        private ObservableCollection<FlowEndpoint> _orbitEndpoints;
+        private ObservableCollection<InteractionEndpoint> _orbitEndpoints;
         [ObservableProperty]
         private List<BubbleData> _currentBubbleDataList;
         [ObservableProperty]
         private ObservableCollection<object> _currentItemViewModelCollecion;
         [ObservableProperty] 
-        private FlowEndpoint? _selectedPivotEndpoint;
-        [ObservableProperty] 
-        private FlowEndpoint? _selectedOrbitEndpoint;
+        private InteractionEndpoint? _selectedPivotEndpoint;
+        [ObservableProperty]
+        private InteractionEndpoint? _selectedOrbitEndpoint;
         private FlowKey? _currentFlowKey;
         [ObservableProperty]
         private string _pivotProcessInfo;
@@ -61,6 +62,11 @@ namespace Netryoshka
         private bool _canContentScroll;
         [ObservableProperty]
         private Type? _viewModelItemType;
+        [ObservableProperty]
+        private InteractionComboBoxMode _pivotCBDisplayMode;
+        [ObservableProperty]
+        private InteractionComboBoxMode _orbitCBDisplayMode;
+
 
         private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
         {
@@ -86,11 +92,13 @@ namespace Netryoshka
 
         
 
-        public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService)
+        public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService, ICaptureService captureService)
         {
             _flowManager = flowManager;
             _logger = logger;
             _tSharkService = tSharkService;
+            _captureService = captureService;
+
             _allFlows = _flowManager.GetAllFlows();
             _pivotEndpoints = new();
             _orbitEndpoints = new();
@@ -103,6 +111,9 @@ namespace Netryoshka
             _currentItemViewModelCollecion = new();
             _deframeMethods = Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
             _canContentScroll = true;
+            _pivotCBDisplayMode = InteractionComboBoxMode.ProcessInfo;
+            _orbitCBDisplayMode = InteractionComboBoxMode.DomainName;
+
             PropertyChanged += OnPropertyChanged;
 
             // sets off a chain of side reactions which updates orbit, updating flowmessages.
@@ -124,8 +135,8 @@ namespace Netryoshka
                         //var type when type == typeof(IpBubbleViewModel) => false,
                         //var type when type == typeof(EthernetBubbleViewModel) => false,
                         //var type when type == typeof(FrameNoSharkBubbleViewModel) => false,
-                        var type when type == typeof(FrameSharkJsonBubbleViewModel) => false,
-                        var type when type == typeof(FrameSharkTextBubbleViewModel) => false,
+                        //var type when type == typeof(FrameSharkJsonBubbleViewModel) => false,
+                        //var type when type == typeof(FrameSharkTextBubbleViewModel) => false,
                         _ => true
                     };
                     break;
@@ -226,42 +237,48 @@ namespace Netryoshka
 
         private void UpdatePivotEndpoints()
         {
-            //SelectedPivotEndpoint = null;
             PivotEndpoints.Clear();
 
-            var uniquePivots = new HashSet<FlowEndpoint>();
+            var uniquePivots = new HashSet<InteractionEndpoint>();
             foreach (var flowKey in _allFlows.Keys)
             {
+                if (flowKey == null) continue;
+
                 var firstPacket = _allFlows[flowKey].FirstOrDefault();
                 if (firstPacket == null)
                 {
-                    _logger.Warn($"First firstpacket was null for flow key: {flowKey}");
+                    _logger.Error($"firstpacket was null for flow key: {flowKey}");
                     continue;
                 }
 
                 switch (firstPacket.Direction)
                 {
                     case BPDirection.Outgoing:
-                        uniquePivots.Add(firstPacket.SrcEndpoint);
+                        uniquePivots.Add(new InteractionEndpoint(flowKey, firstPacket.SrcEndpoint));
                         break;
                     case BPDirection.Incoming:
-                        uniquePivots.Add(firstPacket.DstEndpoint);
+                        uniquePivots.Add(new InteractionEndpoint(flowKey, firstPacket.DstEndpoint));
                         break;
                     default:
-                        uniquePivots.Add(firstPacket.SrcEndpoint);
-                        uniquePivots.Add(firstPacket.DstEndpoint);
+                        uniquePivots.Add(new InteractionEndpoint(flowKey, firstPacket.SrcEndpoint));
+                        uniquePivots.Add(new InteractionEndpoint(flowKey, firstPacket.DstEndpoint));
                         break;
                 }
             }
 
             foreach (var pivot in uniquePivots)
             {
+                var packets = _allFlows[pivot.FlowKey];
+                pivot.ProcessInfo = packets == null || packets.Count <= 0
+                    ? null
+                    : packets[0].ProcessInfo;
+                pivot.DomainName = _captureService.GetDomainName(pivot.FlowEndpoint.IpAddress);
+
                 PivotEndpoints.Add(pivot);
             }
 
             SelectedPivotEndpoint = PivotEndpoints.FirstOrDefault();
             SelectedBotRole ??= PivotEndpoints.Any() ? FlowEndpointRole.Pivot : null;
-            //UpdateOrbitEndpoints();
         }
 
         private void UpdateOrbitEndpoints()
@@ -273,7 +290,7 @@ namespace Netryoshka
             {
                 foreach (var flowKey in _allFlows.Keys)
                 {
-                    var orbitEndpoint = SelectedPivotEndpoint switch
+                    var orbitEndpoint = SelectedPivotEndpoint.FlowEndpoint switch
                     {
                         var pivot when pivot.Equals(flowKey.Endpoint1) => flowKey.Endpoint2,
                         var pivot when pivot.Equals(flowKey.Endpoint2) => flowKey.Endpoint1,
@@ -282,7 +299,11 @@ namespace Netryoshka
 
                     if (orbitEndpoint != null)
                     {
-                        OrbitEndpoints.Add(orbitEndpoint);
+                        var orbit = new InteractionEndpoint(flowKey, orbitEndpoint)
+                        {
+                            DomainName = _captureService.GetDomainName(orbitEndpoint.IpAddress)
+                        };
+                        OrbitEndpoints.Add(orbit);
                     }
                 }
 
@@ -303,7 +324,7 @@ namespace Netryoshka
 
             if (SelectedPivotEndpoint != null && SelectedOrbitEndpoint != null)
             {
-                _currentFlowKey = new FlowKey(SelectedPivotEndpoint, SelectedOrbitEndpoint);
+                _currentFlowKey = new FlowKey(SelectedPivotEndpoint.FlowEndpoint, SelectedOrbitEndpoint.FlowEndpoint);
             }
 
             UpdatePivotProcessInfo();
@@ -312,25 +333,15 @@ namespace Netryoshka
 
         private void UpdatePivotProcessInfo()
         {
-            PivotProcessInfo = string.Empty;
+            var processInfo = SelectedPivotEndpoint?.ProcessInfo;
+            var processName = processInfo?.ProcessName ?? "";
+            var processId = processInfo?.ProcessId != null ? $"pid {processInfo.ProcessId}" : "";
+            var processState = processInfo?.State?.StateDescription ?? "";
+            var n = Environment.NewLine;
 
-            if (_currentFlowKey != null)
-            {
-                var packets = _allFlows[_currentFlowKey];
-                if (packets == null || packets.Count <= 0) return; // shouldn't happen
-
-                var firstpacket = packets[0];
-
-                var processInfo = firstpacket.ProcessInfo;
-                var processName = processInfo?.ProcessName ?? "";
-                var processId = processInfo?.ProcessId != null ? $"pid {processInfo.ProcessId}" : "";
-                var processState = processInfo?.State?.StateDescription ?? "";
-
-                var n = Environment.NewLine;
-                PivotProcessInfo = $"{processName}{n}{processId}{n}{processState}".Trim();
-            }
-
+            PivotProcessInfo = $"{processName}{n}{processId}{n}{processState}".Trim();
         }
+
 
         private void UpdateCurrentChatBubbles()
         {
@@ -344,7 +355,7 @@ namespace Netryoshka
                 var newBubbleDataList = new List<BubbleData>();
                 foreach (var packet in packets)
                 {
-                    var endPointRole = packet.FlowKey.Endpoint1 == SelectedPivotEndpoint
+                    var endPointRole = packet.FlowKey.Endpoint1 == SelectedPivotEndpoint?.FlowEndpoint
                             ? FlowEndpointRole.Pivot
                             : FlowEndpointRole.Orbit;
                     var packetInterval = lastTimestamp.HasValue
@@ -404,6 +415,13 @@ namespace Netryoshka
             }
         }
 
+    }
+
+    public enum InteractionComboBoxMode
+    {
+        ProcessInfo,
+        DomainName,
+        None
     }
 
     public class BubbleTemplateSelector : DataTemplateSelector

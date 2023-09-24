@@ -90,7 +90,7 @@ public partial class App : Application
                 ErrorTarget = LogTarget.Console | LogTarget.Popup
             }));
         services.AddSingleton<FlowManager>();
-        services.AddTransient<ICaptureService, CaptureWindowsService>();
+        services.AddSingleton<ICaptureService, CaptureWindowsService>();
         services.AddSingleton<ISocketProcessMapperService, WindowsSocketProcessMapper>();
         services.AddSingleton<TSharkService>();
         services.AddSingleton<IFileDialogService, FileDialogService>();
