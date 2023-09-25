@@ -40,13 +40,13 @@ namespace Netryoshka
 
         public FrameSharkTextBubbleViewModel(BubbleData data)
         {
-            BodyContent = data.WireSharkData!.JsonString;
+            BodyContent = data.WireSharkData?.JsonString ?? string.Empty;
             var lines = BodyContent.Split('\n');
             FirstPartOfText = string.Join("\n", lines.Take(5));
             RestOfText = lines.Length > 5 ? string.Join("\n", lines.Skip(5)) : string.Empty;
             IsExpanded = false;
             EndPointRole = data.EndPointRole;
-            FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
+            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
 
 

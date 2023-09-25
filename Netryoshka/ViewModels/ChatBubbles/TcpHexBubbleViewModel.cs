@@ -35,7 +35,7 @@ namespace Netryoshka
             EndPointRole = data.EndPointRole;
             HeaderContent = BubbleDataHelper.BuildTcpHeaderContent(data);
             BodyContent = BubbleDataHelper.GetDecodedTcpPayloadContent(data, TcpEncoding.Hex);
-            FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
+            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
         
     }

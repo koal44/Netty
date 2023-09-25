@@ -39,7 +39,7 @@ namespace Netryoshka
             var treeNode = httpNode != null ? TreeNode.BuildFromObject(httpNode) : new TreeNode();
             TreeNodes = new ObservableCollection<TreeNode> { treeNode };
             EndPointRole = data.EndPointRole;
-            FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
+            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
 
     }

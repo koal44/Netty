@@ -36,7 +36,7 @@ namespace Netryoshka
             EndPointRole = data.EndPointRole;
             HeaderContent = null;
             BodyContent = GetEthernetContent(data.BasicPacket);
-            FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
+            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
 
         private static string? GetEthernetContent(BasicPacket packet)

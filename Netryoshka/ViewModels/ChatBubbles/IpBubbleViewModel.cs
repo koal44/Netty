@@ -34,8 +34,8 @@ namespace Netryoshka
         {
             EndPointRole = data.EndPointRole;
             HeaderContent = "";
-            FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
             BodyContent = $"IP: {data.BasicPacket.SrcEndpoint.IpAddress} ⟶ {data.BasicPacket.DstEndpoint.IpAddress}";
+            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
         
     }

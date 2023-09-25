@@ -15,12 +15,15 @@ namespace Netryoshka
         private TimeSpan? _packetInterval;
         [ObservableProperty]
         private WireSharkData? _wireSharkData;
+        [ObservableProperty]
+        private int _bubbleIndex;
 
-        public BubbleData(BasicPacket packet, FlowEndpointRole endPointRole, TimeSpan? packetInterval)
+        public BubbleData(BasicPacket packet, FlowEndpointRole endPointRole, TimeSpan? packetInterval, int bubbleIndex)
         {
             BasicPacket = packet;
             EndPointRole = endPointRole;
             PacketInterval = packetInterval;
+            BubbleIndex = bubbleIndex;
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Netryoshka.DesignTime;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -33,9 +34,15 @@ namespace Netryoshka
 
         public FrameSharkJsonBubbleViewModel(BubbleData data)
         {
-            TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(data.WireSharkData!.WireSharkPacket.Source!.Layers!) };
+            TreeNodes = new ObservableCollection<TreeNode>
+            {
+                TreeNode.BuildFromObject(
+                    data.WireSharkData?.WireSharkPacket?.Source?.Layers
+                    ?? new TSharkLayers()
+                )
+            };
             EndPointRole = data.EndPointRole;
-            FooterContent = data.PacketInterval?.ToString("mm\\.ss\\.ffff");
+            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
 
     }
