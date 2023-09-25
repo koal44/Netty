@@ -182,6 +182,8 @@ namespace Netryoshka
 
                         for (int i = 0; i < CurrentBubbleDataList.Count; i++)
                         {
+                            if (sharkDataList[i] == null)
+                                _logger.Error($"sharkDataList[{i}] was null");
                             CurrentBubbleDataList[i].WireSharkData = sharkDataList[i];
                         }
 
@@ -353,8 +355,9 @@ namespace Netryoshka
                 DateTime? lastTimestamp = null;
 
                 var newBubbleDataList = new List<BubbleData>();
-                foreach (var packet in packets)
+                for (int index = 0; index < packets.Count; index++)
                 {
+                    var packet = packets[index];
                     var endPointRole = packet.FlowKey.Endpoint1 == SelectedPivotEndpoint?.FlowEndpoint
                             ? FlowEndpointRole.Pivot
                             : FlowEndpointRole.Orbit;
@@ -362,8 +365,7 @@ namespace Netryoshka
                             ? packet.Timestamp - lastTimestamp.Value
                             : (TimeSpan?)null;
 
-                    newBubbleDataList.Add(new BubbleData(packet, endPointRole, packetInterval));
-                    CurrentBubbleDataList.Add(new BubbleData(packet, endPointRole, packetInterval));
+                    newBubbleDataList.Add(new BubbleData(packet, endPointRole, packetInterval, index));
 
                     lastTimestamp = packet.Timestamp;
                 }

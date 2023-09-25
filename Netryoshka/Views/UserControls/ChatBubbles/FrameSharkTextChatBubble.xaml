@@ -4,15 +4,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Netryoshka"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:system="clr-namespace:System;assembly=mscorlib"
              d:DataContext="{d:DesignInstance local:FrameSharkTextBubbleViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="100"
              d:DesignWidth="200"
              mc:Ignorable="d">
 
-  <StackPanel Orientation="Vertical">
-    <Border MinWidth="100"
+  <Grid VerticalAlignment="Top">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Border Grid.Row="0"
+            MinWidth="100"
             CornerRadius="5">
       <Border.MaxWidth>
         <MultiBinding Converter="{local:FlowChatBubbleMaxWidthConverter}">
@@ -44,35 +48,39 @@
 
       <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock x:Name="ContentTextBlock"
-                   Grid.RowSpan="2"
-                   Margin="12,2"
-                   Panel.ZIndex="0"
-                   FontSize="11"
-                   Text="{Binding BodyContent}">
-          <TextBlock.Style>
-            <Style BasedOn="{StaticResource {x:Type TextBlock}}"
-                   TargetType="TextBlock">
-              <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-              <Setter Property="MaxHeight" Value="150" />
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding IsChecked, ElementName=ToggleExpander}"
-                             Value="True">
-                  <Setter Property="TextTrimming" Value="None" />
-                  <Setter Property="MaxHeight" Value="9999" />
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </TextBlock.Style>
-          <TextBlock.ContextMenu>
-            <ContextMenu>
-              <MenuItem Command="{Binding CopyTextCommand}"
-                        Header="Copy" />
-            </ContextMenu>
-          </TextBlock.ContextMenu>
-        </TextBlock>
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+          <TextBlock x:Name="ContentTextBlock"
+                     Grid.RowSpan="2"
+                     Margin="12,2"
+                     Panel.ZIndex="0"
+                     FontSize="11"
+                     Text="{Binding BodyContent}">
+            <TextBlock.Style>
+              <Style BasedOn="{StaticResource {x:Type TextBlock}}"
+                     TargetType="TextBlock">
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="MaxHeight" Value="150" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsChecked, ElementName=ToggleExpander}"
+                               Value="True">
+                    <Setter Property="TextTrimming" Value="None" />
+                    <Setter Property="MaxHeight" Value="9999" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+            <TextBlock.ContextMenu>
+              <ContextMenu>
+                <MenuItem Command="{Binding CopyTextCommand}"
+                          Header="Copy" />
+              </ContextMenu>
+            </TextBlock.ContextMenu>
+          </TextBlock>
+        </ScrollViewer>
+
         <ToggleButton x:Name="ToggleExpander"
                       Height="40"
                       HorizontalAlignment="Stretch"
@@ -104,6 +112,7 @@
     </Border>
 
     <TextBlock Name="FooterTextBlock"
+               Grid.Row="1"
                Margin="20,0"
                VerticalAlignment="Top"
                FontSize="9"
@@ -125,6 +134,6 @@
         </Style>
       </TextBlock.Style>
     </TextBlock>
-  </StackPanel>
+  </Grid>
 
 </UserControl>

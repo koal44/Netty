@@ -37,21 +37,21 @@ namespace Netryoshka.DesignTime
             KeyLogFileName = "path/to/keylogfile.txt";
 
             DateTime? lastTimestamp = null;
-            foreach (var packet in DesignTimeData.GetPackets())
+
+            var packets = DesignTimeData.GetPackets();
+            for (int index = 0; index < packets.Count; index++)
             {
+                var packet = packets[index];
                 var role = packet.Direction == BasicPacket.BPDirection.Incoming
                             ? FlowEndpointRole.Pivot
                             : FlowEndpointRole.Orbit;
                 var packetInterval = lastTimestamp.HasValue
                             ? packet.Timestamp - lastTimestamp.Value
                             : TimeSpan.Zero;
-                CurrentFlowChatBubbles.Add(
-                    //new FlowChatBubbleDesignViewModel()
-                    new BubbleData(packet, role, packetInterval)
-                );
 
-                //CurrentBubbleDataCollection.Add(
-                //    new FlowChatBubbleDesignViewModel().Build(packet, role, packetInterval, this));
+                CurrentFlowChatBubbles.Add(
+                    new BubbleData(packet, role, packetInterval, index)
+                );
 
                 lastTimestamp = packet.Timestamp;
             }

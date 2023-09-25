@@ -316,6 +316,7 @@
               <Setter Property="Border.CornerRadius" Value="0" />
               <Setter Property="SnapsToDevicePixels" Value="True" />
               <Setter Property="OverridesDefaultStyle" Value="True" />
+              <Setter Property="MaxHeight" Value="{Binding ElementName=FlowChatListBox, Path=ActualHeight, Converter={local:ScaleConverter Amount=0.8}}" />
               <Setter Property="Template">
                 <Setter.Value>
                   <ControlTemplate TargetType="{x:Type ListBoxItem}">

@@ -11,9 +11,13 @@
              d:DesignWidth="200"
              mc:Ignorable="d">
 
-  <StackPanel Orientation="Vertical">
-    <Border MinWidth="100"
-            MaxHeight="210"
+  <Grid VerticalAlignment="Top">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Border Grid.Row="0"
+            MinWidth="100"
             Padding="2,2"
             CornerRadius="5">
       <Border.MaxWidth>
@@ -44,8 +48,7 @@
         </Style>
       </Border.Style>
 
-      <TreeView MaxHeight="200"
-                FontSize="11"
+      <TreeView FontSize="11"
                 ItemsSource="{Binding TreeNodes}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -68,6 +71,7 @@
     </Border>
 
     <TextBlock Name="FooterTextBlock"
+               Grid.Row="1"
                Margin="20,0"
                VerticalAlignment="Top"
                FontSize="9"
@@ -89,6 +93,6 @@
         </Style>
       </TextBlock.Style>
     </TextBlock>
-  </StackPanel>
+  </Grid>
 
 </UserControl>
