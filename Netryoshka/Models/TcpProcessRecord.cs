@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.NetworkInformation;
 
 namespace Netryoshka
 {
@@ -27,8 +26,5 @@ namespace Netryoshka
     {
         string StateDescription { get; }
     }
-
-
-
 
 }

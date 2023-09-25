@@ -19,112 +19,81 @@
                   ScrollViewer.IsDeferredScrollingEnabled="False"
                   ScrollViewer.VerticalScrollBarVisibility="Disabled"
                   mc:Ignorable="d">
-    <!--  Padding="1" was a magical fix!!!  -->
+  <!--  Padding="1" was a magical fix!!!  -->
 
-    <ui:ContentDialog.Resources>
-        <!--<Style BasedOn="{StaticResource MyContentDialogStyle}" TargetType="{x:Type views:ProcessPortsDialog}" />-->
-        <Style BasedOn="{StaticResource {x:Type ui:ContentDialog}}" TargetType="{x:Type views:ProcessPortsDialog}" />
-        <!--<Style BasedOn="{StaticResource {x:Type ui:ContentDialog}}" TargetType="{x:Type local:ProcessPortsDialog}" />-->
-    </ui:ContentDialog.Resources>
+  <ui:ContentDialog.Resources>
+    <Style BasedOn="{StaticResource {x:Type ui:ContentDialog}}"
+           TargetType="{x:Type views:ProcessPortsDialog}" />
+  </ui:ContentDialog.Resources>
 
-    <Grid x:Name="parentGrid">
-        <!--  VerticalAlignment="Top"  -->
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>-->
-        <!--<ScrollViewer x:Name="thescroller" MouseWheel="ParentGrid_MouseWheel">-->
-        <DataGrid Name="dataGrid"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  AutoGenerateColumns="False"
-                  MouseUp="MouseUp_SelectFilter"
-                  SelectionMode="Single"
-                  SelectionUnit="Cell">
-            <DataGrid.Resources>
-                <DataTemplate x:Key="ColumnHeaderTemplate">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Padding="3,0,0,0"
-                                   VerticalAlignment="Center"
-                                   Text="{Binding}" />
-                        <Separator Margin="0,1,0,0" />
-                    </StackPanel>
-                </DataTemplate>
+  <Grid x:Name="parentGrid">
+    <DataGrid Name="dataGrid"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              AutoGenerateColumns="False"
+              MouseUp="MouseUp_SelectFilter"
+              SelectionMode="Single"
+              SelectionUnit="Cell">
+      <DataGrid.Resources>
+        <DataTemplate x:Key="ColumnHeaderTemplate">
+          <StackPanel Orientation="Vertical">
+            <TextBlock Padding="3,0,0,0"
+                       VerticalAlignment="Center"
+                       Text="{Binding}" />
+            <Separator Margin="0,1,0,0" />
+          </StackPanel>
+        </DataTemplate>
+        <Style TargetType="{x:Type DataGridCell}">
+          <Setter Property="Padding" Value="3,0,0,0" />
+          <Setter Property="VerticalAlignment" Value="Center" />
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="BorderBrush" Value="Transparent" />
+          <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Background" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+              <Setter Property="Cursor" Value="Hand" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter Property="Background" Value="{DynamicResource AccentTextFillColorTertiaryBrush}" />
+            </Trigger>
+          </Style.Triggers>
+        </Style>
+      </DataGrid.Resources>
 
-                <!--<Style x:Key="CustomCellStyle" TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Text, RelativeSource={RelativeSource AncestorType={x:Type DataGridCell}}}" />
-                                    <Image Source="YourImagePath.png" />
-                                </StackPanel>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>-->
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Padding" Value="3,0,0,0" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="BorderBrush" Value="Transparent" />
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
-                            <Setter Property="Cursor" Value="Hand" />
-                        </Trigger>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource AccentTextFillColorTertiaryBrush}" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Resources>
+      <DataGrid.Columns>
+        <DataGridTextColumn MinWidth="60"
+                            MaxWidth="90"
+                            Binding="{Binding ProcessId}"
+                            Header="PID"
+                            HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
+        <DataGridTextColumn MinWidth="80"
+                            MaxWidth="110"
+                            Binding="{Binding LocalPort}"
+                            Header="Local Port"
+                            HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
+        <DataGridTextColumn Width="*"
+                            MinWidth="150"
+                            Binding="{Binding ProcessName}"
+                            Header="Process Name"
+                            HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
+        <DataGridTextColumn MinWidth="120"
+                            MaxWidth="150"
+                            Binding="{Binding RemoteAddress}"
+                            Header="Remote Addr"
+                            HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
+                            SortMemberPath="SortableRemoteAddress" />
+        <DataGridTextColumn MinWidth="90"
+                            MaxWidth="120"
+                            Binding="{Binding RemotePort}"
+                            Header="Remote Port"
+                            HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
+        <!--<DataGridTextColumn Binding="{Binding State}" Header="State" />-->
+      </DataGrid.Columns>
+    </DataGrid>
 
-            <DataGrid.Columns>
+    <!--</ScrollViewer>-->
 
-
-                <DataGridTextColumn MinWidth="60"
-                                    MaxWidth="90"
-                                    Binding="{Binding ProcessId}"
-                                    Header="PID"
-                                    HeaderTemplate="{StaticResource ColumnHeaderTemplate}">
-                    <!--  CellStyle="{StaticResource CustomCellStyle}"  -->
-                    <!--<DataGridTextColumn.HeaderTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Content, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
-                                <Separator />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTextColumn.HeaderTemplate>-->
-                </DataGridTextColumn>
-
-                <DataGridTextColumn MinWidth="80"
-                                    MaxWidth="110"
-                                    Binding="{Binding LocalPort}"
-                                    Header="Local Port"
-                                    HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
-                <DataGridTextColumn Width="*"
-                                    MinWidth="150"
-                                    Binding="{Binding ProcessName}"
-                                    Header="Process Name"
-                                    HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
-                <DataGridTextColumn MinWidth="120"
-                                    MaxWidth="150"
-                                    Binding="{Binding RemoteAddress}"
-                                    Header="Remote Addr"
-                                    HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
-                <DataGridTextColumn MinWidth="90"
-                                    MaxWidth="120"
-                                    Binding="{Binding RemotePort}"
-                                    Header="Remote Port"
-                                    HeaderTemplate="{StaticResource ColumnHeaderTemplate}" />
-                <!--<DataGridTextColumn Binding="{Binding State}" Header="State" />-->
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <!--</ScrollViewer>-->
-
-    </Grid>
+  </Grid>
 
 
 </ui:ContentDialog>

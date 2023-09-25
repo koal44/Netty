@@ -505,9 +505,10 @@ Capture https traffic from MitmProxy, Firefox or Chrome. Restart those apps.",
         public async Task OpenProcessSocketDialog()
         {
             List<TcpProcessRecord> tcpRecords = _socketProcessMapperService.GetAllTcpConnections();
-
+            var viewModelRecords = tcpRecords.Select(r => new TcpProcessRecordViewModel(r)).ToList();
             var recordsWindow = new ProcessPortsDialog(_contentDialogService.GetContentPresenter());
-            recordsWindow.dataGrid.ItemsSource = tcpRecords;
+            recordsWindow.dataGrid.ItemsSource = viewModelRecords;
+
             var dialogResult = await recordsWindow.ShowAsync();
             if (dialogResult == Wpf.Ui.Controls.ContentDialogResult.Primary)
             {
