@@ -32,78 +32,110 @@ namespace Netryoshka.Utils
 
 
 
-        public static JToken? DeserializeAndCombineDuplicates(JsonTextReader reader)
+        /// <summary>
+        /// Deserializes a JSON stream from a JsonTextReader and combines duplicate keys within objects into arrays.
+        /// </summary>
+        /// <param name="reader">The JsonTextReader to read from.</param>
+        /// <returns>A JToken representing the JSON data structure.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the reader is null.</exception>
+        public static JToken DeserializeAndCombineDuplicateKeys(JsonTextReader reader)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
 
-            if (reader.TokenType == JsonToken.None)
+            // Make sure the reader is advanced before starting deserialization
+            if (reader.TokenType == JsonToken.None && !reader.Read())
+                throw new InvalidOperationException("Could not read from JsonTextReader.");
+
+            return reader.TokenType switch
             {
-                if (!reader.Read()) return null;
-            }
-
-            if (reader.TokenType == JsonToken.StartObject)
-            {
-                if (!reader.Read()) return null;
-
-                var obj = new JObject();
-                while (reader.TokenType != JsonToken.EndObject)
-                {
-                    var propName = reader.Value?.ToString();
-                    if (string.IsNullOrEmpty(propName)) return null;
-
-                    if (!reader.Read()) return null;
-
-                    var newValue = DeserializeAndCombineDuplicates(reader);
-                    if (newValue == null) return null;
-
-                    var existingValue = obj[propName];
-                    if (existingValue == null)
-                    {
-                        obj.Add(new JProperty(propName, newValue));
-                    }
-                    else if (existingValue.Type == JTokenType.Array)
-                    {
-                        CombineWithArray(existingValue.Value<JArray>(), newValue);
-                    }
-                    else // Convert existing non-array property nullableDate to an array
-                    {
-                        if (existingValue.Parent is not JProperty prop) return null;
-
-                        var array = new JArray();
-                        prop.Value = array;
-                        array.Add(existingValue);
-                        CombineWithArray(array, newValue);
-                    }
-
-                    if (!reader.Read()) return null;
-                }
-                return obj;
-            }
-
-            if (reader.TokenType == JsonToken.StartArray)
-            {
-                if (!reader.Read()) return null;
-
-                var array = new JArray();
-                while (reader.TokenType != JsonToken.EndArray)
-                {
-                    var newValue = DeserializeAndCombineDuplicates(reader);
-                    if (newValue == null) return null;
-
-                    array.Add(newValue);
-                    if (!reader.Read()) return null;
-                }
-                return array;
-            }
-
-            return new JValue(reader.Value);
+                JsonToken.StartObject => DeserializeObject(reader),
+                JsonToken.StartArray => DeserializeArray(reader),
+                _ => new JValue(reader.Value)
+            };
         }
 
-        // Helper function, also made null-safe
-        private static void CombineWithArray(JArray? array, JToken? newValue)
+        /// <summary>
+        /// Deserialize JSON object from a reader.
+        /// </summary>
+        /// <param name="reader">The JsonTextReader to read from.</param>
+        /// <returns>A JObject.</returns>
+        private static JObject DeserializeObject(JsonTextReader reader)
         {
-            if (array == null || newValue == null) return;
+            if (reader.TokenType != JsonToken.StartObject)
+                throw new ArgumentException("Reader must be at the start of an object", nameof(reader));
 
+            var obj = new JObject();
+            while (true)
+            {
+                if (!reader.Read())
+                    throw new InvalidOperationException("JSON appears to be truncated.");
+
+                if (reader.TokenType == JsonToken.EndObject)
+                    break;
+
+                if (reader.TokenType != JsonToken.PropertyName)
+                    throw new InvalidOperationException("Expected property name but got " + reader.TokenType);
+
+                var propName = reader.Value?.ToString()
+                    ?? throw new InvalidOperationException("Unexpected null property name.");
+
+                if (!reader.Read())
+                    throw new InvalidOperationException("JSON appears to be truncated.");
+
+                var propValue = DeserializeAndCombineDuplicateKeys(reader);
+                CombinePropertyValue(obj, propName, propValue);
+            }
+
+            return obj;
+        }
+
+        /// <summary>
+        /// Deserialize JSON array from a reader.
+        /// </summary>
+        /// <param name="reader">The JsonTextReader to read from.</param>
+        /// <returns>A JArray.</returns>
+        private static JArray DeserializeArray(JsonTextReader reader)
+        {
+            if (reader.TokenType != JsonToken.StartArray)
+                throw new ArgumentException("Reader must be at the start of an array", nameof(reader));
+
+            if (!reader.Read()) throw new InvalidOperationException("JSON appears to be truncated.");
+
+            var array = new JArray();
+            while (reader.TokenType != JsonToken.EndArray)
+            {
+                var newValue = DeserializeAndCombineDuplicateKeys(reader);
+                array.Add(newValue);
+
+                if (!reader.Read()) throw new InvalidOperationException("JSON appears to be truncated.");
+            }
+
+            return array;
+        }
+
+        private static void CombinePropertyValue(JObject obj, string propName, JToken newValue)
+        {
+            var existingValue = obj[propName];
+            if (existingValue == null)
+            {
+                obj.Add(new JProperty(propName, newValue));
+            }
+            else if (existingValue.Type == JTokenType.Array)
+            {
+                var existingArray = existingValue.Value<JArray>()
+                    ?? throw new InvalidOperationException("Expected a JArray but got null.");
+                CombineWithArray(existingArray, newValue);
+            }
+            else if (existingValue.Parent is JProperty prop)
+            {
+                var array = new JArray(existingValue);
+                prop.Value = array;
+                CombineWithArray(array, newValue);
+            }
+        }
+
+        private static void CombineWithArray(JArray array, JToken newValue)
+        {
             if (newValue.Type == JTokenType.Array)
             {
                 foreach (var child in newValue.Children())

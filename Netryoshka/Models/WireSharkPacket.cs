@@ -572,7 +572,7 @@ namespace Netryoshka
                 throw new InvalidOperationException("Expected a JsonTextReader.");
             }
 
-            var jToken = JsonUtil.DeserializeAndCombineDuplicates(jsonTextReader);
+            var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(jsonTextReader);
             var jsonObject = jToken as JObject ?? throw new JsonException("Expected a JSON object.");
 
             return TSharkHttpFactory.CreateFromJson(jsonObject);
