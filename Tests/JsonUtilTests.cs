@@ -2,6 +2,7 @@
 using Netryoshka.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static Netryoshka.Utils.JsonUtil;
 
 namespace Tests
 {
@@ -149,9 +150,42 @@ namespace Tests
             actualDict.Should().BeEquivalentTo(expectedDict);
         }
 
-
     }
 
+    public class AdaptiveJsonDictionaryConverterTests
+    {
+        [Fact]
+        public void ShouldConvertCustomJsonToDictionary()
+        {
+            // Arrange
+            var json = @"{
+                ""key"": ""key1"",
+                ""value"": [""red"", ""orange""],
+                ""key"": ""key2"",
+                ""value"": [""green"", ""grape""]
+            }";
+            var expectedDict = new Dictionary<string, List<string>>
+            {
+                { "key1", new List<string> { "red", "orange" } },
+                { "key2", new List<string> { "green", "grape" } }
+            };
 
+            
+
+            // Act
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new TestConverter());
+            var actualDict = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(json, settings);
+
+            // Assert
+            actualDict.Should().BeEquivalentTo(expectedDict);
+        }
+
+        private class TestConverter : AdaptiveJsonDictionaryConverter<List<string>>
+        {
+            public override string KeyPropertyName => "key";
+            public override string ValuePropertyName => "value";
+        }
+    }
 
 }

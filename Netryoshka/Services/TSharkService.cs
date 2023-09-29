@@ -1,6 +1,5 @@
 ﻿using Netryoshka.Utils;
 using Newtonsoft.Json;
-using PacketDotNet.Lldp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,7 +8,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Netryoshka.Services
 {
@@ -75,7 +73,7 @@ namespace Netryoshka.Services
             var psi = new ProcessStartInfo
             {
                 FileName = TSharkExecutable,
-                Arguments = "-i - -T json", //"-Y http",
+                Arguments = "-i - -T json", //  --no-duplicate-keys
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -130,13 +128,19 @@ namespace Netryoshka.Services
             return json;
         }
 
-       
+        
+
         public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct)
         {
             var json = await SerializePacketsToJsonAsync(packets, ct);
 
-            var jsonList = Util.SplitJsonObjects(json);
-            var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(json) 
+            string jsonWithCombinedKeys = FixForJsonWithDuplicateKeys(json);
+
+            var jsonList = Util.SplitJsonObjects(jsonWithCombinedKeys);
+            //var jsonList = Util.SplitJsonObjects(json);
+
+            var settings = new JsonSerializerSettings { TraceWriter = new JsonUtil.CustomTraceWriter() };
+            var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(jsonWithCombinedKeys, settings)
                 ?? throw new InvalidOperationException("Failed to deserialize json to WireSharkPacket list");
 
             if (packets.Count != jsonList.Count || jsonList.Count != sharkPackets.Count)
@@ -153,7 +157,19 @@ namespace Netryoshka.Services
             return sharkData;
         }
 
-       
+        private static string FixForJsonWithDuplicateKeys(string json)
+        {
+            string jsonWithCombinedKeys;
+            using (var stringReader = new StringReader(json))
+            using (var jsonTextReader = new JsonTextReader(stringReader))
+            {
+                var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(jsonTextReader);
+                jsonWithCombinedKeys = jToken.ToString();
+            }
+
+            return jsonWithCombinedKeys;
+        }
+
 
         public async Task<List<string>> GetTlsHandshakeRandomsAsync(CancellationToken ct)
         {

@@ -7,6 +7,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using static Netryoshka.TSharkHttp;
+using static Netryoshka.TSharkTcp;
+using static Netryoshka.TSharkTls;
+using static Netryoshka.Utils.JsonUtil;
 
 namespace Netryoshka
 {
@@ -45,12 +48,39 @@ namespace Netryoshka
         [JsonProperty("tcp")]
         public TSharkTcp? Tcp { get; set; }
 
+        [JsonProperty("tcp.segments")]  // not sure why this isn't in tcp, but tshark returns it here
+        public TSharkTcpSegments? TcpSegments { get; set; }
+
         [JsonProperty("http")]
         public TSharkHttp? Http { get; set; }
 
+        [JsonProperty("tls")]
+        [JsonConverter(typeof(TlsToArrayConverter))]
+        public List<TSharkTls>? Tls { get; set; }
+
+        [JsonProperty("tls.segments")]
+        [JsonConverter(typeof(TlsSegmentsToArrayConverter))]
+        public List<TSharkTlsSegments>? TlsSegments { get; set; }
+
+        [JsonProperty("http2")]
+        [JsonConverter(typeof(Http2ToArrayConverter))]
+        public List<TSharkHttp2>? Http2 { get; set; }
+
+        [JsonProperty("json")]
+        public TSharkJson? Json { get; set; }
+
         [JsonProperty("data")]
         public TSharkData? Data { get; set; }
+
+        public class TlsToArrayConverter : AdaptiveJsonArrayConverter<TSharkTls>
+        {
+            public override TSharkTls HandleStringToken(string? str) => new() { Tls = str };
+        }
+        public class TlsSegmentsToArrayConverter : AdaptiveJsonArrayConverter<TSharkTlsSegments> { }
+        public class Http2ToArrayConverter : AdaptiveJsonArrayConverter<TSharkHttp2> { }
+
     }
+
 
     public class TSharkFrame
     {
@@ -92,7 +122,6 @@ namespace Netryoshka
         [JsonProperty("frame.protocols")]
         public string? Protocols { get; set; }
     }
-
 
 
     public class TSharkEth
@@ -363,12 +392,11 @@ namespace Netryoshka
         [JsonConverter(typeof(StatusToDescriptionConverter))]
         public string? ChecksumStatus { get; set; }
 
-
         [JsonProperty("tcp.payload")]
         public string? Payload { get; set; }
 
         [JsonProperty("tcp.segments")]
-        public TSharkSegments? Segments { get; set; }
+        public TSharkTcpSegments? Segments { get; set; }
 
         public class TSharkTcpFlags
         {
@@ -413,7 +441,7 @@ namespace Netryoshka
             public bool Fin { get; set; }
         }
 
-        public class TSharkSegments
+        public class TSharkTcpSegments
         {
             [JsonProperty("tcp.segment")]
             public List<int>? Segment { get; set; }
@@ -427,15 +455,6 @@ namespace Netryoshka
             [JsonProperty("tcp.reassembled.data")]
             public string? ReassembledData { get; set; }
         }
-
-        //public static readonly Dictionary<int, string> ChecksumStatusToDescription = new()
-        //{
-        //    { 0, "Bad" },
-        //    { 1, "Good" },
-        //    { 2, "Unverified" },
-        //    { 3, "Not present" },
-        //    { 4, "Illegal" },
-        //};
 
         public static readonly ReadOnlyDictionary<int, string> ChecksumStatusToDescription = new(
             new Dictionary<int, string>
@@ -469,67 +488,15 @@ namespace Netryoshka
                 }
             }
 
-
-            //public override string? ReadJson(JsonReader reader, Type objectType, string? existingValue, bool hasExistingValue, JsonSerializer serializer)
-            //{
-            //    if (int.TryParse(reader.Value?.ToString(), out int key))
-            //    {
-            //        return ChecksumStatusToDescription.TryGetValue(key, out var status) ? status : null;
-            //    }
-            //    return null;
-            //}
+            public override bool CanWrite => false;
 
             public override void WriteJson(JsonWriter writer, string? value, JsonSerializer serializer)
             {
-                writer.WriteValue(value);
-                //throw new NotImplementedException("StatusToDescriptionConverter.WriteJson()");
+                //writer.WriteValue(value);
+                throw new NotImplementedException("StatusToDescriptionConverter.WriteJson()");
             }
         }
     }
-
-   
-
-    //public class FlagsConverter : JsonConverter
-    //{
-    //    public override bool CanConvert(EthType objectType)
-    //    {
-    //        return (objectType == typeof(TSharkTcpFlags));
-    //    }
-
-    //    public override object ReadJson(JsonReader reader, EthType objectType, object? existingValue, JsonSerializer serializer)
-    //    {
-    //        var jsonObject = JObject.Load(reader);
-    //        var flags = new TSharkTcpFlags();
-
-    //        foreach (var property in jsonObject.Properties())
-    //        {
-    //            bool flagValue = property.Value.ToString() == "1" ? true : false;
-
-    //            switch (property.Name)
-    //            {
-    //                case "tcp.flags.res": flags.Res = flagValue; break;
-    //                case "tcp.flags.ae": flags.Ae = flagValue; break;
-    //                case "tcp.flags.cwr": flags.Cwr = flagValue; break;
-    //                case "tcp.flags.ece": flags.Ece = flagValue; break;
-    //                case "tcp.flags.urg": flags.Urg = flagValue; break;
-    //                case "tcp.flags.ack": flags.Ack = flagValue; break;
-    //                case "tcp.flags.push": flags.Push = flagValue; break;
-    //                case "tcp.flags.reset": flags.Reset = flagValue; break;
-    //                case "tcp.flags.syn": flags.Syn = flagValue; break;
-    //                case "tcp.flags.fin": flags.Fin = flagValue; break;
-    //                default: break;
-    //            }
-    //        }
-
-    //        return flags;
-    //    }
-
-    //    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-    //    {
-    //        throw new NotImplementedException();
-    //    }
-    //}
-
 
 
     [JsonConverter(typeof(TSharkHttpConverter))]
@@ -696,14 +663,327 @@ namespace Netryoshka
     }
 
 
+    
+
+    //public class WireSharkPacketConverter : JsonConverter<WireSharkPacket>
+    //{
+    //    public override WireSharkPacket ReadJson(JsonReader reader, Type objectType, WireSharkPacket? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    //    {
+    //        var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(reader);
+
+    //        var wireSharkPacket = new WireSharkPacket
+    //        {
+    //            Source = jToken["_source"]?.ToObject<TSharkSource>()
+    //        };
+    //        return wireSharkPacket;
+    //    }
+
+    //    public override void WriteJson(JsonWriter writer, WireSharkPacket? value, JsonSerializer serializer)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 
 
 
 
     public class TSharkData
     {
-        // Define properties relevant to 'data'
+        [JsonProperty("data.data")]
+        public string? Data { get; set; }
+
+        [JsonProperty("data.len")]
+        public int? Length { get; set; }
+
+        [JsonProperty("data.md5_hash")]
+        public string? Md5Hash { get; set; }
+
+        [JsonProperty("data.text")]
+        public string? Text { get; set; }
+
+        [JsonProperty("data.uncompressed.data")]
+        public string? UncompressedData { get; set; }
+
+        [JsonProperty("data.uncompressed.len")]
+        public int? UncompressedLength { get; set; }
     }
+
+
+    public class TSharkHttp2Converter : JsonConverter<List<TSharkHttp2>>
+    {
+        public override List<TSharkHttp2> ReadJson(JsonReader reader, Type objectType, List<TSharkHttp2>? existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            var jToken = JToken.ReadFrom(reader);
+
+            if (jToken.Type == JTokenType.Array)
+            {
+                return jToken.ToObject<List<TSharkHttp2>>(serializer) ?? new List<TSharkHttp2>();
+            }
+            else if (jToken.Type == JTokenType.Object)
+            {
+                var singleObject = jToken.ToObject<TSharkHttp2>(serializer);
+                return singleObject != null ? new List<TSharkHttp2> { singleObject } : new List<TSharkHttp2>();
+            }
+            else
+            {
+                throw new JsonException($"Unexpected token type for http2: {jToken.Type}");
+            }
+        }
+
+        public override void WriteJson(JsonWriter writer, List<TSharkHttp2>? value, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    
+
+    public class TSharkHttp2
+    {
+        [JsonProperty("http2.stream")]
+        public Http2Stream? Stream { get; set; }
+
+        public class Http2Stream
+        {
+            [JsonProperty("http2.magic")]
+            public string? Magic { get; set; }
+
+            [JsonProperty("http2.type")]
+            public string? Type { get; set; }
+
+            [JsonProperty("http2.flags")]
+            public string? Flags { get; set; }
+
+            [JsonProperty("http2.streamid")]
+            public int? StreamId { get; set; }
+
+            [JsonProperty("http2.header")]
+            public List<TSharkHttp2Header>? Header { get; set; }
+
+            [JsonProperty("http2.request.full_uri")]
+            public string? FullUri { get; set; }
+
+            [JsonProperty("http2.time")] // delta t, but not sure what it's relative to
+            public double? Time { get; set; }
+
+            [JsonProperty("http2.body.fragments")]
+            public Http2BodyFragments? BodyFragments { get; set; }
+
+            [JsonProperty("http2.request_in")]
+            public uint? RequestIn { get; set; }
+
+            public class Http2BodyFragments
+            {
+                [JsonConverter(typeof(IntToArrayConverter))]
+                [JsonProperty("http2.body.fragment")]
+                public List<int>? Fragment { get; set; }
+
+                [JsonProperty("http2.body.reassembled.length")]
+                public int? ReassembledLength { get; set; }
+
+                [JsonProperty("http2.body.reassembled.data")]
+                public string? ReassembledData { get; set; }
+            }
+        }
+
+        public class TSharkHttp2Header
+        {
+            [JsonProperty("http2.header.name")]
+            public string? Name { get; set; }
+
+            [JsonProperty("http2.header.value")]
+            public string? Value { get; set; }
+        }
+    }
+
+    public class IntToArrayConverter : AdaptiveJsonArrayConverter<int> { }
+
+    public class TSharkTls
+    {
+        public string? Tls { get; set; } // sometimes the entire class is just a string
+
+        [JsonConverter(typeof(TlsRecordToArrayConverter))]
+        [JsonProperty("tls.record")]
+        public List<TlsRecord>? Records { get; set; }
+
+        [JsonProperty("tls.alert_message")]
+        public string? AlertMessage { get; set; }
+
+        [JsonProperty("tls.session_id")]
+        public string? SessionId { get; set; }
+
+        public class TlsRecordToArrayConverter : AdaptiveJsonArrayConverter<TlsRecord> { }
+        public class TlsHandshakeToArrayConverter : AdaptiveJsonArrayConverter<TlsHandshake> { }
+        public class StringToHandshakeVersionConverter : StringToEnumConverter<TlsHandshakeVersion> { }
+
+        public enum TlsHandshakeVersion
+        {
+            Unknown = 0,
+            Tls10 = 0x0301,
+            Tls11 = 0x0302,
+            Tls12 = 0x0303,
+            Tls13 = 0x0304
+        }
+
+        public class TlsRecord
+        {
+            [JsonProperty("tls.record.content_type")]
+            public string? ContentType { get; set; }
+
+            [JsonProperty("tls.record.version")]
+            public string? Version { get; set; }
+
+            [JsonProperty("tls.record.length")]
+            public int? Length { get; set; }
+
+            [JsonProperty("tls.record.opaque_type")]
+            public string? OpaqueType { get; set; }
+
+            [JsonProperty("tls.app_data")]
+            public string? AppData { get; set; }
+
+            [JsonProperty("tls.app_data_proto")]
+            public string? AppDataProtocol { get; set; }
+
+            [JsonConverter(typeof(TlsHandshakeToArrayConverter))]
+            [JsonProperty("tls.handshake")]
+            public List<TlsHandshake>? Handshake { get; set; }
+        }
+
+        public class TlsHandshake
+        {
+            [JsonProperty("tls.handshake.type")]
+            public string? HandshakeType { get; set; }
+
+            [JsonConverter(typeof(StringToHandshakeVersionConverter))]
+            [JsonProperty("tls.handshake.version")]
+            public TlsHandshakeVersion HandshakeVersion { get; set; }
+
+            [JsonProperty("tls.handshake.certificates")]
+            public TlsCertificates? HandshakeCertificates { get; set; }
+
+            [JsonProperty("tls.handshake.extensions_server_name")]
+            public string? ExtensionsServerName { get; set; }
+
+            [JsonProperty("tls.handshake.random")]
+            public string? Random { get; set; }
+
+            [JsonProperty("tls.handshake.session_id")]
+            public string? SessionId { get; set; }
+
+            // "tls.handshake.certificates": {
+            //  "tls.handshake.certificate_length": [  ],
+            //  "tls.handshake.certificate": [  ],
+            //  "tls.handshake.certificate_tree": [  ],
+            //  "tls.handshake.extensions_length": [  ],
+            //  "Extension: status_request (len=286)": {  }
+            //}
+            public class TlsCertificates
+            {
+
+            }
+        }
+
+        public class TSharkTlsSegments
+        {
+            [JsonProperty("tls.segment")]
+            public List<int>? SegmentFrameNumbers { get; set; }
+
+            [JsonProperty("tls.segment.count")]
+            public int? SegmentCount { get; set; }
+
+            [JsonProperty("tls.segment.data")]
+            public string? SegmentData { get; set; }
+        }
+    }
+
+
+    
+
+    public class TSharkJson
+    {
+        [JsonProperty("json.object")]
+        [JsonConverter(typeof(JsonObjectToDictionaryConverter))]
+        public Dictionary<string, JsonMemberTree>? Object { get; set; }
+
+        public class JsonMemberTree
+        {
+            [JsonProperty("json.value.string")]
+            public string? ValueString { get; set; }
+
+            [JsonProperty("json.key")]
+            public string? Key { get; set; }
+
+            [JsonProperty("json.path")]
+            public string? Path { get; set; }
+
+            [JsonProperty("json.object")]
+            [JsonConverter(typeof(JsonObjectToDictionaryConverter))]
+            public Dictionary<string, JsonMemberTree>? Object { get; set; }
+        }
+
+        public class JsonObjectToDictionaryConverter : AdaptiveJsonDictionaryConverter<JsonMemberTree>
+        {
+            public override string KeyPropertyName => "json.member";
+            public override string ValuePropertyName => "json.member_tree";
+        }
+    }
+
+
+    //public class TSharkJson
+    //{
+    //    [JsonProperty("json.object")]
+    //    public JsonObject? Object { get; set; }
+
+    //    public class JsonObject
+    //    {
+    //        [JsonProperty("json.member")]
+    //        public string? Member { get; set; }
+
+    //        [JsonProperty("json.member_tree")]
+    //        public JsonMemberTree? MemberTree { get; set; }
+
+    //        [JsonProperty("json.key")]
+    //        public string? Key { get; set; }
+
+    //        [JsonProperty("json.path")]
+    //        public string? Path { get; set; }
+    //    }
+
+    //    public class JsonMemberTree
+    //    {
+    //        [JsonProperty("json.object")]
+    //        public JsonObject? Object { get; set; }
+
+    //        [JsonProperty("json.member")]
+    //        public List<string>? Members { get; set; }
+
+    //        [JsonProperty("json.member_tree")]
+    //        public List<JsonMemberDetails>? MemberDetails { get; set; }
+    //    }
+
+    //    public class JsonMemberDetails
+    //    {
+    //        [JsonProperty("json.path_with_value")]
+    //        public string? PathWithValue { get; set; }
+
+    //        [JsonProperty("json.member_with_value")]
+    //        public string? MemberWithValue { get; set; }
+
+    //        [JsonProperty("json.value.string")]
+    //        public string? ValueString { get; set; }
+
+    //        [JsonProperty("json.value.null")]
+    //        public object? ValueNull { get; set; }
+
+    //        [JsonProperty("json.key")]
+    //        public string? Key { get; set; }
+
+    //        [JsonProperty("json.path")]
+    //        public string? Path { get; set; }
+    //    }
+    //}
+
 
 
 }
