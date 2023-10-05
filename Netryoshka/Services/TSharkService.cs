@@ -1,5 +1,6 @@
 ﻿using Netryoshka.Utils;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -133,14 +134,20 @@ namespace Netryoshka.Services
         public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct)
         {
             var json = await SerializePacketsToJsonAsync(packets, ct);
+            var jsonList = Util.SplitJsonObjects(json);
 
-            string jsonWithCombinedKeys = FixForJsonWithDuplicateKeys(json);
+            var loadSettings = new JsonLoadSettings
+            {
+                DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error
+            };
 
-            var jsonList = Util.SplitJsonObjects(jsonWithCombinedKeys);
-            //var jsonList = Util.SplitJsonObjects(json);
-
-            var settings = new JsonSerializerSettings { TraceWriter = new JsonUtil.CustomTraceWriter() };
-            var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(jsonWithCombinedKeys, settings)
+            var serializerSettings = new JsonSerializerSettings
+            {
+                TraceWriter = new JsonUtil.CustomTraceWriter(),
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+            };
+            var sharkPackets = JsonUtil.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings, loadSettings)
                 ?? throw new InvalidOperationException("Failed to deserialize json to WireSharkPacket list");
 
             if (packets.Count != jsonList.Count || jsonList.Count != sharkPackets.Count)

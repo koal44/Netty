@@ -329,7 +329,7 @@ namespace Netryoshka
         }
     }
 
-
+    [JsonConverter(typeof(DummyConverter))]
     public class TSharkIp
     {
         [JsonProperty("ip.version")]
@@ -353,6 +353,32 @@ namespace Netryoshka
         //public bool FlagsRb => (Convert.ToByte(Flags, 16) & 0x01) != 0;
         //public bool FlagsDf => (Convert.ToByte(Flags, 16) & 0x02) != 0;
         //public bool FlagsMf => (Convert.ToByte(Flags, 16) & 0x04) != 0;
+
+        public class DummyConverter : JsonConverter<TSharkIp>
+        {
+            public override TSharkIp ReadJson(JsonReader reader, Type objectType, TSharkIp existingValue, bool hasExistingValue, JsonSerializer serializer)
+            {
+                var tSharkIp = new TSharkIp();
+
+                var jsonObject = JObject.Load(reader);
+
+                // Manually set each property
+                if (jsonObject.TryGetValue("ip.version", out var jVersion)) tSharkIp.Version = jVersion?.ToString();
+                if (jsonObject.TryGetValue("ip.src", out var jSrc)) tSharkIp.Src = jSrc?.ToString();
+                if (jsonObject.TryGetValue("ip.dst", out var jDst)) tSharkIp.Dst = jDst?.ToString();
+                if (jsonObject.TryGetValue("ip.ttl", out var jTtl)) tSharkIp.Ttl = jTtl?.ToString();
+                if (jsonObject.TryGetValue("ip.proto", out var jProto)) tSharkIp.Proto = jProto?.ToString();
+                if (jsonObject.TryGetValue("ip.flags", out var jFlags)) tSharkIp.Flags = jFlags?.ToString();
+
+                return tSharkIp;
+            }
+
+            public override void WriteJson(JsonWriter writer, TSharkIp value, JsonSerializer serializer)
+            {
+                // Serialization logic here, if needed
+            }
+        }
+
     }
 
 
@@ -898,8 +924,6 @@ namespace Netryoshka
     }
 
 
-    
-
     public class TSharkJson
     {
         [JsonProperty("json.object")]
@@ -910,6 +934,9 @@ namespace Netryoshka
         {
             [JsonProperty("json.value.string")]
             public string? ValueString { get; set; }
+
+            [JsonProperty("json.value.null")]
+            public object? ValueNull { get; set; }
 
             [JsonProperty("json.key")]
             public string? Key { get; set; }

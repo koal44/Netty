@@ -4,12 +4,25 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Netryoshka.Utils
 {
     public static class JsonUtil
     {
+
+        public static T? DeserializeObject<T>(string json, JsonSerializerSettings serializerSettings, JsonLoadSettings loadSettings)
+        {
+            JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(serializerSettings);
+
+            using JsonTextReader reader = new(new StringReader(json));
+            var jtoken = JToken.ReadFrom(reader, loadSettings);
+            return jtoken.ToObject<T>(jsonSerializer);
+        }
+
+
         public static bool JObjToBool(JToken? token)
         {
             string? value = token?.ToString();
@@ -393,6 +406,46 @@ namespace Netryoshka.Utils
                 Debug.WriteLine(string.Join(", ", components));
             }
         }
+
+
+        public class CustomContractResolver : DefaultContractResolver
+        {
+            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+            {
+                var prop = base.CreateProperty(member, memberSerialization);
+
+                // Ignore properties that are marked with the [JsonIgnore] attribute
+                if (member.GetCustomAttributes(typeof(JsonIgnoreAttribute), true).Any())
+                {
+                    prop.Ignored = true;
+                }
+
+                return prop;
+            }
+        }
+
+        public class NoDuplicateKeysContractResolver : DefaultContractResolver
+        {
+            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+            {
+                var property = base.CreateProperty(member, memberSerialization);
+
+                Predicate<object> originalShouldSerialize = property.ShouldSerialize;
+                property.ShouldSerialize = obj =>
+                {
+                    bool shouldSerialize = originalShouldSerialize == null || originalShouldSerialize(obj);
+                    if (shouldSerialize)
+                    {
+                        // Add your duplicate check logic here. 
+                        // Throw an exception if the condition for duplicates is met.
+                    }
+                    return shouldSerialize;
+                };
+
+                return property;
+            }
+        }
+
 
     }
 }
