@@ -10,9 +10,12 @@ using static Netryoshka.TSharkHttp;
 using static Netryoshka.TSharkTcp;
 using static Netryoshka.TSharkTls;
 using static Netryoshka.Utils.JsonUtil;
+using static Netryoshka.TSharkLayers;
+using static Netryoshka.TSharkIp;
 
 namespace Netryoshka
 {
+    [JsonConverter(typeof(WireSharkPacketConverter))]
     public class WireSharkPacket
     {
         //[JsonProperty("_index")]
@@ -26,14 +29,20 @@ namespace Netryoshka
 
         [JsonProperty("_source")]
         public TSharkSource? Source { get; set; }
+
+        public class WireSharkPacketConverter : ErrorOnDupesConverter<WireSharkPacket> { }
     }
 
+    [JsonConverter(typeof(TSharkSourceConverter))]
     public class TSharkSource
     {
         [JsonProperty("layers")]
         public TSharkLayers? Layers { get; set; }
+
+        public class TSharkSourceConverter : ErrorOnDupesConverter<TSharkSource> { }
     }
 
+    [JsonConverter(typeof(TSharkLayersConverter))]
     public class TSharkLayers
     {
         [JsonProperty("frame")]
@@ -55,15 +64,15 @@ namespace Netryoshka
         public TSharkHttp? Http { get; set; }
 
         [JsonProperty("tls")]
-        [JsonConverter(typeof(TlsToArrayConverter))]
+        [JsonConverter(typeof(TlsToListConverter))]
         public List<TSharkTls>? Tls { get; set; }
 
         [JsonProperty("tls.segments")]
-        [JsonConverter(typeof(TlsSegmentsToArrayConverter))]
+        [JsonConverter(typeof(TlsSegmentsToListConverter))]
         public List<TSharkTlsSegments>? TlsSegments { get; set; }
 
         [JsonProperty("http2")]
-        [JsonConverter(typeof(Http2ToArrayConverter))]
+        [JsonConverter(typeof(Http2ToListConverter))]
         public List<TSharkHttp2>? Http2 { get; set; }
 
         [JsonProperty("json")]
@@ -72,16 +81,17 @@ namespace Netryoshka
         [JsonProperty("data")]
         public TSharkData? Data { get; set; }
 
-        public class TlsToArrayConverter : AdaptiveJsonArrayConverter<TSharkTls>
+        public class TlsToListConverter : SingleToListConverter<TSharkTls>
         {
             public override TSharkTls HandleStringToken(string? str) => new() { Tls = str };
         }
-        public class TlsSegmentsToArrayConverter : AdaptiveJsonArrayConverter<TSharkTlsSegments> { }
-        public class Http2ToArrayConverter : AdaptiveJsonArrayConverter<TSharkHttp2> { }
-
+        public class TlsSegmentsToListConverter : SingleToListConverter<TSharkTlsSegments> { }
+        public class Http2ToListConverter : SingleToListConverter<TSharkHttp2> { }
+        public class TSharkLayersConverter : ErrorOnDupesConverter<TSharkLayers> { }
     }
 
 
+    [JsonConverter(typeof(TSharkFrameConverter))]
     public class TSharkFrame
     {
         // Section number within the packet capture.
@@ -121,9 +131,12 @@ namespace Netryoshka
         // List of protocols involved in the frame.
         [JsonProperty("frame.protocols")]
         public string? Protocols { get; set; }
+
+        public class TSharkFrameConverter : ErrorOnDupesConverter<TSharkFrame> { }
     }
 
 
+    [JsonConverter(typeof(TSharkEthConverter))]
     public class TSharkEth
     {
         [JsonProperty("eth.dst")]
@@ -144,20 +157,26 @@ namespace Netryoshka
         public string? EthTypeVal { get; set; }
 
 
+        [JsonConverter(typeof(EthernetDstTreeConverter))]
         public class EthernetDstTree
         {
             [JsonProperty("eth.dst.oui_resolved")]
             public string? DstOuiResolved { get; set; }
+
+            public class EthernetDstTreeConverter : ErrorOnDupesConverter<EthernetDstTree> { }
         }
 
+        [JsonConverter(typeof(EthernetSrcTreeConverter))]
         public class EthernetSrcTree
         {
             [JsonProperty("eth.src.oui_resolved")]
             public string? SrcOuiResolved { get; set; }
+
+            public class EthernetSrcTreeConverter : ErrorOnDupesConverter<EthernetSrcTree> { }
         }
 
 
-        public static readonly Dictionary<int, string> EthTypeToProtocol = new()
+        public static readonly Dictionary<int, string> EthTypeToProtocolMap = new()
         {
             { 0x0000, "ETHERTYPE_UNK" },
             { 0x0600, "XNS Internet Datagram Protocol" },
@@ -183,7 +202,7 @@ namespace Netryoshka
             { 0x3E3F, "EPL_V1" },
             { 0x4742, "ETHERTYPE_C15_CH" },
             { 0x6000, "DEC proto" },
-            { 0x6001, "DEC DNA Dump/Load" },
+            { 0x6001, "DEC DNA Dump/JObjectLoad" },
             { 0x6002, "DEC DNA Remote Console" },
             { 0x6003, "DEC DNA Routing" },
             { 0x6004, "DEC LAT" },
@@ -318,7 +337,7 @@ namespace Netryoshka
         internal void SetEthTypeVal(StreamingContext context)
         {
             int? ethyTypeNum = !string.IsNullOrEmpty(EthType) ? Convert.ToInt32(EthType, 16) : null;
-            if (ethyTypeNum.HasValue && EthTypeToProtocol.TryGetValue(ethyTypeNum.Value, out var protocol))
+            if (ethyTypeNum.HasValue && EthTypeToProtocolMap.TryGetValue(ethyTypeNum.Value, out var protocol))
             {
                 EthTypeVal = protocol;
             }
@@ -327,9 +346,11 @@ namespace Netryoshka
                 EthTypeVal = null;
             }
         }
+
+        public class TSharkEthConverter : ErrorOnDupesConverter<TSharkEth> { }
     }
 
-    [JsonConverter(typeof(DummyConverter))]
+    [JsonConverter(typeof(TSharkIpConverter))]
     public class TSharkIp
     {
         [JsonProperty("ip.version")]
@@ -350,38 +371,16 @@ namespace Netryoshka
         [JsonProperty("ip.flags")]
         public string? Flags { get; set; }
 
-        //public bool FlagsRb => (Convert.ToByte(Flags, 16) & 0x01) != 0;
-        //public bool FlagsDf => (Convert.ToByte(Flags, 16) & 0x02) != 0;
-        //public bool FlagsMf => (Convert.ToByte(Flags, 16) & 0x04) != 0;
+        private byte FlagsByte => string.IsNullOrEmpty(Flags) ? (byte)0 : Convert.ToByte(Flags, 16);
+        public bool FlagsRb => (FlagsByte & 0x01) != 0;
+        public bool FlagsDf => (FlagsByte & 0x02) != 0;
+        public bool FlagsMf => (FlagsByte & 0x04) != 0;
 
-        public class DummyConverter : JsonConverter<TSharkIp>
-        {
-            public override TSharkIp ReadJson(JsonReader reader, Type objectType, TSharkIp existingValue, bool hasExistingValue, JsonSerializer serializer)
-            {
-                var tSharkIp = new TSharkIp();
-
-                var jsonObject = JObject.Load(reader);
-
-                // Manually set each property
-                if (jsonObject.TryGetValue("ip.version", out var jVersion)) tSharkIp.Version = jVersion?.ToString();
-                if (jsonObject.TryGetValue("ip.src", out var jSrc)) tSharkIp.Src = jSrc?.ToString();
-                if (jsonObject.TryGetValue("ip.dst", out var jDst)) tSharkIp.Dst = jDst?.ToString();
-                if (jsonObject.TryGetValue("ip.ttl", out var jTtl)) tSharkIp.Ttl = jTtl?.ToString();
-                if (jsonObject.TryGetValue("ip.proto", out var jProto)) tSharkIp.Proto = jProto?.ToString();
-                if (jsonObject.TryGetValue("ip.flags", out var jFlags)) tSharkIp.Flags = jFlags?.ToString();
-
-                return tSharkIp;
-            }
-
-            public override void WriteJson(JsonWriter writer, TSharkIp value, JsonSerializer serializer)
-            {
-                // Serialization logic here, if needed
-            }
-        }
-
+        public class TSharkIpConverter : ErrorOnDupesConverter<TSharkIp> { }
     }
 
 
+    [JsonConverter(typeof(TSharkTcpConverter))]
     public class TSharkTcp
     {
         [JsonProperty("tcp.srcport")]
@@ -424,6 +423,9 @@ namespace Netryoshka
         [JsonProperty("tcp.segments")]
         public TSharkTcpSegments? Segments { get; set; }
 
+        public class TSharkTcpConverter : ErrorOnDupesConverter<TSharkTcp> { }
+
+        [JsonConverter(typeof(TSharkTcpFlagsConverter))]
         public class TSharkTcpFlags
         {
             [JsonProperty("tcp.flags.res")]
@@ -465,11 +467,15 @@ namespace Netryoshka
             [JsonProperty("tcp.flags.fin")]
             [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
             public bool Fin { get; set; }
+
+            public class TSharkTcpFlagsConverter : ErrorOnDupesConverter<TSharkTcpFlags> { }
         }
 
+        [JsonConverter(typeof(TSharkTcpSegmentsConverter))]
         public class TSharkTcpSegments
         {
             [JsonProperty("tcp.segment")]
+            [JsonConverter(typeof(IntToListConverter))]
             public List<int>? Segment { get; set; }
 
             [JsonProperty("tcp.segment.count")]
@@ -480,6 +486,8 @@ namespace Netryoshka
 
             [JsonProperty("tcp.reassembled.data")]
             public string? ReassembledData { get; set; }
+
+            public class TSharkTcpSegmentsConverter : ErrorOnDupesConverter<TSharkTcpSegments> { }
         }
 
         public static readonly ReadOnlyDictionary<int, string> ChecksumStatusToDescription = new(
@@ -800,7 +808,7 @@ namespace Netryoshka
 
             public class Http2BodyFragments
             {
-                [JsonConverter(typeof(IntToArrayConverter))]
+                [JsonConverter(typeof(IntToListConverter))]
                 [JsonProperty("http2.body.fragment")]
                 public List<int>? Fragment { get; set; }
 
@@ -822,13 +830,11 @@ namespace Netryoshka
         }
     }
 
-    public class IntToArrayConverter : AdaptiveJsonArrayConverter<int> { }
-
     public class TSharkTls
     {
         public string? Tls { get; set; } // sometimes the entire class is just a string
 
-        [JsonConverter(typeof(TlsRecordToArrayConverter))]
+        [JsonConverter(typeof(TlsRecordToListConverter))]
         [JsonProperty("tls.record")]
         public List<TlsRecord>? Records { get; set; }
 
@@ -838,8 +844,8 @@ namespace Netryoshka
         [JsonProperty("tls.session_id")]
         public string? SessionId { get; set; }
 
-        public class TlsRecordToArrayConverter : AdaptiveJsonArrayConverter<TlsRecord> { }
-        public class TlsHandshakeToArrayConverter : AdaptiveJsonArrayConverter<TlsHandshake> { }
+        public class TlsRecordToListConverter : SingleToListConverter<TlsRecord> { }
+        public class TlsHandshakeToListConverter : SingleToListConverter<TlsHandshake> { }
         public class StringToHandshakeVersionConverter : StringToEnumConverter<TlsHandshakeVersion> { }
 
         public enum TlsHandshakeVersion
@@ -871,7 +877,7 @@ namespace Netryoshka
             [JsonProperty("tls.app_data_proto")]
             public string? AppDataProtocol { get; set; }
 
-            [JsonConverter(typeof(TlsHandshakeToArrayConverter))]
+            [JsonConverter(typeof(TlsHandshakeToListConverter))]
             [JsonProperty("tls.handshake")]
             public List<TlsHandshake>? Handshake { get; set; }
         }
@@ -949,68 +955,11 @@ namespace Netryoshka
             public Dictionary<string, JsonMemberTree>? Object { get; set; }
         }
 
-        public class JsonObjectToDictionaryConverter : AdaptiveJsonDictionaryConverter<JsonMemberTree>
+        public class JsonObjectToDictionaryConverter : KeyedPairToDictConverter<JsonMemberTree>
         {
             public override string KeyPropertyName => "json.member";
             public override string ValuePropertyName => "json.member_tree";
         }
     }
-
-
-    //public class TSharkJson
-    //{
-    //    [JsonProperty("json.object")]
-    //    public JsonObject? Object { get; set; }
-
-    //    public class JsonObject
-    //    {
-    //        [JsonProperty("json.member")]
-    //        public string? Member { get; set; }
-
-    //        [JsonProperty("json.member_tree")]
-    //        public JsonMemberTree? MemberTree { get; set; }
-
-    //        [JsonProperty("json.key")]
-    //        public string? Key { get; set; }
-
-    //        [JsonProperty("json.path")]
-    //        public string? Path { get; set; }
-    //    }
-
-    //    public class JsonMemberTree
-    //    {
-    //        [JsonProperty("json.object")]
-    //        public JsonObject? Object { get; set; }
-
-    //        [JsonProperty("json.member")]
-    //        public List<string>? Members { get; set; }
-
-    //        [JsonProperty("json.member_tree")]
-    //        public List<JsonMemberDetails>? MemberDetails { get; set; }
-    //    }
-
-    //    public class JsonMemberDetails
-    //    {
-    //        [JsonProperty("json.path_with_value")]
-    //        public string? PathWithValue { get; set; }
-
-    //        [JsonProperty("json.member_with_value")]
-    //        public string? MemberWithValue { get; set; }
-
-    //        [JsonProperty("json.value.string")]
-    //        public string? ValueString { get; set; }
-
-    //        [JsonProperty("json.value.null")]
-    //        public object? ValueNull { get; set; }
-
-    //        [JsonProperty("json.key")]
-    //        public string? Key { get; set; }
-
-    //        [JsonProperty("json.path")]
-    //        public string? Path { get; set; }
-    //    }
-    //}
-
-
 
 }

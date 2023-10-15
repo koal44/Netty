@@ -114,6 +114,16 @@ namespace Netryoshka.Utils
             return (id: "", accessKey: "");
         }
 
+        // from json.net library
+        public static char IntToHex(int n)
+        {
+            if (n <= 9)
+            {
+                return (char)(n + 48);
+            }
+
+            return (char)((n - 10) + 97);
+        }
 
     }
 }

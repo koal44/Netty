@@ -138,7 +138,7 @@ namespace Netryoshka.Services
 
             var loadSettings = new JsonLoadSettings
             {
-                DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error
+                DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Ignore,
             };
 
             var serializerSettings = new JsonSerializerSettings
@@ -147,7 +147,9 @@ namespace Netryoshka.Services
                 NullValueHandling = NullValueHandling.Ignore,
                 MissingMemberHandling = MissingMemberHandling.Ignore,
             };
-            var sharkPackets = JsonUtil.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings, loadSettings)
+
+            //var sharkPackets = JsonUtil.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings, loadSettings)
+            var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings)
                 ?? throw new InvalidOperationException("Failed to deserialize json to WireSharkPacket list");
 
             if (packets.Count != jsonList.Count || jsonList.Count != sharkPackets.Count)
@@ -164,18 +166,18 @@ namespace Netryoshka.Services
             return sharkData;
         }
 
-        private static string FixForJsonWithDuplicateKeys(string json)
-        {
-            string jsonWithCombinedKeys;
-            using (var stringReader = new StringReader(json))
-            using (var jsonTextReader = new JsonTextReader(stringReader))
-            {
-                var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(jsonTextReader);
-                jsonWithCombinedKeys = jToken.ToString();
-            }
+        //private static string FixForJsonWithDuplicateKeys(string json)
+        //{
+        //    string jsonWithCombinedKeys;
+        //    using (var stringReader = new StringReader(json))
+        //    using (var jsonTextReader = new JsonTextReader(stringReader))
+        //    {
+        //        var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(jsonTextReader);
+        //        jsonWithCombinedKeys = jToken.ToString();
+        //    }
 
-            return jsonWithCombinedKeys;
-        }
+        //    return jsonWithCombinedKeys;
+        //}
 
 
         public async Task<List<string>> GetTlsHandshakeRandomsAsync(CancellationToken ct)

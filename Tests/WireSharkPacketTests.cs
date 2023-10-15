@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using Netryoshka;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using static Netryoshka.Utils.JsonUtil;
 
 namespace Tests
 {
@@ -8,7 +10,7 @@ namespace Tests
     {
         public class TSharkJsonTests
         {
-            private string _json = /*lang=json,strict*/ @"{
+            private readonly string _json = /*lang=json,strict*/ @"{
                 ""json.object"": {
                 ""json.member"": ""detail"",
                 ""json.member_tree"": {
@@ -51,6 +53,7 @@ namespace Tests
                 }
                 }
             }";
+
             [Fact]
             public void ShouldDeserializeJsonObjectIntoDictionary()
             {
@@ -113,11 +116,72 @@ namespace Tests
         [Fact]
         public void ShouldUseCustomConverter()
         {
-            var deserializedObject = JsonConvert.DeserializeObject<TSharkIp>(_json);
+            var obj = JsonConvert.DeserializeObject<TSharkIp>(_json);
 
-            // This test will fail but you should be able to hit the breakpoint in DummyConverter
-            deserializedObject.Should().NotBeNull();
-            deserializedObject.Version.Should().Be("5"); // Deliberate failure
+            obj.Should().NotBeNull();
+            obj!.Version.Should().Be("4");
+            obj.Src.Should().Be("192.168.0.110");
+            obj.Dst.Should().Be("1.1.1.1");
+            obj.Ttl.Should().Be("64");
+            obj.Proto.Should().Be("6");
+            obj.Flags.Should().Be("0x00");
         }
     }
+
+
+    public class TSharkTcpTests
+    {
+        private readonly string _json = @"{
+            ""tcp.srcport"": ""12345"",
+            ""tcp.dstport"": ""443"",
+            ""tcp.port"": ""443"",
+            ""tcp.stream"": ""0"",
+            ""tcp.len"": ""0"",
+            ""tcp.seq"": ""0"",
+            ""tcp.nxtseq"": ""0"",
+            ""tcp.ack"": ""0"",
+            ""tcp.hdr_len"": ""20"",
+            ""tcp.flags"": ""0x00000002"",
+            ""tcp.flags_tree"": {
+              ""tcp.flags.res"": ""0"",
+              ""tcp.flags.ns"": ""0"",
+              ""tcp.flags.cwr"": ""0"",
+              ""tcp.flags.ecn"": ""0"",
+              ""tcp.flags.urg"": ""0"",
+              ""tcp.flags.ack"": ""1"",
+              ""tcp.flags.push"": ""0"",
+              ""tcp.flags.reset"": ""0"",
+              ""tcp.flags.syn"": ""0"",
+              ""tcp.flags.fin"": ""0""
+            },
+            ""tcp.window_size"": ""65535"",
+            ""tcp.checksum"": ""0x0000"",
+            ""tcp.checksum.status"": ""2"",
+            ""tcp.urgent_pointer"": ""0"",
+            ""tcp.options"": ""(none)"",
+            ""tcp.analysis"": {
+              ""tcp.analysis.bytes_in_flight"": ""0"",
+              ""tcp.analysis.push_bytes_sent"": ""0"",
+              ""tcp.analysis.retransmission"": ""0"",
+              ""tcp.analysis.duplicate_ack"": ""0"",
+              ""tcp.analysis.out_of_order"": ""0"",
+              ""tcp.analysis.window_full"": ""0"",
+              ""tcp.analysis.window_update"": ""0"",
+              ""tcp.analysis.ack_lost_segment"": ""0"",
+              ""tcp.analysis.fast_retransmission"": ""0"",
+              ""tcp.analysis.spurious_retransmission"": ""0"",
+              ""tcp.analysis.bytes_retransmitted"": ""0"",
+              ""tcp.analysis.dup_ack"": ""0"",
+              ""tcp.analysis.reused_ports"": ""0"",
+              ""tcp.analysis.keep_alive"": ""0"",
+              ""tcp.analysis.out_of_order_bytes"": ""0"",
+              ""tcp.analysis.paws_update"": ""0"",
+              ""tcp.analysis.window_shrink"": ""0"",
+              ""tcp.analysis.window_expand"": ""0"",
+              ""tcp.analysis.missed_segment"": ""0"",
+              ""tcp.analysis.fast_retransmission_ack"": ""0"",
+              """;
+    }
+
+
 }
