@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Netryoshka.Json;
 using Netryoshka.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,9 +10,6 @@ using System.Runtime.Serialization;
 using static Netryoshka.TSharkHttp;
 using static Netryoshka.TSharkTcp;
 using static Netryoshka.TSharkTls;
-using static Netryoshka.Utils.JsonUtil;
-using static Netryoshka.TSharkLayers;
-using static Netryoshka.TSharkIp;
 
 namespace Netryoshka
 {
@@ -104,7 +102,7 @@ namespace Netryoshka
 
         // Time of frame capture in epoch seconds.
         [JsonProperty("frame.time_epoch")]
-        [JsonConverter(typeof(JsonUtil.EpochToDateTimeConverter))]
+        [JsonConverter(typeof(EpochToDateTimeConverter))]
         public DateTime? TimeEpoch { get; set; }
 
         // Time between this and the previous frame in seconds.
@@ -125,7 +123,7 @@ namespace Netryoshka
 
         // Whether the frame is ignored.
         [JsonProperty("frame.ignored")]
-        [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+        [JsonConverter(typeof(BitToBoolConverter))]
         public bool? Ignored { get; set; }
 
         // List of protocols involved in the frame.
@@ -372,9 +370,9 @@ namespace Netryoshka
         public string? Flags { get; set; }
 
         private byte FlagsByte => string.IsNullOrEmpty(Flags) ? (byte)0 : Convert.ToByte(Flags, 16);
-        public bool FlagsRb => (FlagsByte & 0x01) != 0;
-        public bool FlagsDf => (FlagsByte & 0x02) != 0;
-        public bool FlagsMf => (FlagsByte & 0x04) != 0;
+        //public bool FlagsRb => (FlagsByte & 0x01) != 0;
+        //public bool FlagsDf => (FlagsByte & 0x02) != 0;
+        //public bool FlagsMf => (FlagsByte & 0x04) != 0;
 
         public class TSharkIpConverter : ErrorOnDupesConverter<TSharkIp> { }
     }
@@ -429,43 +427,43 @@ namespace Netryoshka
         public class TSharkTcpFlags
         {
             [JsonProperty("tcp.flags.res")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Res { get; set; }
 
             [JsonProperty("tcp.flags.ae")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Ae { get; set; }
 
             [JsonProperty("tcp.flags.cwr")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Cwr { get; set; }
 
             [JsonProperty("tcp.flags.ece")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Ece { get; set; }
 
             [JsonProperty("tcp.flags.urg")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Urg { get; set; }
 
             [JsonProperty("tcp.flags.ack")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Ack { get; set; }
 
             [JsonProperty("tcp.flags.push")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Push { get; set; }
 
             [JsonProperty("tcp.flags.reset")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Reset { get; set; }
 
             [JsonProperty("tcp.flags.syn")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Syn { get; set; }
 
             [JsonProperty("tcp.flags.fin")]
-            [JsonConverter(typeof(JsonUtil.BitToBoolConverter))]
+            [JsonConverter(typeof(BitToBoolConverter))]
             public bool Fin { get; set; }
 
             public class TSharkTcpFlagsConverter : ErrorOnDupesConverter<TSharkTcpFlags> { }
@@ -490,7 +488,7 @@ namespace Netryoshka
             public class TSharkTcpSegmentsConverter : ErrorOnDupesConverter<TSharkTcpSegments> { }
         }
 
-        public static readonly ReadOnlyDictionary<int, string> ChecksumStatusToDescription = new(
+        private static readonly ReadOnlyDictionary<int, string> ChecksumStatusToDescriptionMap = new(
             new Dictionary<int, string>
             {
                 { 0, "Bad" },
@@ -501,7 +499,7 @@ namespace Netryoshka
             }
         );
 
-        public class StatusToDescriptionConverter : JsonConverter<string>
+        private class StatusToDescriptionConverter : JsonConverter<string>
         {
             public override string? ReadJson(JsonReader reader, Type objectType, string? existingValue, bool hasExistingValue, JsonSerializer serializer)
             {
@@ -510,7 +508,7 @@ namespace Netryoshka
                 try
                 {
                     int key = int.Parse(reader.Value.ToString()!);
-                    return ChecksumStatusToDescription[key];
+                    return ChecksumStatusToDescriptionMap[key];
                 }
                 catch (FormatException)
                 {
@@ -573,7 +571,7 @@ namespace Netryoshka
                 throw new InvalidOperationException("Expected a JsonTextReader.");
             }
 
-            var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(jsonTextReader);
+            var jToken = JsonUtils.DeserializeAndCombineDuplicateKeys(jsonTextReader);
             var jsonObject = jToken as JObject ?? throw new JsonException("Expected a JSON object.");
 
             return TSharkHttpFactory.CreateFromJson(jsonObject);
@@ -666,59 +664,35 @@ namespace Netryoshka
 
         private static TSharkRequest? CreateRequest(JObject jsonObject)
         {
-            return JsonUtil.JObjToBool(jsonObject["http.request"])
+            return JsonUtils.JObjToBool(jsonObject["http.request"])
                 ? new TSharkRequest()
                 {
-                    RequestNumber = JsonUtil.JObjToValue<uint>(jsonObject["http.request_number"]),
-                    FullUri = JsonUtil.JObjToString(jsonObject["http.request.full_uri"]),
-                    PrevRequestIn = JsonUtil.JObjToValue<uint>(jsonObject["http.prev_request_in"]),
-                    ResponseIn = JsonUtil.JObjToValue<uint>(jsonObject["http.response_in"]),
+                    RequestNumber = JsonUtils.JObjToValue<uint>(jsonObject["http.request_number"]),
+                    FullUri = JsonUtils.JObjToString(jsonObject["http.request.full_uri"]),
+                    PrevRequestIn = JsonUtils.JObjToValue<uint>(jsonObject["http.prev_request_in"]),
+                    ResponseIn = JsonUtils.JObjToValue<uint>(jsonObject["http.response_in"]),
                 }
                 : null;
         }
 
         private static TSharkResponse? CreateResponse(JObject jsonObject)
         {
-            return JsonUtil.JObjToBool(jsonObject["http.response"])
+            return JsonUtils.JObjToBool(jsonObject["http.response"])
                 ? new TSharkResponse()
                 {
-                    ContentLength = JsonUtil.JObjToValue<ulong>(jsonObject["http.content_length_header"]),
-                    ResponseNumber = JsonUtil.JObjToValue<uint>(jsonObject["http.response_number"]),
-                    Time = JsonUtil.JObjToValue<double>(jsonObject["http.time"]),
-                    RequestIn = JsonUtil.JObjToValue<uint>(jsonObject["http.request_in"]),
-                    PrevRequestIn = JsonUtil.JObjToValue<uint>(jsonObject["http.prev_request_in"]),
-                    PrevResponseIn = JsonUtil.JObjToValue<uint>(jsonObject["http.prev_response_in"]),
-                    ResponseForUri = JsonUtil.JObjToString(jsonObject["http.response_for.uri"]),
-                    FileData = JsonUtil.JObjToString(jsonObject["http.file_data"]),
+                    ContentLength = JsonUtils.JObjToValue<ulong>(jsonObject["http.content_length_header"]),
+                    ResponseNumber = JsonUtils.JObjToValue<uint>(jsonObject["http.response_number"]),
+                    Time = JsonUtils.JObjToValue<double>(jsonObject["http.time"]),
+                    RequestIn = JsonUtils.JObjToValue<uint>(jsonObject["http.request_in"]),
+                    PrevRequestIn = JsonUtils.JObjToValue<uint>(jsonObject["http.prev_request_in"]),
+                    PrevResponseIn = JsonUtils.JObjToValue<uint>(jsonObject["http.prev_response_in"]),
+                    ResponseForUri = JsonUtils.JObjToString(jsonObject["http.response_for.uri"]),
+                    FileData = JsonUtils.JObjToString(jsonObject["http.file_data"]),
                 }
                 : null;
         }
 
     }
-
-
-    
-
-    //public class WireSharkPacketConverter : JsonConverter<WireSharkPacket>
-    //{
-    //    public override WireSharkPacket ReadJson(JsonReader reader, Type objectType, WireSharkPacket? existingValue, bool hasExistingValue, JsonSerializer serializer)
-    //    {
-    //        var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(reader);
-
-    //        var wireSharkPacket = new WireSharkPacket
-    //        {
-    //            Source = jToken["_source"]?.ToObject<TSharkSource>()
-    //        };
-    //        return wireSharkPacket;
-    //    }
-
-    //    public override void WriteJson(JsonWriter writer, WireSharkPacket? value, JsonSerializer serializer)
-    //    {
-    //        throw new NotImplementedException();
-    //    }
-    //}
-
-
 
 
     public class TSharkData

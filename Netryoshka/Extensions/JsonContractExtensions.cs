@@ -1,8 +1,5 @@
-﻿using Netryoshka.Utils;
-using Newtonsoft.Json.Serialization;
-using System;
+﻿using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
-using static Netryoshka.Utils.JsonUtil;
 
 namespace Netryoshka
 {
@@ -33,25 +30,7 @@ namespace Netryoshka
             return true;
         }
 
-        public static bool IsNullable(this JsonContract contract)
-        {
-            return ReflectionUtils.IsNullable(contract.UnderlyingType);
-        }
 
-        public static bool IsConvertable(this JsonContract contract)
-        {
-            return typeof(IConvertible).IsAssignableFrom(contract.CreatedType);
-        }
-
-        public static bool IsEnum(this JsonContract contract)
-        {
-            return contract.CreatedType.IsEnum;
-        }
-
-        public static PrimitiveTypeCode GetTypeCode(this JsonContract contract)
-        {
-            return JsonUtil.GetTypeCode(contract.UnderlyingType);
-        }
     }
 
 }

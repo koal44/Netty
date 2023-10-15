@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
+using Netryoshka.Json;
 using Netryoshka.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static Netryoshka.Utils.JsonUtil;
 
 namespace Tests
 {
@@ -19,7 +19,7 @@ namespace Tests
             using var reader = new JsonTextReader(new StringReader(json));
 
             // Act
-            var result = JsonUtil.DeserializeAndCombineDuplicateKeys(reader);
+            var result = JsonUtils.DeserializeAndCombineDuplicateKeys(reader);
 
             // Assert
             result.Should().NotBeNull();
@@ -50,7 +50,7 @@ namespace Tests
             using var reader = new JsonTextReader(new StringReader(json));
 
             // Act
-            var result = JsonUtil.DeserializeAndCombineDuplicateKeys(reader);
+            var result = JsonUtils.DeserializeAndCombineDuplicateKeys(reader);
 
             // Assert
             var jObject = result.Should().BeOfType<JObject>().Subject;
@@ -76,7 +76,7 @@ namespace Tests
             using var reader = new JsonTextReader(new StringReader(json));
 
             // Act
-            var result = JsonUtil.DeserializeAndCombineDuplicateKeys(reader);
+            var result = JsonUtils.DeserializeAndCombineDuplicateKeys(reader);
 
             // Assert
             result.Should().BeOfType<JObject>();
@@ -98,7 +98,7 @@ namespace Tests
             using var reader = new JsonTextReader(new StringReader(json));
 
             // Act
-            var result = JsonUtil.DeserializeAndCombineDuplicateKeys(reader);
+            var result = JsonUtils.DeserializeAndCombineDuplicateKeys(reader);
 
             // Assert
             var jObject = (JObject)result;
@@ -130,7 +130,7 @@ namespace Tests
             using var reader = new JsonTextReader(new StringReader(json));
 
             // Act
-            var result = JsonUtil.DeserializeAndCombineDuplicateKeys(reader);
+            var result = JsonUtils.DeserializeAndCombineDuplicateKeys(reader);
 
             // Assert
             var jObject = (JObject)result;
@@ -161,7 +161,7 @@ namespace Tests
             public List<int>? Property3List { get; set; }
         }
 
-        private readonly JsonSerializerSettings _settings = new JsonSerializerSettings
+        private readonly JsonSerializerSettings _settings = new()
         {
             Converters = new List<JsonConverter> { new IntToListConverter() }
         };

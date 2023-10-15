@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
 using Netryoshka;
 using Newtonsoft.Json;
-using System.Runtime.Serialization;
-using static Netryoshka.Utils.JsonUtil;
 
 namespace Tests
 {

@@ -1,4 +1,5 @@
-﻿using Netryoshka.Utils;
+﻿using Netryoshka.Json;
+using Netryoshka.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -12,8 +13,6 @@ using System.Threading.Tasks;
 
 namespace Netryoshka.Services
 {
-    //tshark -r my_capture.pcap -Y 'http' -T fields -E header=y -E separator=, -E quote=d -e frame.number -e ip.src -e ip.dst -e http.request.method -e http.request.uri -e http.response.code
-
     public class TSharkService
     {
         private readonly ICaptureService _captureService;
@@ -136,14 +135,14 @@ namespace Netryoshka.Services
             var json = await SerializePacketsToJsonAsync(packets, ct);
             var jsonList = Util.SplitJsonObjects(json);
 
-            var loadSettings = new JsonLoadSettings
-            {
-                DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Ignore,
-            };
+            //var loadSettings = new JsonLoadSettings
+            //{
+            //    DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Ignore,
+            //};
 
             var serializerSettings = new JsonSerializerSettings
             {
-                TraceWriter = new JsonUtil.CustomTraceWriter(),
+                TraceWriter = new CustomTraceWriter(),
                 NullValueHandling = NullValueHandling.Ignore,
                 MissingMemberHandling = MissingMemberHandling.Ignore,
             };
@@ -172,7 +171,7 @@ namespace Netryoshka.Services
         //    using (var stringReader = new StringReader(json))
         //    using (var jsonTextReader = new JsonTextReader(stringReader))
         //    {
-        //        var jToken = JsonUtil.DeserializeAndCombineDuplicateKeys(jsonTextReader);
+        //        var jToken = JsonUtils.DeserializeAndCombineDuplicateKeys(jsonTextReader);
         //        jsonWithCombinedKeys = jToken.ToString();
         //    }
 
@@ -276,20 +275,6 @@ namespace Netryoshka.Services
 
             return keys;
         }
-
-        //public List<string> GetKeysFromRandoms(List<string> randoms)
-        //{
-        //    if (!File.Exists(KeysFile))
-        //    {
-        //        _logger.Error($"Keys file not found: {KeysFile}");
-        //        return new List<string>();
-        //    }
-
-        //    var keys = File.ReadLines(KeysFile)
-        //        .Where(line => randoms.Any(random => line.Matches($@"\b{random}\b", RegexOptions.IgnoreCase).Any()))
-        //        .ToList();
-        //    return keys;
-        //}
 
 
         public void CheckKeyAndRandomCounts(List<string> tlsHandshakeRandoms, List<string> keys)

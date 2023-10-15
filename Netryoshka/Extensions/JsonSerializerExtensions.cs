@@ -6,12 +6,7 @@ namespace Netryoshka
 {
     public static class JsonSerializerExtensions
     {
-        public static JsonConverter? GetConverter(
-            this JsonSerializer serializer,
-            JsonContract? contract,
-            JsonConverter? memberConverter,
-            JsonContainerContract? containerContract,
-            JsonProperty? containerProperty)
+        public static JsonConverter? GetConverter(this JsonSerializer serializer, JsonContract? contract, JsonConverter? memberConverter, JsonContainerContract? containerContract, JsonProperty? containerProperty)
         {
             JsonConverter? converter = null;
 

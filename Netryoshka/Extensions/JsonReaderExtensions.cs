@@ -73,7 +73,7 @@ namespace Netryoshka
                     reader.ReadAsDateTime();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"Unexpected ReadType {t}.");
             }
 
             return (reader.TokenType != JsonToken.None);
@@ -120,19 +120,6 @@ namespace Netryoshka
             }
 
             return ReadType.Read;
-        }
-
-        private enum JsonContractType
-        {
-            None = 0,
-            Object = 1,
-            Array = 2,
-            Primitive = 3,
-            String = 4,
-            Dictionary = 5,
-            Dynamic = 6,
-            Serializable = 7,
-            Linq = 8
         }
 
     }
