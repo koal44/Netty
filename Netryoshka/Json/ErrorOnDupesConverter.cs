@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Netryoshka.Json
 {
@@ -16,19 +17,8 @@ namespace Netryoshka.Json
     /// <typeparam name="T">The type of the object to deserialize.</typeparam>
     public class ErrorOnDupesConverter<T> : JsonConverter<T?>
     {
-        private readonly HashSet<Type> _ignoredConverters;
         private List<string>? _propertiesToConsider;
-        private List<string>? _propertiesToIgnore;
-
-        public ErrorOnDupesConverter()
-        {
-            _ignoredConverters = new HashSet<Type>
-                {
-                    typeof(KeyedPairToDictConverter<T>),
-                    typeof(SingleToListConverter<T>),
-                    typeof(IntToListConverter),
-                };
-        }
+        private List<string>? _propertiesWithConverters;
 
         private List<string> PropertiesToConsider => _propertiesToConsider
             ??= typeof(T).GetProperties()
@@ -37,11 +27,10 @@ namespace Netryoshka.Json
                 .Select(attr => attr!.PropertyName!)
                 .ToList();
 
-        private List<string> PropertiesToIgnore => _propertiesToIgnore
+        // assume that properties with converters are responsible for handling duplicate keys
+        private List<string> PropertiesWithConverters => _propertiesWithConverters
             ??= typeof(T).GetProperties()
-                .Where(prop => prop.GetCustomAttributes(typeof(JsonConverterAttribute), true)
-                    .Cast<JsonConverterAttribute>()
-                    .Any(attr => _ignoredConverters.Contains(attr.ConverterType)))
+                .Where(prop => prop.GetCustomAttributes(typeof(JsonConverterAttribute), true).Any())
                 .Select(prop => prop.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? prop.Name)
                 .ToList();
 
@@ -62,6 +51,10 @@ namespace Netryoshka.Json
 
             var handledProperties = new HashSet<string>();
 
+            var dynamicProperties = contract.Properties
+                .Where(p => p?.PropertyName != null && p.PropertyName.StartsWith("REGEX_"))
+                .ToList();
+
             while (reader.Read() && reader.TokenType != JsonToken.EndObject)
             {
                 if (reader.TokenType == JsonToken.Comment) continue;
@@ -72,29 +65,32 @@ namespace Netryoshka.Json
                 var propertyName = reader.Value?.ToString()
                     ?? throw new JsonSerializationException("PropertyName not found.");
 
-                if (handledProperties.Contains(propertyName) && !PropertiesToIgnore.Contains(propertyName))
+                if (handledProperties.Contains(propertyName) && !PropertiesWithConverters.Contains(propertyName))
                 {
                     throw new JsonSerializationException($"Duplicate property '{propertyName}' found.");
                 }
 
-                if (PropertiesToConsider.Contains(propertyName))
+                bool isDynamicProperty = false;
+
+                JsonProperty? property = contract.Properties.GetClosestMatchProperty(propertyName);
+                if (property == null)
                 {
-                    handledProperties.Add(propertyName);
+                    property = dynamicProperties.FirstOrDefault(p => p?.PropertyName != null && Regex.IsMatch(propertyName, p.PropertyName[6..]));
+                    
+                    if (property != null)
+                    {
+                        isDynamicProperty = true;
+                        HandleDynamicProperty(propertyName, property, instance);
+                    }
                 }
-                else
+
+                if (property == null || property.Ignored || (!isDynamicProperty && !PropertiesToConsider.Contains(propertyName)))
                 {
                     reader.Skip();
                     continue;
                 }
 
-                JsonProperty property = contract.Properties.GetClosestMatchProperty(propertyName)
-                    ?? throw new JsonSerializationException($"Couldn't find json property for '{propertyName}'.");
-
-                if (property == null || property.Ignored)
-                {
-                    reader.Read();
-                    continue;
-                }
+                handledProperties.Add(propertyName);
 
                 var propertyContract = property.PropertyType == null
                     ? null
@@ -107,13 +103,15 @@ namespace Netryoshka.Json
                     throw new JsonSerializationException($"Unexpected end when setting {propertyName}'s value.");
                 }
 
-                _ = SetPropertyValue(property, propertyConverter, contract, null, reader, instance, serializer);
-
+                SetPropertyValue(property, propertyConverter, contract, null, reader, instance, serializer);
             }
 
-            return instance;
+            contract.InvokeOnDeserialized(instance, serializer.Context);
 
+            return instance;
         }
+
+        protected virtual void HandleDynamicProperty(string propertyName, JsonProperty property, T instance) { }
 
         public override void WriteJson(JsonWriter writer, T? value, JsonSerializer serializer)
         {

@@ -178,8 +178,269 @@ namespace Tests
               ""tcp.analysis.window_expand"": ""0"",
               ""tcp.analysis.missed_segment"": ""0"",
               ""tcp.analysis.fast_retransmission_ack"": ""0"",
-              """;
+              }";
+
+        [Fact]
+        public void DeserializeJson_ShouldPopulateTSharkTcpObject()
+        {
+            var expectedTSharkTcp = new TSharkTcp
+            {
+                SrcPort = "12345",
+                DstPort = "443",
+                Stream = "0",
+                Len = "0",
+                Seq = "0",
+                HdrLen = "20",
+                WindowSize = "65535",
+                Checksum = "0x0000",
+                ChecksumStatus = "Unverified",
+                Flags = new TSharkTcp.TSharkTcpFlags
+                {
+                    Ack = true,
+                    Res = false,
+                    Ae = false,
+                    Cwr = false,
+                    Ece = false,
+                    Urg = false,
+                    Push = false,
+                    Reset = false,
+                    Syn = false,
+                    Fin = false
+                },
+                Segments = null
+            };
+
+            // Act
+            var actualTSharkTcp = JsonConvert.DeserializeObject<TSharkTcp>(_json);
+
+            // Assert
+            actualTSharkTcp.Should().BeEquivalentTo(expectedTSharkTcp);
+        }
     }
 
+    public class TSharkEthTests
+    {
+        private readonly string _json = @"{
+          ""eth.dst"": ""a0:29:42:37:ef:4c"",
+          ""eth.dst_tree"": {
+            ""eth.dst_resolved"": ""Intel_37:ef:4c"",
+            ""eth.dst.oui"": ""10496322"",
+            ""eth.dst.oui_resolved"": ""Intel Corporate"",
+            ""eth.addr"": ""a0:29:42:37:ef:4c"",
+            ""eth.addr_resolved"": ""Intel_37:ef:4c"",
+            ""eth.addr.oui"": ""10496322"",
+            ""eth.addr.oui_resolved"": ""Intel Corporate"",
+            ""eth.dst.lg"": ""0"",
+            ""eth.lg"": ""0"",
+            ""eth.dst.ig"": ""0"",
+            ""eth.ig"": ""0""
+          },
+          ""eth.src"": ""30:b5:c2:e4:e0:b2"",
+          ""eth.src_tree"": {
+            ""eth.src_resolved"": ""TpLinkTechno_e4:e0:b2"",
+            ""eth.src.oui"": ""3192258"",
+            ""eth.src.oui_resolved"": ""Tp-Link Technologies Co.,Ltd."",
+            ""eth.addr"": ""30:b5:c2:e4:e0:b2"",
+            ""eth.addr_resolved"": ""TpLinkTechno_e4:e0:b2"",
+            ""eth.addr.oui"": ""3192258"",
+            ""eth.addr.oui_resolved"": ""Tp-Link Technologies Co.,Ltd."",
+            ""eth.src.lg"": ""0"",
+            ""eth.lg"": ""0"",
+            ""eth.src.ig"": ""0"",
+            ""eth.ig"": ""0""
+          },
+          ""eth.type"": ""0x0800""
+        }";
+
+        [Fact]
+        public void ShouldDeserializeCorrectly()
+        {
+            // Arrange
+            var expectedObject = new TSharkEth
+            {
+                Dst = "a0:29:42:37:ef:4c",
+                Src = "30:b5:c2:e4:e0:b2",
+                EthType = "0x0800",
+                DstTree = new TSharkEth.EthernetDstTree
+                {
+                    DstOuiResolved = "Intel Corporate"
+                },
+                SrcTree = new TSharkEth.EthernetSrcTree
+                {
+                    SrcOuiResolved = "Tp-Link Technologies Co.,Ltd."
+                },
+                EthTypeVal = "IPv4"
+            };
+
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkEth>(_json);
+
+            // Assert
+            actualObject.Should().BeEquivalentTo(expectedObject);
+        }
+    }
+
+
+    public class TSharkHttpAltTests
+    {
+        private readonly string _jsonRequest = @"{
+          ""GET / HTTP/1.1\\r\\n"": {
+            ""_ws.expert"": {
+              ""http.chat"": """",
+              ""_ws.expert.message"": ""GET / HTTP/1.1\\r\\n"",
+              ""_ws.expert.severity"": ""2097152"",
+              ""_ws.expert.group"": ""33554432""
+            },
+            ""http.request.method"": ""GET"",
+            ""http.request.uri"": ""/"",
+            ""http.request.version"": ""HTTP/1.1""
+          },
+          ""http.host"": ""portquiz.net"",
+          ""http.request.line"": ""Host: portquiz.net\r\n"",
+          ""http.user_agent"": ""Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"",
+          ""http.request.line"": ""User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0\r\n"",
+          ""http.accept"": ""text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"",
+          ""http.request.line"": ""Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n"",
+          ""http.accept_language"": ""en-US,en;q=0.5"",
+          ""http.request.line"": ""Accept-Language: en-US,en;q=0.5\r\n"",
+          ""http.accept_encoding"": ""gzip, deflate"",
+          ""http.request.line"": ""Accept-Encoding: gzip, deflate\r\n"",
+          ""http.referer"": ""https://www.google.com/"",
+          ""http.request.line"": ""Referer: https://www.google.com/\r\n"",
+          ""http.request.line"": ""DNT: 1\r\n"",
+          ""http.connection"": ""keep-alive"",
+          ""http.request.line"": ""Connection: keep-alive\r\n"",
+          ""http.request.line"": ""Upgrade-Insecure-Requests: 1\r\n"",
+          ""\\r\\n"": """",
+          ""http.request.full_uri"": ""http://portquiz.net/"",
+          ""http.request"": ""1"",
+          ""http.request_number"": ""1""
+        }";
+
+        private readonly string _jsonResponse = @"{
+          ""HTTP/1.1 200 OK\\r\\n"": {
+            ""_ws.expert"": {
+              ""http.chat"": """",
+              ""_ws.expert.message"": ""HTTP/1.1 200 OK\\r\\n"",
+              ""_ws.expert.severity"": ""2097152"",
+              ""_ws.expert.group"": ""33554432""
+            },
+            ""http.response.version"": ""HTTP/1.1"",
+            ""http.response.code"": ""200"",
+            ""http.response.code.desc"": ""OK"",
+            ""http.response.phrase"": ""OK""
+          },
+          ""http.date"": ""Mon, 16 Oct 2023 16:53:34 GMT"",
+          ""http.response.line"": ""Date: Mon, 16 Oct 2023 16:53:34 GMT\r\n"",
+          ""http.server"": ""Apache/2.4.29 (Ubuntu)"",
+          ""http.response.line"": ""Server: Apache/2.4.29 (Ubuntu)\r\n"",
+          ""http.response.line"": ""Vary: Accept-Encoding\r\n"",
+          ""http.content_encoding"": ""gzip"",
+          ""http.response.line"": ""Content-Encoding: gzip\r\n"",
+          ""http.content_length_header"": ""1197"",
+          ""http.content_length_header_tree"": {
+            ""http.content_length"": ""1197""
+          },
+          ""http.response.line"": ""Content-Length: 1197\r\n"",
+          ""http.connection"": ""close"",
+          ""http.response.line"": ""Connection: close\r\n"",
+          ""http.content_type"": ""text/html; charset=UTF-8"",
+          ""http.response.line"": ""Content-Type: text/html; charset=UTF-8\r\n"",
+          ""\\r\\n"": """",
+          ""http.response"": ""1"",
+          ""http.response_number"": ""1"",
+          ""http.time"": ""0.169084000"",
+          ""http.request_in"": ""4"",
+          ""http.response_for.uri"": ""http://portquiz.net/"",
+          ""Content-encoded entity body (gzip): 1197 bytes -> 2543 bytes"": """",
+          ""http.file_data"": ""\n<html>\n<head>\n<title>Outgoing Port Tester<\/title>\nbody {\n\tfont-family: sans-serif;\n\tfont-size: 0.9em;\n}\n<\/style>\n\n<\/head>\n\n<body><\/body>\n\n<\/html>\n""
+        }";
+
+        [Fact]
+        public void ShouldDeserializeHttpRequestCorrectly()
+        {
+            // Arrange
+            var expectedObject = new TSharkHttp
+            {
+                Declaration = "GET / HTTP/1.1\\r\\n",
+                RequestLines = new List<string>
+                {
+                    "Host: portquiz.net\r\n",
+                    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0\r\n",
+                    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n",
+                    "Accept-Language: en-US,en;q=0.5\r\n",
+                    "Accept-Encoding: gzip, deflate\r\n",
+                    "Referer: https://www.google.com/\r\n",
+                    "DNT: 1\r\n",
+                    "Connection: keep-alive\r\n",
+                    "Upgrade-Insecure-Requests: 1\r\n"
+                },
+                Lines = new Dictionary<string, string>
+                {
+                    ["Host"] = "portquiz.net\r\n",
+                    ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0\r\n",
+                    ["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n",
+                    ["Accept-Language"] = "en-US,en;q=0.5\r\n",
+                    ["Accept-Encoding"] = "gzip, deflate\r\n",
+                    ["Referer"] = "https://www.google.com/\r\n",
+                    ["Connection"] = "keep-alive\r\n",
+                    ["DNT"] = "1\r\n",
+                    ["Upgrade-Insecure-Requests"] = "1\r\n"
+                },
+                RequestNumber = 1,
+                FullUri = "http://portquiz.net/",
+                Request = true,
+            };
+
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkHttp>(_jsonRequest);
+
+            // Assert
+            actualObject.Should().BeEquivalentTo(expectedObject);
+        }
+
+        [Fact]
+        public void ShouldDeserializeHttpResponseCorrectly()
+        {
+            // Arrange
+            var expectedObject = new TSharkHttp
+            {
+                Declaration = "HTTP/1.1 200 OK\\r\\n",
+                ResponseLines = new List<string>
+                {
+                    "Date: Mon, 16 Oct 2023 16:53:34 GMT\r\n",
+                    "Server: Apache/2.4.29 (Ubuntu)\r\n",
+                    "Vary: Accept-Encoding\r\n",
+                    "Content-Encoding: gzip\r\n",
+                    "Content-Length: 1197\r\n",
+                    "Connection: close\r\n",
+                    "Content-Type: text/html; charset=UTF-8\r\n"
+                },
+                Lines = new Dictionary<string, string>
+                {
+                    ["Date"] = "Mon, 16 Oct 2023 16:53:34 GMT\r\n",
+                    ["Server"] = "Apache/2.4.29 (Ubuntu)\r\n",
+                    ["Vary"] = "Accept-Encoding\r\n",
+                    ["Content-Encoding"] = "gzip\r\n",
+                    ["Content-Length"] = "1197\r\n",
+                    ["Connection"] = "close\r\n",
+                    ["Content-Type"] = "text/html; charset=UTF-8\r\n"
+                },
+                ContentLength = 1197,
+                FileData = "\n<html>\n<head>\n<title>Outgoing Port Tester</title>\nbody {\n\tfont-family: sans-serif;\n\tfont-size: 0.9em;\n}\n</style>\n\n</head>\n\n<body></body>\n\n</html>\n",
+                RequestIn = 4,
+                ResponseNumber = 1,
+                Time = 0.169084,
+                ResponseForUri = "http://portquiz.net/",
+                Response = true,
+            };
+
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkHttp>(_jsonResponse);
+
+            // Assert
+            actualObject.Should().BeEquivalentTo(expectedObject);
+        }
+    }
 
 }

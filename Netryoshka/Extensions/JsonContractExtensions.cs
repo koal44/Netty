@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Netryoshka
 {
@@ -28,6 +29,17 @@ namespace Netryoshka
             // If none of the special cases are met, assume it's read-only or fixed size.
             // This will also return true for JsonDictionaryContract and JsonPrimitiveContract
             return true;
+        }
+
+        public static void InvokeOnDeserialized(this JsonContract contract, object o, StreamingContext context)
+        {
+            if (contract.OnDeserializedCallbacks != null)
+            {
+                foreach (SerializationCallback callback in contract.OnDeserializedCallbacks)
+                {
+                    callback(o, context);
+                }
+            }
         }
 
 

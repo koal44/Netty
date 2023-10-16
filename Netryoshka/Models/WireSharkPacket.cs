@@ -1,15 +1,12 @@
 ﻿using Netryoshka.Json;
-using Netryoshka.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
-using static Netryoshka.TSharkHttp;
-using static Netryoshka.TSharkTcp;
-using static Netryoshka.TSharkTls;
 
 namespace Netryoshka
 {
@@ -56,7 +53,7 @@ namespace Netryoshka
         public TSharkTcp? Tcp { get; set; }
 
         [JsonProperty("tcp.segments")]  // not sure why this isn't in tcp, but tshark returns it here
-        public TSharkTcpSegments? TcpSegments { get; set; }
+        public TSharkTcp.TSharkTcpSegments? TcpSegments { get; set; }
 
         [JsonProperty("http")]
         public TSharkHttp? Http { get; set; }
@@ -67,7 +64,7 @@ namespace Netryoshka
 
         [JsonProperty("tls.segments")]
         [JsonConverter(typeof(TlsSegmentsToListConverter))]
-        public List<TSharkTlsSegments>? TlsSegments { get; set; }
+        public List<TSharkTls.TSharkTlsSegments>? TlsSegments { get; set; }
 
         [JsonProperty("http2")]
         [JsonConverter(typeof(Http2ToListConverter))]
@@ -83,7 +80,7 @@ namespace Netryoshka
         {
             public override TSharkTls HandleStringToken(string? str) => new() { Tls = str };
         }
-        public class TlsSegmentsToListConverter : SingleToListConverter<TSharkTlsSegments> { }
+        public class TlsSegmentsToListConverter : SingleToListConverter<TSharkTls.TSharkTlsSegments> { }
         public class Http2ToListConverter : SingleToListConverter<TSharkHttp2> { }
         public class TSharkLayersConverter : ErrorOnDupesConverter<TSharkLayers> { }
     }
@@ -332,7 +329,7 @@ namespace Netryoshka
 
 
         [OnDeserialized]
-        internal void SetEthTypeVal(StreamingContext context)
+        public void SetEthTypeVal(StreamingContext context)
         {
             int? ethyTypeNum = !string.IsNullOrEmpty(EthType) ? Convert.ToInt32(EthType, 16) : null;
             if (ethyTypeNum.HasValue && EthTypeToProtocolMap.TryGetValue(ethyTypeNum.Value, out var protocol))
@@ -369,7 +366,7 @@ namespace Netryoshka
         [JsonProperty("ip.flags")]
         public string? Flags { get; set; }
 
-        private byte FlagsByte => string.IsNullOrEmpty(Flags) ? (byte)0 : Convert.ToByte(Flags, 16);
+        //private byte FlagsByte => string.IsNullOrEmpty(Flags) ? (byte)0 : Convert.ToByte(Flags, 16);
         //public bool FlagsRb => (FlagsByte & 0x01) != 0;
         //public bool FlagsDf => (FlagsByte & 0x02) != 0;
         //public bool FlagsMf => (FlagsByte & 0x04) != 0;
@@ -534,164 +531,91 @@ namespace Netryoshka
     [JsonConverter(typeof(TSharkHttpConverter))]
     public class TSharkHttp
     {
+        //[JsonProperty("REGEX_.*HTTP.*\\r\\n")]
+        [JsonProperty(@"REGEX_.*HTTP.*\\r\\n")]
         public string? Declaration { get; set; }
-        public IReadOnlyDictionary<string, string>? Lines { get; set; }
-        public TSharkRequest? Request { get; set; }
-        public TSharkResponse? Response { get; set; }
+        public Dictionary<string, string>? Lines { get; set; }
 
-        public class TSharkRequest
+        [JsonProperty("http.response.line")]
+        [JsonConverter(typeof(StringToListConverter))]
+        public List<string>? ResponseLines { get; set; }
+
+        [JsonProperty("http.request.line")]
+        [JsonConverter(typeof(StringToListConverter))]
+        public List<string>? RequestLines { get; set; }
+
+        [JsonProperty("http.prev_request_in")]
+        public uint? PrevRequestIn { get; set; } // previous request in frame
+
+        // requests
+        [JsonProperty("http.request")]
+        [JsonConverter(typeof(BitToBoolConverter))]
+        public bool? Request { get; set; }
+
+        [JsonProperty("http.request_number")]
+        public uint? RequestNumber { get; set; }
+
+        [JsonProperty("http.request.full_uri")]
+        public string? FullUri { get; set; }
+
+        [JsonProperty("http.response_in")]
+        public uint? ResponseIn { get; set; } // response in frame. ? - doesn't seem to exist
+
+
+        // response
+        [JsonProperty("http.response")]
+        [JsonConverter(typeof(BitToBoolConverter))]
+        public bool? Response { get; set; }
+
+        [JsonProperty("http.content_length_header")]
+        public ulong? ContentLength { get; set; }
+
+        [JsonProperty("http.response_number")]
+        public uint? ResponseNumber { get; set; }
+
+        [JsonProperty("http.time")]
+        public double? Time { get; set; } // time since request
+
+        [JsonProperty("http.request_in")]
+        public uint? RequestIn { get; set; } // request in frame
+
+        [JsonProperty("http.prev_response_in")]
+        public uint? PrevResponseIn { get; set; } // previous response in frame
+
+        [JsonProperty("http.response_for.uri")]
+        public string? ResponseForUri { get; set; }
+
+        [JsonProperty("http.file_data")]
+        public string? FileData { get; set; }
+
+
+        [OnDeserialized]
+        public void OnDeserialized(StreamingContext context)
         {
-            public uint? RequestNumber { get; set; }
-            public string? FullUri { get; set; }
-            public uint? PrevRequestIn { get; set; }
-            public uint? ResponseIn { get; set; } // response in frame. ? - doesn't seem to exist
-        }
-
-        public class TSharkResponse
-        {
-            public ulong? ContentLength { get; set; }
-            public uint? ResponseNumber { get; set; }
-            public double? Time { get; set; } // time since request
-            public uint? RequestIn { get; set;   } // request in frame
-            public uint? PrevRequestIn { get; set; } // previous request in frame
-            public uint? PrevResponseIn { get; set; } // previous response in frame
-            public string? ResponseForUri { get; set; }
-            public string? FileData { get; set; }
-        }
-        
-    }
-
-
-    public class TSharkHttpConverter : JsonConverter<TSharkHttp>
-    {
-        public override TSharkHttp ReadJson(JsonReader reader, Type objectType, TSharkHttp? existingValue, bool hasExistingValue, JsonSerializer serializer)
-        {
-            if (reader is not JsonTextReader jsonTextReader)
+            var lines = ResponseLines ?? RequestLines ?? new List<string>();
+            foreach (var line in lines)
             {
-                throw new InvalidOperationException("Expected a JsonTextReader.");
-            }
+                var lineStr = line?.ToString();
+                if (string.IsNullOrEmpty(lineStr)) continue;
 
-            var jToken = JsonUtils.DeserializeAndCombineDuplicateKeys(jsonTextReader);
-            var jsonObject = jToken as JObject ?? throw new JsonException("Expected a JSON object.");
-
-            return TSharkHttpFactory.CreateFromJson(jsonObject);
-        }
-
-        // Use the default serialization
-        // public override bool CanWrite => false; 
-
-        public override void WriteJson(JsonWriter writer, TSharkHttp? value, JsonSerializer serializer)
-        {
-            //throw new InvalidOperationException("WriteJson should not be called.");
-
-            if (value == null)
-            {
-                writer.WriteNull();
-                return;
-            }
-
-            writer.WriteStartObject();
-
-            // Serialize Declaration
-            writer.WritePropertyName("Declaration");
-            serializer.Serialize(writer, value.Declaration);
-
-            // Serialize Lines
-            writer.WritePropertyName("Lines");
-            serializer.Serialize(writer, value.Lines);
-
-            // Serialize Request
-            writer.WritePropertyName("Request");
-            serializer.Serialize(writer, value.Request);
-
-            // Serialize Response
-            writer.WritePropertyName("Response");
-            serializer.Serialize(writer, value.Response);
-
-            writer.WriteEndObject();
-        }
-
-    }
-
-    public static class TSharkHttpFactory
-    {
-        public static TSharkHttp CreateFromJson(JObject jsonObject)
-        {
-            if (jsonObject == null || !jsonObject.HasValues)
-            {
-                throw new ArgumentException("Invalid JSON object.", nameof(jsonObject));
-            }
-
-            return new TSharkHttp
-            {
-                Declaration = GetDeclaration(jsonObject),
-                Lines = GetLineDictionary(jsonObject),
-                Request = CreateRequest(jsonObject),
-                Response = CreateResponse(jsonObject)
-            };
-        }
-
-        private static string GetDeclaration(JObject jsonObject)
-        {
-            // Take the first property's name as the message
-            var firstProperty = jsonObject.Properties().FirstOrDefault();
-            return firstProperty?.Name ?? string.Empty;
-        }
-
-        private static IReadOnlyDictionary<string, string> GetLineDictionary(JObject jsonObject)
-        {
-            var dictResult = new Dictionary<string, string>();
-            foreach (var property in jsonObject.Properties())
-            {
-                if (property.Name.Equals("http.response.line") || property.Name.Equals("http.request.line"))
+                var parts = lineStr.Split(new[] { ": " }, StringSplitOptions.None);
+                if (parts.Length >= 2)
                 {
-                    foreach (var line in property.Value?.Children() ?? Enumerable.Empty<JToken>())
-                    {
-                        var lineStr = line?.ToString();
-                        if (string.IsNullOrEmpty(lineStr)) continue;
-
-                        var parts = lineStr.Split(new[] { ": " }, StringSplitOptions.None);
-                        if (parts.Length >= 2)
-                        {
-                            dictResult[parts[0]] = string.Join(": ", parts.Skip(1));
-                        }
-                    }
+                    Lines ??= new Dictionary<string, string>();
+                    Lines[parts[0]] = string.Join(": ", parts.Skip(1));
                 }
             }
 
-            return new ReadOnlyDictionary<string, string>(dictResult);
         }
 
-        private static TSharkRequest? CreateRequest(JObject jsonObject)
+        public class TSharkHttpConverter : ErrorOnDupesConverter<TSharkHttp>
         {
-            return JsonUtils.JObjToBool(jsonObject["http.request"])
-                ? new TSharkRequest()
-                {
-                    RequestNumber = JsonUtils.JObjToValue<uint>(jsonObject["http.request_number"]),
-                    FullUri = JsonUtils.JObjToString(jsonObject["http.request.full_uri"]),
-                    PrevRequestIn = JsonUtils.JObjToValue<uint>(jsonObject["http.prev_request_in"]),
-                    ResponseIn = JsonUtils.JObjToValue<uint>(jsonObject["http.response_in"]),
-                }
-                : null;
+            protected override void HandleDynamicProperty(string propertyName, JsonProperty property, TSharkHttp instance)
+            {
+                instance.Declaration = propertyName;
+                property.Ignored = true; // this will skip over the dynamic property valueobject
+            }
         }
-
-        private static TSharkResponse? CreateResponse(JObject jsonObject)
-        {
-            return JsonUtils.JObjToBool(jsonObject["http.response"])
-                ? new TSharkResponse()
-                {
-                    ContentLength = JsonUtils.JObjToValue<ulong>(jsonObject["http.content_length_header"]),
-                    ResponseNumber = JsonUtils.JObjToValue<uint>(jsonObject["http.response_number"]),
-                    Time = JsonUtils.JObjToValue<double>(jsonObject["http.time"]),
-                    RequestIn = JsonUtils.JObjToValue<uint>(jsonObject["http.request_in"]),
-                    PrevRequestIn = JsonUtils.JObjToValue<uint>(jsonObject["http.prev_request_in"]),
-                    PrevResponseIn = JsonUtils.JObjToValue<uint>(jsonObject["http.prev_response_in"]),
-                    ResponseForUri = JsonUtils.JObjToString(jsonObject["http.response_for.uri"]),
-                    FileData = JsonUtils.JObjToString(jsonObject["http.file_data"]),
-                }
-                : null;
-        }
-
     }
 
 

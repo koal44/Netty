@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Serialization;
+﻿using Netryoshka.Utils;
+using Newtonsoft.Json.Serialization;
 
 namespace Netryoshka.Extensions
 {
