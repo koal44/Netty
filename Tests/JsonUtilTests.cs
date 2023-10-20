@@ -1,8 +1,10 @@
 ﻿using FluentAssertions;
+using Netryoshka;
 using Netryoshka.Json;
 using Netryoshka.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Tests
 {
@@ -224,18 +226,29 @@ namespace Tests
 
             public class TestTlsToListConverter : SingleToListConverter<TestTSharkTls>
             {
-                public override TestTSharkTls HandleStringToken(string? str) => new() { Tls = str };
+                public override TestTSharkTls FallbackDeserializeFromString(string? str) => new() { Tls = str };
             }
 
             public class TestTSharkTls
             {
-                public string? Tls { get; set; } // sometimes the entire class is just a string
+                public string? Tls { get; set; }
 
                 [JsonProperty("tls.alert_message")]
                 public string? AlertMessage { get; set; }
 
                 [JsonProperty("tls.session_id")]
                 public string? SessionId { get; set; }
+
+                [JsonProperty("tls.record")]
+                [JsonConverter(typeof(TestTlsRecordToListConverter))]
+                public List<TestTlsRecord>? Records { get; set; }
+
+                public class TestTlsRecord
+                {
+                    public string? Name { get; set; }
+                }
+
+                public class TestTlsRecordToListConverter : SingleToListConverter<TestTlsRecord> { }
             }
         }
 
@@ -286,14 +299,25 @@ namespace Tests
                 ]
             }";
 
-            var obj = JsonConvert.DeserializeObject<TestTSharkLayers>(json);
+            var expectedObj = new TestTSharkLayers
+            {
+                Tls = new List<TestTSharkLayers.TestTSharkTls>
+                {
+                    new TestTSharkLayers.TestTSharkTls
+                    {
+                        AlertMessage = "Alert1",
+                        SessionId = "Session1"
+                    },
+                    new TestTSharkLayers.TestTSharkTls
+                    {
+                        AlertMessage = "Alert2",
+                        SessionId = "Session2"
+                    }
+                }
+            };
 
-            obj.Should().NotBeNull();
-            obj!.Tls.Should().HaveCount(2);
-            obj.Tls![0].AlertMessage.Should().Be("Alert1");
-            obj.Tls[0].SessionId.Should().Be("Session1");
-            obj.Tls[1].AlertMessage.Should().Be("Alert2");
-            obj.Tls[1].SessionId.Should().Be("Session2");
+            var actualObj = JsonConvert.DeserializeObject<TestTSharkLayers>(json);
+            actualObj.Should().BeEquivalentTo(expectedObj);
         }
 
         [Fact]
@@ -326,6 +350,62 @@ namespace Tests
             obj.Tls[2].AlertMessage.Should().Be("Alert2");
             obj.Tls[2].SessionId.Should().Be("Session2");
         }
+
+        [Fact]
+        public void Should_Deserialize_MultipleTlsObjects_WithNestedProperties()
+        {
+            var json = @"{
+                ""tls"": {
+                    ""tls.alert_message"": ""Alert1"",
+                    ""tls.session_id"": ""SessionId1"",
+                    ""tls.record"": {
+                        ""Name"": ""Record11""
+                    }
+                },
+                ""tls"": {
+                    ""tls.alert_message"": ""Alert2"",
+                    ""tls.session_id"": ""SessionId2"",
+                    ""tls.record"": {
+                        ""Name"": ""Record21""
+                    },
+                    ""tls.record"": {
+                        ""Name"": ""Record22""
+                    }
+                }
+            }";
+
+            var ActualObject = JsonConvert.DeserializeObject<TestTSharkLayers>(json);
+
+            var ExpectedObject = new TestTSharkLayers
+            {
+                Tls = new List<TestTSharkLayers.TestTSharkTls>
+                {
+                    new TestTSharkLayers.TestTSharkTls
+                    {
+                        AlertMessage = "Alert1",
+                        SessionId = "SessionId1",
+                        Records = new List<TestTSharkLayers.TestTSharkTls.TestTlsRecord>
+                        {
+                            new TestTSharkLayers.TestTSharkTls.TestTlsRecord { Name = "Record11" }
+                        }
+                    },
+                    new TestTSharkLayers.TestTSharkTls
+                    {
+                        AlertMessage = "Alert2",
+                        SessionId = "SessionId2",
+                        Records = new List<TestTSharkLayers.TestTSharkTls.TestTlsRecord>
+                        {
+                            new TestTSharkLayers.TestTSharkTls.TestTlsRecord { Name = "Record21" },
+                            new TestTSharkLayers.TestTSharkTls.TestTlsRecord { Name = "Record22" }
+                        }
+                    }
+                }
+            };
+
+            ActualObject.Should().NotBeNull();
+            ActualObject!.Should().BeEquivalentTo(ExpectedObject);
+        }
+
     }
 
     public class KeyValuePairConverterTests
@@ -378,15 +458,41 @@ namespace Tests
             public List<int>? Property3List { get; set; }
 
             [JsonProperty("nested.property")]
-            public NestClass? NestedProperty { get; set; }
+            public NestedClass? NestedProperty { get; set; }
 
-            public class NestClass
+            [JsonProperty(@"REGEX_.*alpha.*")]
+            public string? AlphaProperty { get; set; }
+
+            [JsonProperty(@"REGEX_.*beta.*")]
+            public NestedClass? BetaProperty { get; set; }
+
+            [JsonProperty("nested.property4")]
+            [JsonConverter(typeof(NestedClassToListConverter))]
+            public List<NestedClass>? NestedList { get; set; }
+
+            public class NestedClass
             {
                 [JsonProperty("sub.property")]
                 public string? Property { get; set; }
             }
 
-            public class TestConverter : ErrorOnDupesConverter<TestClass> { }
+            public class TestConverter : ErrorOnDupesConverter<TestClass>
+            {
+                protected override void HandleDynamicProperty(string propertyName, JsonProperty property, TestClass instance)
+                {
+                    if (propertyName.Contains("alpha"))
+                    {
+                        instance.Property1 = $"***{propertyName}***";
+                        property.Ignored = true; // this will skip over the dynamic property valueobject
+                    }
+                    else if (propertyName.Contains("beta"))
+                    {
+                        instance.AlphaProperty = propertyName;
+                    }
+                }
+            }
+
+            public class NestedClassToListConverter : SingleToListConverter<NestedClass> { }
         }
 
         [Fact]
@@ -534,6 +640,79 @@ namespace Tests
             obj.Should().NotBeNull();
             obj!.Property1.Should().Be("value1");
         }
+
+        [Fact]
+        public void DeserializeWithAlphaDynamicKey_HandlesCorrectly()
+        {
+            var json = @"{
+                ""property1"": ""value1"",
+                ""property2"": 42,
+                ""dynamic_alpha_key"": ""someValue""
+            }";
+
+            var expected = new TestClass
+            {
+                Property1 = "***dynamic_alpha_key***",
+                Property2 = 42,
+                AlphaProperty = null
+            };
+
+            var actual = JsonConvert.DeserializeObject<TestClass>(json);
+
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        // NOTE: This test would fail if property1 came after dynamic_beta_key in the JSON. The test is just meant to showcase what HandleDynamicProperty() can do.
+        [Fact]
+        public void DeserializeWithBetaDynamicKey_HandlesCorrectly()
+        {
+            var json = @"{
+                ""property1"": ""value1"",
+                ""property2"": 42,
+                ""dynamic_beta_key"": { ""sub.property"": ""nestedValue"" }
+            }";
+
+            var expected = new TestClass
+            {
+                Property1 = "value1",
+                Property2 = 42,
+                AlphaProperty = "dynamic_beta_key",
+                BetaProperty = new TestClass.NestedClass { Property = "nestedValue" }
+            };
+
+            var actual = JsonConvert.DeserializeObject<TestClass>(json);
+
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+
+        [Fact]
+        public void ShouldDeserializeDuplicateNestedProperty4IntoList()
+        {
+            // Arrange
+            string json = @"{
+                ""nested.property4"": {
+                    ""sub.property"": ""value1""
+                },
+                ""nested.property4"": {
+                    ""sub.property"": ""value2""
+                }
+            }";
+
+            List<TestClass.NestedClass> expectedNestedList = new()
+            {
+                new TestClass.NestedClass { Property = "value1" },
+                new TestClass.NestedClass { Property = "value2" }
+            };
+
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TestClass>(json);
+
+            // Assert
+            actualObject.Should().NotBeNull();
+            actualObject!.NestedList.Should().BeEquivalentTo(expectedNestedList);
+        }
+
 
     }
 

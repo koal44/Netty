@@ -78,7 +78,7 @@ namespace Netryoshka
 
         public class TlsToListConverter : SingleToListConverter<TSharkTls>
         {
-            public override TSharkTls HandleStringToken(string? str) => new() { Tls = str };
+            public override TSharkTls FallbackDeserializeFromString(string? str) => new() { Tls = str };
         }
         public class TlsSegmentsToListConverter : SingleToListConverter<TSharkTls.TSharkTlsSegments> { }
         public class Http2ToListConverter : SingleToListConverter<TSharkHttp2> { }

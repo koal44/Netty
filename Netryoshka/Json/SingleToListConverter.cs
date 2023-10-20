@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -17,29 +16,39 @@ namespace Netryoshka.Json
     /// </remarks>
     public class SingleToListConverter<T> : JsonConverter<List<T>?>
     {
-        public override List<T> ReadJson(JsonReader reader, Type objectType, List<T>? existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override List<T>? ReadJson(JsonReader reader, Type objectType, List<T>? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            var jToken = JToken.ReadFrom(reader);
-
-            if (jToken.Type == JTokenType.Array)
-            {
-                if (existingValue != null) throw new JsonException("Unexpected array token within existing list.");
-                return jToken.ToObject<List<T>>(serializer)
-                    ?? throw new JsonException("Unexpected null instance.");
-            }
-
             var list = existingValue ?? new List<T>();
 
-            T? value = jToken.Type switch
+            switch (reader.TokenType)
             {
-                JTokenType.Object => jToken.ToObject<T>(serializer),
-                JTokenType.String => HandleStringToken(jToken.Value<string>()),
-                _ => throw new JsonException($"Unexpected token type: {jToken.Type}")
-            };
+                case JsonToken.StartArray:
+                    reader.Read(); // consume the StartArray token
 
-            if (value is T nonNullValue)
-            {
-                list.Add(nonNullValue);
+                    while (reader.TokenType != JsonToken.EndArray)
+                    {
+                        var arrayValue = serializer.Deserialize<T>(reader)
+                            ?? throw new JsonException($"Error converting token at path {reader.Path}");
+                        list.Add(arrayValue);
+                        reader.Read(); // Move to the next array item or EndArray
+                    }
+                    break;
+
+                case JsonToken.String:
+                    var stringVal = reader.Value as string;
+                    var handledVal = FallbackDeserializeFromString(stringVal)
+                        ?? throw new JsonException($"Unexpected null instance from string '{stringVal}' at path {reader.Path}");
+                    list.Add(handledVal);
+                    break;
+
+                case JsonToken.StartObject:
+                    var objVal = serializer.Deserialize<T>(reader)
+                        ?? throw new JsonException($"Failed to deserialize an object of type {objectType.Name} at path {reader.Path}");
+                    list.Add(objVal);
+                    break;
+
+                default:
+                    throw new JsonException($"Unexpected token type: {reader.TokenType} at path {reader.Path}");
             }
 
             return list;
@@ -61,7 +70,7 @@ namespace Netryoshka.Json
         /// This method serves as an unusual workaround for cases where the JSON data 
         /// from Wireshark returns a plain string instead of an expected JSON object.
         /// </remarks>
-        public virtual T HandleStringToken(string? str)
+        public virtual T FallbackDeserializeFromString(string? str)
         {
             throw new NotImplementedException("Handling of string tokens is not implemented in the base class.");
         }
