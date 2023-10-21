@@ -68,7 +68,7 @@ namespace Netryoshka.ViewModels
             _deviceNames = new ObservableCollection<string>();
             _selectedDeviceName = "Wi-Fi";
             _isCapturing = false;
-            _remotePorts = "5991";
+            _remotePorts = "443";
 			_remoteIPAddresses = "";
 			_localPorts = "";
 			_localPIDs = "";

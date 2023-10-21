@@ -1,6 +1,5 @@
-﻿using System.Data.Common;
+﻿using Netryoshka.ViewModels;
 using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -32,7 +31,7 @@ namespace Netryoshka.Views
 
             SelectedPropertyName = columnBinding?.Path.Path; // e.g. "LocalPort"
 
-            var currentTcpRecord = dataGrid.CurrentItem as TcpProcessRecord;
+            var currentTcpRecord = dataGrid.CurrentItem as TcpProcessRecordViewModel;
 
             if (SelectedPropertyName != null && currentTcpRecord != null)
             {
