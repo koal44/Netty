@@ -39,7 +39,7 @@ namespace Netryoshka.DesignTime
             DateTime? lastTimestamp = null;
 
             var packets = DesignTimeData.GetPackets();
-            for (int index = 0; index < packets.Count; index++)
+            for (int index = 1; index < packets.Count; index++)
             {
                 var packet = packets[index];
                 var role = packet.Direction == BasicPacket.BPDirection.Incoming

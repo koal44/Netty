@@ -133,7 +133,7 @@ namespace Netryoshka.Services
         public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct)
         {
             var json = await SerializePacketsToJsonAsync(packets, ct);
-            var jsonList = Util.SplitJsonObjects(json);
+            var jsonList = JsonUtils.SplitJsonObjects(json);
 
             //var loadSettings = new JsonLoadSettings
             //{
@@ -171,7 +171,7 @@ namespace Netryoshka.Services
         //    using (var stringReader = new StringReader(json))
         //    using (var jsonTextReader = new JsonTextReader(stringReader))
         //    {
-        //        var jToken = JsonUtils.DeserializeAndCombineDuplicateKeys(jsonTextReader);
+        //        var jToken = JsonNetUtils.DeserializeAndCombineDuplicateKeys(jsonTextReader);
         //        jsonWithCombinedKeys = jToken.ToString();
         //    }
 

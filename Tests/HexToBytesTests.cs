@@ -13,7 +13,7 @@ namespace Proton.Tests
         public void HexToBytes_ShouldConvertCorrectly(string hex, byte[] expected)
         {
             // Act
-            byte[] result = Util.HexToBytes(hex);
+            byte[] result = HexUtils.HexToBytes(hex);
 
             // Assert
             result.Should().Equal(expected);
@@ -27,7 +27,7 @@ namespace Proton.Tests
         public void HexToBytesOptimized_ShouldConvertCorrectly(string hex, byte[] expected)
         {
             // Act
-            byte[] result = Util.HexToBytesOptimized(hex);
+            byte[] result = HexUtils.HexToBytesOptimized(hex);
 
             // Assert
             result.Should().Equal(expected);
@@ -39,7 +39,7 @@ namespace Proton.Tests
         public void HexToBytes_ShouldThrowArgumentException_ForOddLength(string hex)
         {
             // Act
-            void act() => Util.HexToBytes(hex);
+            void act() => HexUtils.HexToBytes(hex);
 
             // Assert
             var exception = Record.Exception(act);
@@ -53,7 +53,7 @@ namespace Proton.Tests
         public void HexToBytesOptimized_ShouldThrowArgumentException_ForOddLength(string hex)
         {
             // Act & Assert
-            Action act = () => Util.HexToBytesOptimized(hex);
+            Action act = () => HexUtils.HexToBytesOptimized(hex);
             act.Should().Throw<ArgumentException>().WithMessage("The hex string cannot have an odd number of digits*");
         }
     }

@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Netryoshka.Hack;
 using Netryoshka.Models;
 using Netryoshka.Services;
-using Netryoshka.Utils;
 using Netryoshka.Views;
 using Netryoshka.Views.Dialogs;
 using System;

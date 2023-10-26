@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.DesignTime;
 using Netryoshka.Utils;
+using System;
 using System.ComponentModel;
 using System.Windows;
 
@@ -22,7 +22,7 @@ namespace Netryoshka
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
-                var packet = DesignTimeData.GetPackets()[0];
+                //var packet = DesignTimeData.GetPackets()[0];
                 EndPointRole = FlowEndpointRole.Pivot;
                 HeaderContent = "IpHeader";
                 BodyContent = "IpBody";
@@ -35,7 +35,9 @@ namespace Netryoshka
             EndPointRole = data.EndPointRole;
             HeaderContent = "";
             FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
-            BodyContent = Util.ExtractHttpJsonObject(data.WireSharkData!.JsonString!);
+            //BodyContent = JsonUtils.ExtractHttpJsonObject(data.WireSharkData!.JsonString!);
+            var httpJsonList = JsonUtils.ExtractJsonObjectsFromKey(data.WireSharkData!.JsonString!, "http");
+            BodyContent = StringUtils.StringJoin(Environment.NewLine, httpJsonList);
         }
         
     }

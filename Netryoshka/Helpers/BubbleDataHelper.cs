@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Netryoshka.Utils;
+using System;
 using System.Collections.Generic;
 using static Netryoshka.BasicPacket;
 
@@ -12,7 +13,7 @@ namespace Netryoshka.Helpers
             return encoding switch
             {
                 TcpEncoding.Hex => Convert.ToHexString(packet.Payload),
-                TcpEncoding.Ascii => Utils.Util.BytesToAscii(packet.Payload),
+                TcpEncoding.Ascii => BitUtils.BytesToAscii(packet.Payload),
                 _ => throw new InvalidOperationException($"Unexpected TCP encoding: {encoding}")
             };
         }

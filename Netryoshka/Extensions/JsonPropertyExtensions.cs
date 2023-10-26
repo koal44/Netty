@@ -18,7 +18,7 @@ namespace Netryoshka.Extensions
                 return jsonProperty.DefaultValue;
             }
 
-            return JsonUtils.GetDefaultValue(propertyType);
+            return JsonNetUtils.GetDefaultValue(propertyType);
         }
 
 

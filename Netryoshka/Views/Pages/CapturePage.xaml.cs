@@ -27,7 +27,7 @@ namespace Netryoshka
 
         private void CapturePage_Loaded(object sender, RoutedEventArgs e)
         {
-            _capturedScrollViewer = Util.FindVisualChild<ScrollViewer>(CapturedTextListBox);
+            _capturedScrollViewer = WpfUtils.FindVisualChild<ScrollViewer>(CapturedTextListBox);
         }
 
         private void ViewModel_CaptureTextChanged(object? sender, PropertyChangedEventArgs e)
@@ -45,7 +45,7 @@ namespace Netryoshka
 
         private void CapturedTextDoubleClickHandler(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            Util.DoubleClickSelectsParagraphBlock(sender, e);
+            WpfUtils.DoubleClickSelectsParagraphBlock(sender, e);
         }
     }
 }

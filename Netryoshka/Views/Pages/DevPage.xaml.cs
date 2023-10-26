@@ -44,7 +44,7 @@ namespace Netryoshka
                 ?? throw new InvalidOperationException("could not create instance of control");
             control.Style = null;
             MainPanel.Children.Add(control);
-            var style = Util.GetNonPublicProperty<Style>(control, "ThemeStyle")
+            var style = ReflectionUtils.GetNonPublicProperty<Style>(control, "ThemeStyle")
                 ?? throw new InvalidOperationException("could not get style");
             return style;
         }

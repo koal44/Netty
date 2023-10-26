@@ -89,7 +89,6 @@ namespace Netryoshka
             typeof(FrameSharkJsonBubbleViewModel),
             typeof(FrameSharkTextBubbleViewModel),
         };
-
         
 
         public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService, ICaptureService captureService)
@@ -344,7 +343,6 @@ namespace Netryoshka
             PivotProcessInfo = $"{processName}{n}{processId}{n}{processState}".Trim();
         }
 
-
         private void UpdateCurrentChatBubbles()
         {
             if (_currentFlowKey != null)
@@ -355,7 +353,7 @@ namespace Netryoshka
                 DateTime? lastTimestamp = null;
 
                 var newBubbleDataList = new List<BubbleData>();
-                for (int index = 0; index < packets.Count; index++)
+                for (int index = 1; index < packets.Count; index++)
                 {
                     var packet = packets[index];
                     var endPointRole = packet.FlowKey.Endpoint1 == SelectedPivotEndpoint?.FlowEndpoint
