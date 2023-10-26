@@ -1,20 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
+﻿using System;
 
 namespace Netryoshka
 {
-    public partial class BubbleData : ObservableObject
+    public class BubbleData
     {
-        [ObservableProperty]
-        private BasicPacket _basicPacket;
-        [ObservableProperty]
-        private FlowEndpointRole _endPointRole;
-        [ObservableProperty] 
-        private TimeSpan? _packetInterval;
-        [ObservableProperty]
-        private WireSharkData? _wireSharkData;
-        [ObservableProperty]
-        private int _bubbleIndex;
+        public BasicPacket BasicPacket { get; set; }
+        public FlowEndpointRole EndPointRole { get; set; }
+        public TimeSpan? PacketInterval { get; set; }
+        public WireSharkData? WireSharkData { get; set; }
+        public int BubbleIndex { get; set; }
 
         public BubbleData(BasicPacket packet, FlowEndpointRole endPointRole, TimeSpan? packetInterval, int bubbleIndex)
         {
