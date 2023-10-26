@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
-//using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -75,7 +74,8 @@ namespace Netryoshka
         public TSharkJson? Json { get; set; }
 
         [JsonProperty("data")]
-        public TSharkData? Data { get; set; }
+        [JsonConverter(typeof(DataToListConverter))]
+        public List<TSharkData>? Data { get; set; }
 
         public class TlsToListConverter : SingleToListConverter<TSharkTls>
         {
@@ -83,6 +83,7 @@ namespace Netryoshka
         }
         public class TlsSegmentsToListConverter : SingleToListConverter<TSharkTlsSegments> { }
         public class Http2ToListConverter : SingleToListConverter<TSharkHttp2> { }
+        public class DataToListConverter : SingleToListConverter<TSharkData> { }
         public class TSharkLayersConverter : ErrorOnDupesConverter<TSharkLayers> { }
     }
 

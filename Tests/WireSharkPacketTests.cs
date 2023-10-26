@@ -1016,6 +1016,138 @@ namespace Tests
             actualObj.Should().BeEquivalentTo(expectedObj);
         }
 
+
+        [Fact]
+        public void DeserializeWireSharkJson_WithMultipleDataKeys_ShouldDeserializeCorrectly()
+        {
+            // Arrange
+            var json = @"{
+              ""_index"": ""packets-2023-10-25"",
+              ""_type"": ""doc"",
+              ""_score"": null,
+              ""_source"": {
+                ""layers"": {
+                  ""frame"": {
+                    ""frame.section_number"": ""1"",
+                    ""frame.interface_id_tree"": {},
+                    ""frame.time"": ""Oct 25, 2023 23:59:43.213714000 Pacific Daylight Time"",
+                  },
+                  ""eth"": {
+                    ""eth.dst"": ""a0:29:42:37:ef:4c"",
+                    ""eth.dst_tree"": {},
+                    ""eth.src"": ""30:b5:c2:e4:e0:b2"",
+                    ""eth.src_tree"": {},
+                    ""eth.type"": ""0x0800""
+                  },
+                  ""ip"": {
+                    ""ip.version"": ""4"",
+                    ""ip.hdr_len"": ""20"",
+                    ""ip.proto"": ""6"",
+                    ""ip.src"": ""94.131.48.150"",
+                    ""ip.addr"": ""94.131.48.150"",
+                    ""ip.src_host"": ""94.131.48.150"",
+                    ""ip.host"": ""94.131.48.150"",
+                    ""ip.dst"": ""192.168.0.110"",
+                    ""ip.addr"": ""192.168.0.110"",
+                    ""ip.dst_host"": ""192.168.0.110"",
+                    ""ip.host"": ""192.168.0.110""
+                  },
+                  ""tcp"": {
+                    ""tcp.srcport"": ""50101"",
+                    ""tcp.dstport"": ""58295"",
+                    ""tcp.port"": ""50101"",
+                    ""tcp.port"": ""58295"",
+                    ""tcp.stream"": ""0"",
+                    ""Timestamps"": {
+                      ""tcp.time_relative"": ""0.407783000"",
+                      ""tcp.time_delta"": ""0.000000000""
+                    },
+                    ""tcp.payload"": ""00:00:00:4d"",
+                    ""tcp.pdu.size"": ""113"",
+                    ""tcp.segment_data"": ""00:00:00:4d"",
+                    ""tcp.pdu.size"": ""2"",
+                    ""tcp.pdu.size"": ""3"",
+                    ""tcp.segment_data"": ""4d:b0:04:00:00:1e:4d:b0:04""
+                  },
+                  ""tcp.segments"": {
+                    ""tcp.segment"": ""14"",
+                    ""tcp.segment"": ""15"",
+                    ""tcp.segment.count"": ""2"",
+                    ""tcp.reassembled.length"": ""4"",
+                    ""tcp.reassembled.data"": ""d0:6f""
+                  },
+                  ""websocket"": {},
+                  ""websocket.fragments"": {},        
+                  ""data"": {
+                    ""data.data"": ""04:00:00:9f"",
+                    ""data.len"": ""4""
+                  },
+                  ""websocket.fragments"": {},
+                  ""data"": {
+                    ""data.data"": ""00:00:08"",
+                    ""data.len"": ""3""
+                  }
+                }
+              }
+            }";
+
+            // Action
+            var actualObj = JsonConvert.DeserializeObject<WireSharkPacket>(json);
+
+            // Assert
+            var expectedObj = new WireSharkPacket
+            {
+                Source = new TSharkSource
+                {
+                    Layers = new TSharkLayers
+                    {
+                        Frame = new TSharkFrame
+                        {
+                            SectionNumber = 1,
+                            Time = "Oct 25, 2023 23:59:43.213714000 Pacific Daylight Time",
+                        },
+                        Eth = new TSharkEth
+                        {
+                            Dst = "a0:29:42:37:ef:4c",
+                            Src = "30:b5:c2:e4:e0:b2",
+                            EthType = "0x0800",
+                            EthTypeVal = "IPv4",
+                            DstTree = new TSharkEth.EthernetDstTree(),
+                            SrcTree = new TSharkEth.EthernetSrcTree(),
+                        },
+                        Ip = new TSharkIp
+                        {
+                            Version = "4",
+                            Src = "94.131.48.150",
+                            Dst = "192.168.0.110",
+                            Proto = "6",
+                        },
+                        Tcp = new TSharkTcp
+                        {
+                            SrcPort = "50101",
+                            DstPort = "58295",
+                            Stream = "0",
+                            Payload = "00:00:00:4d",
+                        },
+                        TcpSegments = new TSharkTcpSegments
+                        {
+                            ReassembledData = "d0:6f",
+                            ReassembledLength = 4,
+                            Segment = new List<int> { 14, 15 },
+                            SegmentCount = 2
+                        },
+                        Data = new List<TSharkData>
+                        {
+                            new TSharkData { Data = "04:00:00:9f", Length = 4 },
+                            new TSharkData { Data = "00:00:08", Length = 3 }
+                        }
+                    }
+                }
+            };
+
+            actualObj.Should().BeEquivalentTo(expectedObj);
+        }
+
     }
 
 
