@@ -1,31 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.Helpers;
+﻿using Netryoshka.ViewModels;
 
 namespace Netryoshka
 {
-    public partial class TcpAsciiBubbleViewModel : ObservableObject
+    public partial class TcpAsciiBubbleViewModel : TcpBubbleViewModelBase
     {
-
-        [ObservableProperty]
-        private FlowEndpointRole _endPointRole;
-        [ObservableProperty]
-        private string? _headerContent;
-        [ObservableProperty]
-        private string? _bodyContent;
-        [ObservableProperty]
-        private string? _footerContent;
-
-        public TcpAsciiBubbleViewModel()
-        {
-
-        }
-
         public TcpAsciiBubbleViewModel(BubbleData data)
+            : base(data, TcpEncoding.Ascii)
         {
-            EndPointRole = data.EndPointRole;
-            HeaderContent = BubbleDataHelper.BuildTcpHeaderContent(data);
-            BodyContent = BubbleDataHelper.GetDecodedTcpPayloadContent(data, TcpEncoding.Ascii);
-            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
         
     }

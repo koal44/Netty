@@ -1,24 +1,64 @@
-﻿using Netryoshka.Utils;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Netryoshka.DesignTime;
+using Netryoshka.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows;
 using static Netryoshka.BasicPacket;
 
-namespace Netryoshka.Helpers
+namespace Netryoshka.ViewModels
 {
-    public static class BubbleDataHelper
+    public abstract partial class TcpBubbleViewModelBase : ObservableObject
     {
-        public static string GetDecodedTcpPayloadContent(BubbleData data, TcpEncoding encoding)
+        public TcpEncoding? Encoding { get; }
+
+        [ObservableProperty]
+        private FlowEndpointRole _endPointRole;
+        [ObservableProperty]
+        private string? _headerContent;
+        [ObservableProperty]
+        private string? _bodyContent;
+        [ObservableProperty]
+        private string? _footerContent;
+
+
+        protected TcpBubbleViewModelBase()
+        {
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            {
+                var packet = DesignTimeData.GetPackets()[0];
+                EndPointRole = FlowEndpointRole.Pivot;
+                HeaderContent = "TcpHeader";
+                BodyContent = "TcpBody";
+                FooterContent = "TcpFooter";
+            }
+        }
+
+
+        protected TcpBubbleViewModelBase(BubbleData data, TcpEncoding encoding)
+        {
+            Encoding = encoding;
+            EndPointRole = data.EndPointRole;
+            HeaderContent = BuildTcpHeaderContent(data);
+            BodyContent = GetDecodedTcpPayloadContent(data);
+            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
+        }
+
+
+        private string GetDecodedTcpPayloadContent(BubbleData data)
         {
             var packet = data.BasicPacket;
-            return encoding switch
+            return Encoding switch
             {
                 TcpEncoding.Hex => Convert.ToHexString(packet.Payload),
                 TcpEncoding.Ascii => BitUtils.BytesToAscii(packet.Payload),
-                _ => throw new InvalidOperationException($"Unexpected TCP encoding: {encoding}")
+                _ => throw new InvalidOperationException($"Unexpected TCP encoding: {Encoding}")
             };
         }
 
-        public static string? BuildTcpHeaderContent(BubbleData data)
+
+        private static string? BuildTcpHeaderContent(BubbleData data)
         {
             var packet = data.BasicPacket;
 
@@ -51,5 +91,6 @@ namespace Netryoshka.Helpers
                 _ => throw new InvalidOperationException($"Unexpected TCP role: {role}")
             };
         }
+
     }
 }
