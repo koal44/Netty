@@ -3,9 +3,10 @@ using Netryoshka;
 using Netryoshka.Services;
 using System.Net;
 using System.Net.NetworkInformation;
+using Xunit;
 using static Netryoshka.BasicPacket;
 
-namespace Proton.Tests
+namespace Tests
 {
     public class FlowManagerTests
     {
@@ -102,6 +103,7 @@ namespace Proton.Tests
             allFlows[packet1.FlowKey].Should().HaveCount(2); // Two packets, including the duplicate
         }
 
+
         [Fact]
         public void ShouldReturnEmptyListForUnavailableFlowEndpoint()
         {
@@ -114,6 +116,7 @@ namespace Proton.Tests
             // Assert
             packets.Should().BeEmpty(); // Expecting an empty list
         }
+
 
         [Fact]
         public void ShouldRetrieveAllPacketsForGivenFlowEndpoint()

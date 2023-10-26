@@ -35,7 +35,6 @@ namespace Netryoshka
             EndPointRole = data.EndPointRole;
             HeaderContent = "";
             FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
-            //BodyContent = JsonUtils.ExtractHttpJsonObject(data.WireSharkData!.JsonString!);
             var httpJsonList = JsonUtils.ExtractJsonObjectsFromKey(data.WireSharkData!.JsonString!, "http");
             BodyContent = StringUtils.StringJoin(Environment.NewLine, httpJsonList);
         }

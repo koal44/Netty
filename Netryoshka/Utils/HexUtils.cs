@@ -31,6 +31,7 @@ namespace Netryoshka.Utils
             return (char)(n - 10 + ASCII_LOWERCASE_A);
         }
 
+
         /// <summary>
         /// Gets the integer value of a hex character.
         /// </summary>
@@ -45,6 +46,7 @@ namespace Netryoshka.Utils
             // ASCII values for 'a' to 'f' are 97-102.
             return val - (val < 58 ? 48 : val < 97 ? 55 : 87);
         }
+
 
         /// <summary>
         /// Converts a hexadecimal string to a byte array using optimized bitwise operations.
@@ -104,6 +106,7 @@ namespace Netryoshka.Utils
         public static string GenerateRandomHexString(int length)
         {
             if (length < 0) throw new ArgumentException("Length should be non-negative");
+            if (length % 2 != 0) throw new ArgumentException("Hex string lengths need to be even");
 
             byte[] buffer = new byte[length / 2];  // 2 hex digits represent one byte
             Random random = new();
@@ -113,12 +116,6 @@ namespace Netryoshka.Utils
             foreach (byte b in buffer)
             {
                 sb.Append(b.ToString("X2"));  // Convert byte to 2-digit hex
-            }
-
-            // If odd, add one more random digit
-            if (length % 2 != 0)
-            {
-                sb.Append(random.Next(0, 16).ToString("X"));
             }
 
             return sb.ToString();
@@ -198,44 +195,6 @@ namespace Netryoshka.Utils
             }
         }
 
-
-        //public static bool TryRead2Bytes(string hex, out int result)
-        //{
-        //    result = 0;
-        //    if (hex.Length < 8) return false;
-
-        //    try
-        //    {
-        //        string part = hex.Substring(4, 4);
-        //        var reversed = ReverseHexEndianness(part);
-        //        result = Convert.ToUInt16(reversed, 16);
-        //        return true;
-        //    }
-        //    catch
-        //    {
-        //        result = 0;
-        //        return false;
-        //    }
-        //}
-
-        //public static bool TryRead4Bytes(string hex, out int result)
-        //{
-        //    result = 0;
-        //    if (hex.Length < 16) return false;
-
-        //    try
-        //    {
-        //        string part = hex.Substring(8, 8);
-        //        var reversed = ReverseHexEndianness(part);
-        //        result = (int)Convert.ToUInt32(reversed, 16);
-        //        return true;
-        //    }
-        //    catch
-        //    {
-        //        result = 0;
-        //        return false;
-        //    }
-        //}
 
     }
 }

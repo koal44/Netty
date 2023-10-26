@@ -2,6 +2,7 @@
 using Netryoshka.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Tests
 {

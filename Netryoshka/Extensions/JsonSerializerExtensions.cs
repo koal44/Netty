@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Serialization;
 using System;
 
-namespace Netryoshka
+namespace Netryoshka.Extensions
 {
     public static class JsonSerializerExtensions
     {

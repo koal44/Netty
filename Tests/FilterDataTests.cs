@@ -1,16 +1,15 @@
 using FluentAssertions;
 using Netryoshka;
 using System.Net;
+using Xunit;
 using static Netryoshka.BasicPacket;
 
-namespace Proton.Tests
+namespace Tests
 {
     public class FilterDataTests
     {
-
 #pragma warning disable IDE0230 // Use UTF-8 string literal
 #pragma warning disable CA1825 // Avoid zero-length array allocations
-
 
         [Fact]
         public void ShouldKeepPacket_RemotePortMatchesOutgoingSrc_ReturnsTrue()
@@ -185,47 +184,6 @@ namespace Proton.Tests
 #pragma warning restore IDE0230 // Use UTF-8 string literal
 #pragma warning restore CA1825 // Avoid zero-length array allocations
 
-
-
-        //[Fact]
-        //public void ShouldKeepPacket_IncomingPacketMatchesRemotePort_ReturnsFalse()
-        //{
-        //    // Arrange
-        //    var filterData = new FilterData(remotePorts: new HashSet<int> { 80 });
-        //    var packet = new BasicPacket(
-        //        IPAddress.Parse("192.168.1.1"), 1000,
-        //        IPAddress.Parse("192.168.1.2"), 80,
-        //        new byte[] { }, DateTime.Now,
-        //        BPProtocol.TCP);
-        //    packet.BPDirection = BPDirection.Pivot;
-
-        //    // Act 
-        //    var result = filterData.ShouldKeepPacket(packet);
-
-        //    // Assert
-        //    result.Should().BeFalse();
-        //}
-
-
-        //[Fact]
-        //public void ShouldKeepPacket_UnknownDirectionPacketMatchesRemotePort_ReturnsTrue()
-        //{
-        //    // Arrange
-        //    var filterData = new FilterData(remotePorts: new HashSet<int> { 80 });
-        //    var packet = new BasicPacket(
-        //        IPAddress.Parse("192.168.1.1"), 1000,
-        //        IPAddress.Parse("192.168.1.2"), 80,
-        //        new byte[] { }, DateTime.Now,
-        //        BPProtocol.TCP);
-        //    packet.BPDirection = BPDirection.Other;
-
-        //    // Act 
-        //    var result = filterData.ShouldKeepPacket(packet);
-
-        //    // Assert
-        //    result.Should().BeTrue();
-        //}
     }
-
 
 }

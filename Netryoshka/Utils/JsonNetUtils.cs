@@ -252,50 +252,6 @@ namespace Netryoshka.Utils
 
         private static PrimitiveTypeCode GetTypeCode(Type t, out bool isEnum)
         {
-            var TypeCodeMap = new Dictionary<Type, PrimitiveTypeCode>()
-            {
-                { typeof(char), PrimitiveTypeCode.Char },
-                { typeof(char?), PrimitiveTypeCode.CharNullable },
-                { typeof(bool), PrimitiveTypeCode.Boolean },
-                { typeof(bool?), PrimitiveTypeCode.BooleanNullable },
-                { typeof(sbyte), PrimitiveTypeCode.SByte },
-                { typeof(sbyte?), PrimitiveTypeCode.SByteNullable },
-                { typeof(short), PrimitiveTypeCode.Int16 },
-                { typeof(short?), PrimitiveTypeCode.Int16Nullable },
-                { typeof(ushort), PrimitiveTypeCode.UInt16 },
-                { typeof(ushort?), PrimitiveTypeCode.UInt16Nullable },
-                { typeof(int), PrimitiveTypeCode.Int32 },
-                { typeof(int?), PrimitiveTypeCode.Int32Nullable },
-                { typeof(byte), PrimitiveTypeCode.Byte },
-                { typeof(byte?), PrimitiveTypeCode.ByteNullable },
-                { typeof(uint), PrimitiveTypeCode.UInt32 },
-                { typeof(uint?), PrimitiveTypeCode.UInt32Nullable },
-                { typeof(long), PrimitiveTypeCode.Int64 },
-                { typeof(long?), PrimitiveTypeCode.Int64Nullable },
-                { typeof(ulong), PrimitiveTypeCode.UInt64 },
-                { typeof(ulong?), PrimitiveTypeCode.UInt64Nullable },
-                { typeof(float), PrimitiveTypeCode.Single },
-                { typeof(float?), PrimitiveTypeCode.SingleNullable },
-                { typeof(double), PrimitiveTypeCode.Double },
-                { typeof(double?), PrimitiveTypeCode.DoubleNullable },
-                { typeof(DateTime), PrimitiveTypeCode.DateTime },
-                { typeof(DateTime?), PrimitiveTypeCode.DateTimeNullable },
-                { typeof(DateTimeOffset), PrimitiveTypeCode.DateTimeOffset },
-                { typeof(DateTimeOffset?), PrimitiveTypeCode.DateTimeOffsetNullable },
-                { typeof(decimal), PrimitiveTypeCode.Decimal },
-                { typeof(decimal?), PrimitiveTypeCode.DecimalNullable },
-                { typeof(Guid), PrimitiveTypeCode.Guid },
-                { typeof(Guid?), PrimitiveTypeCode.GuidNullable },
-                { typeof(TimeSpan), PrimitiveTypeCode.TimeSpan },
-                { typeof(TimeSpan?), PrimitiveTypeCode.TimeSpanNullable },
-                { typeof(BigInteger), PrimitiveTypeCode.BigInteger },
-                { typeof(BigInteger?), PrimitiveTypeCode.BigIntegerNullable },
-                { typeof(Uri), PrimitiveTypeCode.Uri },
-                { typeof(string), PrimitiveTypeCode.String },
-                { typeof(byte[]), PrimitiveTypeCode.Bytes },
-                //{ typeof(DBNull), PrimitiveTypeCode.DBNull }
-            };
-
             if (TypeCodeMap.TryGetValue(t, out PrimitiveTypeCode typeCode))
             {
                 isEnum = false;
@@ -323,6 +279,50 @@ namespace Netryoshka.Utils
             isEnum = false;
             return PrimitiveTypeCode.Object;
         }
+
+        private static readonly Dictionary<Type, PrimitiveTypeCode> TypeCodeMap = new()
+        {
+            { typeof(char), PrimitiveTypeCode.Char },
+            { typeof(char?), PrimitiveTypeCode.CharNullable },
+            { typeof(bool), PrimitiveTypeCode.Boolean },
+            { typeof(bool?), PrimitiveTypeCode.BooleanNullable },
+            { typeof(sbyte), PrimitiveTypeCode.SByte },
+            { typeof(sbyte?), PrimitiveTypeCode.SByteNullable },
+            { typeof(short), PrimitiveTypeCode.Int16 },
+            { typeof(short?), PrimitiveTypeCode.Int16Nullable },
+            { typeof(ushort), PrimitiveTypeCode.UInt16 },
+            { typeof(ushort?), PrimitiveTypeCode.UInt16Nullable },
+            { typeof(int), PrimitiveTypeCode.Int32 },
+            { typeof(int?), PrimitiveTypeCode.Int32Nullable },
+            { typeof(byte), PrimitiveTypeCode.Byte },
+            { typeof(byte?), PrimitiveTypeCode.ByteNullable },
+            { typeof(uint), PrimitiveTypeCode.UInt32 },
+            { typeof(uint?), PrimitiveTypeCode.UInt32Nullable },
+            { typeof(long), PrimitiveTypeCode.Int64 },
+            { typeof(long?), PrimitiveTypeCode.Int64Nullable },
+            { typeof(ulong), PrimitiveTypeCode.UInt64 },
+            { typeof(ulong?), PrimitiveTypeCode.UInt64Nullable },
+            { typeof(float), PrimitiveTypeCode.Single },
+            { typeof(float?), PrimitiveTypeCode.SingleNullable },
+            { typeof(double), PrimitiveTypeCode.Double },
+            { typeof(double?), PrimitiveTypeCode.DoubleNullable },
+            { typeof(DateTime), PrimitiveTypeCode.DateTime },
+            { typeof(DateTime?), PrimitiveTypeCode.DateTimeNullable },
+            { typeof(DateTimeOffset), PrimitiveTypeCode.DateTimeOffset },
+            { typeof(DateTimeOffset?), PrimitiveTypeCode.DateTimeOffsetNullable },
+            { typeof(decimal), PrimitiveTypeCode.Decimal },
+            { typeof(decimal?), PrimitiveTypeCode.DecimalNullable },
+            { typeof(Guid), PrimitiveTypeCode.Guid },
+            { typeof(Guid?), PrimitiveTypeCode.GuidNullable },
+            { typeof(TimeSpan), PrimitiveTypeCode.TimeSpan },
+            { typeof(TimeSpan?), PrimitiveTypeCode.TimeSpanNullable },
+            { typeof(BigInteger), PrimitiveTypeCode.BigInteger },
+            { typeof(BigInteger?), PrimitiveTypeCode.BigIntegerNullable },
+            { typeof(Uri), PrimitiveTypeCode.Uri },
+            { typeof(string), PrimitiveTypeCode.String },
+            { typeof(byte[]), PrimitiveTypeCode.Bytes },
+            //{ typeof(DBNull), PrimitiveTypeCode.DBNull }
+        };
 
 
         public enum PrimitiveTypeCode
@@ -543,8 +543,8 @@ namespace Netryoshka.Utils
                 {
                     propertyContract = serializer.GetContract(currentValue.GetType());
 
-                    useExistingValue = !propertyContract.IsReadOnlyOrFixedSize()
-                        && !propertyContract.UnderlyingType.IsValueType;
+                    useExistingValue = !propertyContract.UnderlyingType.IsValueType
+                        && !propertyContract.IsReadOnlyOrFixedSize();
                 }
             }
 
@@ -565,10 +565,10 @@ namespace Netryoshka.Utils
             }
 
             // test tokenType here because default value might not be convertible to actual type, e.g. default of "" for DateTime
-            if (JsonNetUtils.HasFlag(property.DefaultValueHandling.GetValueOrDefault(serializer.DefaultValueHandling), DefaultValueHandling.Ignore)
-                && !JsonNetUtils.HasFlag(property.DefaultValueHandling.GetValueOrDefault(serializer.DefaultValueHandling), DefaultValueHandling.Populate)
-                && JsonNetUtils.IsPrimitiveToken(tokenType)
-                && JsonNetUtils.ValueEquals(reader.Value, property.GetResolvedDefaultValue()))
+            if (HasFlag(property.DefaultValueHandling.GetValueOrDefault(serializer.DefaultValueHandling), DefaultValueHandling.Ignore)
+                && !HasFlag(property.DefaultValueHandling.GetValueOrDefault(serializer.DefaultValueHandling), DefaultValueHandling.Populate)
+                && IsPrimitiveToken(tokenType)
+                && ValueEquals(reader.Value, property.GetResolvedDefaultValue()))
             {
                 ignoredValue = true;
                 return true;

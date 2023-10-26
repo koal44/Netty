@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.Serialization;
+using static Netryoshka.Extensions.JsonReaderExtensions;
 
-namespace Netryoshka
+namespace Netryoshka.Extensions
 {
     public static class JsonContractExtensions
     {
@@ -41,6 +44,43 @@ namespace Netryoshka
                 }
             }
         }
+
+
+        public static Type NonNullableUnderlyingType(this JsonContract contract)
+        {
+            var type = contract.GetType();
+            var fieldInfo = type.GetField("NonNullableUnderlyingType", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new Exception("Could not find field 'NonNullableUnderlyingType' in JsonContract");
+            var fieldValue = fieldInfo.GetValue(contract)
+                ?? throw new Exception(fieldInfo.Name + " is null");
+
+            return (Type)fieldValue;
+        }
+
+        public static ReadType GetReadType(this JsonContract contract)
+        {
+            if (ReadTypeMap.TryGetValue(contract.CreatedType, out ReadType readType))
+            {
+                return readType;
+            }
+
+            return ReadType.Read;
+        }
+
+        private static readonly Dictionary<Type, ReadType> ReadTypeMap = new()
+        {
+            [typeof(byte[])] = ReadType.ReadAsBytes,
+            [typeof(byte)] = ReadType.ReadAsInt32,
+            [typeof(short)] = ReadType.ReadAsInt32,
+            [typeof(int)] = ReadType.ReadAsInt32,
+            [typeof(decimal)] = ReadType.ReadAsDecimal,
+            [typeof(bool)] = ReadType.ReadAsBoolean,
+            [typeof(string)] = ReadType.ReadAsString,
+            [typeof(DateTime)] = ReadType.ReadAsDateTime,
+            [typeof(float)] = ReadType.ReadAsDouble,
+            [typeof(double)] = ReadType.ReadAsDouble,
+            [typeof(long)] = ReadType.ReadAsInt64
+        };
 
 
     }

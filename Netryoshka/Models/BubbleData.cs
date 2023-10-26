@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.Services;
 using System;
-using System.Windows;
 
 namespace Netryoshka
 {

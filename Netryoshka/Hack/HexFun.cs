@@ -1,12 +1,30 @@
-﻿using System;
+﻿using Netryoshka.Utils;
+using System;
 using System.Text;
-using Netryoshka.Utils;
 
 namespace Netryoshka.Hack
 {
     public static class HexFun
     {
-        public static string GetAccessKeyFromHexMessage(string hex)
+        
+        public static (string id, string accessKey) GetDataFromAccessKeyPacket(string tcpPayload)
+        {
+            var hex = tcpPayload;
+
+            if (HexUtils.TryReadNBytesFromHex(hex, 2, 2, Endianness.Little, out uint messageType) && messageType == 1044)
+            {
+                if (HexUtils.TryReadNBytesFromHex(hex, 4, 4, Endianness.Little, out uint id))
+                {
+                    var accessKey = GetAccessKeyFromHexMessage(hex);
+                    return (id: $"{id}", accessKey);
+                }
+            }
+
+            return (id: "", accessKey: "");
+        }
+
+
+        private static string GetAccessKeyFromHexMessage(string hex)
         {
             int startIndex = hex.ToLower().IndexOf("a001");
             if (startIndex == -1)
@@ -28,23 +46,6 @@ namespace Netryoshka.Hack
             }
 
             return result.ToString();
-        }
-
-
-        public static (string id, string accessKey) GetDataFromAccessKeyPacket(string tcpPayload)
-        {
-            var hex = tcpPayload;
-
-            if (HexUtils.TryReadNBytesFromHex(hex, 2, 2, Endianness.Little, out uint messageType) && messageType == 1044)
-            {
-                if (HexUtils.TryReadNBytesFromHex(hex, 4, 4, Endianness.Little, out uint id))
-                {
-                    var accessKey = GetAccessKeyFromHexMessage(hex);
-                    return (id: $"{id}", accessKey);
-                }
-            }
-
-            return (id: "", accessKey: "");
         }
 
     }

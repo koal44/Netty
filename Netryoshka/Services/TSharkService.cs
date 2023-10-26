@@ -1,7 +1,7 @@
-﻿using Netryoshka.Json;
+﻿using Netryoshka.Extensions;
+using Netryoshka.Json;
 using Netryoshka.Utils;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -127,7 +127,6 @@ namespace Netryoshka.Services
 
             return json;
         }
-
         
 
         public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct)
@@ -164,6 +163,7 @@ namespace Netryoshka.Services
 
             return sharkData;
         }
+
 
         //private static string FixForJsonWithDuplicateKeys(string json)
         //{
@@ -386,6 +386,6 @@ namespace Netryoshka.Services
             }
         }
 
-    }
 
+    }
 }

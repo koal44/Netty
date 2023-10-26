@@ -1,9 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 
-namespace Netryoshka
+namespace Netryoshka.Extensions
 {
     public static class JsonReaderExtensions
     {
@@ -38,7 +37,7 @@ namespace Netryoshka
                 return reader.Read();
             }
 
-            ReadType t = GetReadType(contract);
+            ReadType t = contract?.GetReadType() ?? ReadType.Read;
 
             switch (t)
             {
@@ -79,7 +78,7 @@ namespace Netryoshka
             return (reader.TokenType != JsonToken.None);
         }
 
-        private enum ReadType
+        public enum ReadType
         {
             Read,
             ReadAsInt32,
@@ -90,36 +89,6 @@ namespace Netryoshka
             ReadAsDateTime,
             ReadAsDouble,
             ReadAsBoolean
-        }
-
-        private static readonly Dictionary<Type, ReadType> ReadTypeMap = new()
-        {
-            [typeof(byte[])] = ReadType.ReadAsBytes,
-            [typeof(byte)] = ReadType.ReadAsInt32,
-            [typeof(short)] = ReadType.ReadAsInt32,
-            [typeof(int)] = ReadType.ReadAsInt32,
-            [typeof(decimal)] = ReadType.ReadAsDecimal,
-            [typeof(bool)] = ReadType.ReadAsBoolean,
-            [typeof(string)] = ReadType.ReadAsString,
-            [typeof(DateTime)] = ReadType.ReadAsDateTime,
-            [typeof(float)] = ReadType.ReadAsDouble,
-            [typeof(double)] = ReadType.ReadAsDouble,
-            [typeof(long)] = ReadType.ReadAsInt64
-        };
-
-        private static ReadType GetReadType(JsonContract? contract)
-        {
-            if (contract == null)
-            {
-                return ReadType.Read;
-            }
-
-            if (ReadTypeMap.TryGetValue(contract.CreatedType, out ReadType readType))
-            {
-                return readType;
-            }
-
-            return ReadType.Read;
         }
 
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace Netryoshka
+namespace Netryoshka.Extensions
 {
     public static partial class StringExtensions
     {
