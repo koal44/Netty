@@ -33,7 +33,7 @@ namespace Netryoshka.DesignTime
             PivotProcessInfo = "SystemService";
             SelectedNetworkLayer = NetworkLayer.Frame;
             SelectedTcpEncoding = TcpEncoding.Hex;
-            SelectedDeframeMethod = DeframeMethod.Https;
+            SelectedDeframeMethod = DeframeMethod.Tls;
             KeyLogFileName = "path/to/keylogfile.txt";
 
             DateTime? lastTimestamp = null;

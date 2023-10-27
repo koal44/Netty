@@ -800,6 +800,7 @@ namespace Netryoshka
     public class TSharkTlsSegments
     {
         [JsonProperty("tls.segment")]
+        [JsonConverter(typeof(IntToListConverter))]
         public List<int>? SegmentFrameNumbers { get; set; }
 
         [JsonProperty("tls.segment.count")]

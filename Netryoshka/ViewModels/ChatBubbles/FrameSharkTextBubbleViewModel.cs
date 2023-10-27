@@ -1,24 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Netryoshka.DesignTime;
-using System;
-using System.Collections.ObjectModel;
+using Netryoshka.ViewModels.ChatBubbles;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 
-namespace Netryoshka
+namespace Netryoshka.ViewModels
 {
-    public partial class FrameSharkTextBubbleViewModel : ObservableObject
+    [CanContentScroll(true)]
+    [RequiresWireShark]
+    [RegisterBubbleViewModel("FrameSharkText")]
+    public partial class FrameSharkTextBubbleViewModel : BubbleViewModelBase
     {
-        [ObservableProperty]
-        private double _bubbleScale = 0.8;
-        [ObservableProperty]
-        private FlowEndpointRole _endPointRole;
-        [ObservableProperty]
-        private string? _footerContent;
-        [ObservableProperty]
-        private string? _bodyContent;
         [ObservableProperty]
         private bool _isExpanded;
         [ObservableProperty]
@@ -26,27 +19,27 @@ namespace Netryoshka
         [ObservableProperty]
         private string? _restOfText;
 
+
         public FrameSharkTextBubbleViewModel()
+            : base()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
                 BodyContent = "BodyContent";
                 FirstPartOfText = "FirstPartOfText";
                 RestOfText = "RestOfText";
-                EndPointRole = FlowEndpointRole.Pivot;
-                FooterContent = TimeSpan.Zero.ToString("mm\\.ss\\.ffff");
             }
         }
 
+
         public FrameSharkTextBubbleViewModel(BubbleData data)
+            : base(data)
         {
             BodyContent = data.WireSharkData?.JsonString ?? string.Empty;
             var lines = BodyContent.Split('\n');
             FirstPartOfText = string.Join("\n", lines.Take(5));
             RestOfText = lines.Length > 5 ? string.Join("\n", lines.Skip(5)) : string.Empty;
             IsExpanded = false;
-            EndPointRole = data.EndPointRole;
-            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
 
 

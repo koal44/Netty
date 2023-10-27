@@ -2,22 +2,23 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using Netryoshka.Services;
+using Netryoshka.ViewModels;
+using Netryoshka.ViewModels.ChatBubbles;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using static Netryoshka.BasicPacket;
 
 namespace Netryoshka
 {
     public partial class FlowsPageViewModel : ObservableRecipient, IFlowsPageViewModel
     {
-
         private readonly FlowManager _flowManager;
         private readonly ILogger _logger;
         private readonly TSharkService _tSharkService;
@@ -68,29 +69,6 @@ namespace Netryoshka
         private InteractionComboBoxMode _orbitCBDisplayMode;
 
 
-        private readonly Dictionary<string, Type> BubbleViewModelsByName = new()
-        {
-            { "AppHttp", typeof(AppHttpBubbleViewModel) },
-            { "AppHttps", typeof(AppHttpsBubbleViewModel) },
-            { "AppLengthPrefix", typeof(AppLengthPrefixBubbleViewModel) },
-            { "TcpHex", typeof(TcpHexBubbleViewModel) },
-            { "TcpAscii", typeof(TcpAsciiBubbleViewModel) },
-            { "Ip", typeof(IpBubbleViewModel) },
-            { "Eth", typeof(EthernetBubbleViewModel) },
-            { "FrameNoShark", typeof(FrameNoSharkBubbleViewModel) },
-            { "FrameSharkJson", typeof(FrameSharkJsonBubbleViewModel) },
-            { "FrameSharkText", typeof(FrameSharkTextBubbleViewModel) },
-        };
-
-        private readonly List<Type> WireSharkViewModelTypes = new()
-        {
-            typeof(AppHttpBubbleViewModel),
-            typeof(AppHttpsBubbleViewModel),
-            typeof(FrameSharkJsonBubbleViewModel),
-            typeof(FrameSharkTextBubbleViewModel),
-        };
-        
-
         public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService, ICaptureService captureService)
         {
             _flowManager = flowManager;
@@ -119,25 +97,12 @@ namespace Netryoshka
             UpdatePivotEndpoints();
         }
 
+
         private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
                 case nameof(ViewModelItemType):
-                    CanContentScroll = ViewModelItemType switch
-                    {
-                        //var type when type == typeof(AppHttpBubbleViewModel) => false,
-                        var type when type == typeof(AppHttpsBubbleViewModel) => false,
-                        //var type when type == typeof(AppLengthPrefixBubbleViewModel) => false,
-                        //var type when type == typeof(TcpHexBubbleViewModel) => false,
-                        //var type when type == typeof(TcpAsciiBubbleViewModel) => false,
-                        //var type when type == typeof(IpBubbleViewModel) => false,
-                        //var type when type == typeof(EthernetBubbleViewModel) => false,
-                        //var type when type == typeof(FrameNoSharkBubbleViewModel) => false,
-                        //var type when type == typeof(FrameSharkJsonBubbleViewModel) => false,
-                        //var type when type == typeof(FrameSharkTextBubbleViewModel) => false,
-                        _ => true
-                    };
                     break;
                 case nameof(SelectedPivotEndpoint):
                     UpdateOrbitEndpoints();
@@ -156,6 +121,7 @@ namespace Netryoshka
                 //case nameof(MessageTypeLength):
             }
         }
+
 
         private void UpdateWireSharkData()
         {
@@ -200,6 +166,7 @@ namespace Netryoshka
             });
         }
 
+
         private void UpdateBubbleItemsViewModels()
         {
             string key = SelectedNetworkLayer switch
@@ -210,15 +177,22 @@ namespace Netryoshka
                 _ => $"{SelectedNetworkLayer}"
             };
 
-            BubbleViewModelsByName.TryGetValue(key, out var viewModelType);
+            //BubbleViewModelsByName.TryGetValue(key, out var viewModelType);
+            BubbleViewModelBase.RegisteredTypes.TryGetValue(key, out var viewModelType);
             if (viewModelType is null)
                 throw new InvalidOperationException($"Could not select a suitable view model for key '{key}'");
 
             ViewModelItemType = viewModelType;
 
+            var canScrollAttr = viewModelType.GetCustomAttribute<CanContentScrollAttribute>(false)
+                ?? throw new InvalidOperationException($"Could not get CanContentScrollAttribute for type '{viewModelType}'");
+            CanContentScroll = canScrollAttr.CanScroll;
+
+            bool isWireSharkDependent = viewModelType.GetCustomAttributes(typeof(RequiresWireSharkAttribute), true).Any();
+
             // if it's a WireSharkViewModel and the first bubble doesn't have WireSharkData, then update it
             // UpdateWireSharkData() will call UpdateBubbleItemsViewModels() when it's done
-            if (WireSharkViewModelTypes.Contains(viewModelType) 
+            if (isWireSharkDependent
                 && CurrentBubbleDataList.Count > 0 
                 && CurrentBubbleDataList.First().WireSharkData == null)
             {
@@ -235,6 +209,7 @@ namespace Netryoshka
             }
             CurrentItemViewModelCollecion = newItemViewModelCollecion;
         }
+
 
         private void UpdatePivotEndpoints()
         {
@@ -254,10 +229,10 @@ namespace Netryoshka
 
                 switch (firstPacket.Direction)
                 {
-                    case BPDirection.Outgoing:
+                    case BasicPacket.BPDirection.Outgoing:
                         uniquePivots.Add(new InteractionEndpoint(flowKey, firstPacket.SrcEndpoint));
                         break;
-                    case BPDirection.Incoming:
+                    case BasicPacket.BPDirection.Incoming:
                         uniquePivots.Add(new InteractionEndpoint(flowKey, firstPacket.DstEndpoint));
                         break;
                     default:
@@ -281,6 +256,7 @@ namespace Netryoshka
             SelectedPivotEndpoint = PivotEndpoints.FirstOrDefault();
             SelectedBotRole ??= PivotEndpoints.Any() ? FlowEndpointRole.Pivot : null;
         }
+
 
         private void UpdateOrbitEndpoints()
         {
@@ -319,6 +295,7 @@ namespace Netryoshka
             }
         }
 
+
         private void UpdateCurrentFlow()
         {
             _currentFlowKey = null;
@@ -332,6 +309,7 @@ namespace Netryoshka
             UpdateCurrentChatBubbles();
         }
 
+
         private void UpdatePivotProcessInfo()
         {
             var processInfo = SelectedPivotEndpoint?.ProcessInfo;
@@ -342,6 +320,7 @@ namespace Netryoshka
 
             PivotProcessInfo = $"{processName}{n}{processId}{n}{processState}".Trim();
         }
+
 
         private void UpdateCurrentChatBubbles()
         {
@@ -371,11 +350,13 @@ namespace Netryoshka
             }
         }
 
+
         [RelayCommand]
         public void SelectBotRole(FlowEndpointRole endpointRole)
         {
             SelectedBotRole = endpointRole;
         }
+
 
         [RelayCommand]
         public void ToggleTcpDisplayMode()
@@ -387,6 +368,7 @@ namespace Netryoshka
             SelectedTcpEncoding = values[nextIndex];
         }
 
+
         [RelayCommand]
         public void ToggleFrameDisplay()
         {
@@ -396,6 +378,7 @@ namespace Netryoshka
 
             SelectedFrameDisplay = values[nextIndex];
         }
+
 
         [RelayCommand]
         private void LoadKeyLogFileWizard()
@@ -417,12 +400,14 @@ namespace Netryoshka
 
     }
 
+
     public enum InteractionComboBoxMode
     {
         ProcessInfo,
         DomainName,
         None
     }
+
 
     public class BubbleTemplateSelector : DataTemplateSelector
     {

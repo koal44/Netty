@@ -2,8 +2,8 @@
 {
     public enum DeframeMethod
     {
+        Tls,
         Http,
-        Https,
         LengthPrefix,
         //DelimiterBased,
         //FixSized,

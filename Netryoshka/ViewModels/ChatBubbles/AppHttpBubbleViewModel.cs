@@ -1,43 +1,22 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.Utils;
+﻿using Netryoshka.Utils;
+using Netryoshka.ViewModels.ChatBubbles;
 using System;
-using System.ComponentModel;
-using System.Windows;
 
-namespace Netryoshka
+namespace Netryoshka.ViewModels
 {
-    public partial class AppHttpBubbleViewModel : ObservableObject
+    [CanContentScroll(true)]
+    [RequiresWireShark]
+    [RegisterBubbleViewModel("AppHttp")]
+    public partial class AppHttpBubbleViewModel : BubbleViewModelBase
     {
-
-        [ObservableProperty]
-        private FlowEndpointRole _endPointRole;
-        [ObservableProperty]
-        private string? _headerContent;
-        [ObservableProperty]
-        private string? _bodyContent;
-        [ObservableProperty]
-        private string? _footerContent;
-
-        public AppHttpBubbleViewModel()
-        {
-            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
-            {
-                //var packet = DesignTimeData.GetPackets()[0];
-                EndPointRole = FlowEndpointRole.Pivot;
-                HeaderContent = "IpHeader";
-                BodyContent = "IpBody";
-                FooterContent = "IpFooter";
-            }
-        }
+        public AppHttpBubbleViewModel() : base()
+        { }
 
         public AppHttpBubbleViewModel(BubbleData data)
+            : base(data)
         {
-            EndPointRole = data.EndPointRole;
-            HeaderContent = "";
-            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
             var httpJsonList = JsonUtils.ExtractJsonObjectsFromKey(data.WireSharkData!.JsonString!, "http");
             BodyContent = StringUtils.StringJoin(Environment.NewLine, httpJsonList);
         }
-        
     }
 }

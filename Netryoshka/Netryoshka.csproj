@@ -104,7 +104,7 @@
       <Compile Update="Views\UserControls\ChatBubbles\AppHttpBubble.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\AppHttpsBubble.xaml.cs">
+      <Compile Update="Views\UserControls\ChatBubbles\AppTlsBubble.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
       <Compile Update="Views\UserControls\ChatBubbles\IpBubble.xaml.cs">

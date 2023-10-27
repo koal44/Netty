@@ -1,38 +1,36 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Netryoshka.DesignTime;
-using System;
-using System.Collections.Generic;
+using Netryoshka.ViewModels.ChatBubbles;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 
-namespace Netryoshka
+namespace Netryoshka.ViewModels
 {
-    public partial class FrameSharkJsonBubbleViewModel : ObservableObject
+    [CanContentScroll(true)]
+    [RequiresWireShark]
+    [RegisterBubbleViewModel("FrameSharkJson")]
+    public partial class FrameSharkJsonBubbleViewModel : BubbleViewModelBase
     {
-        [ObservableProperty]
-        private double _bubbleScale = 0.8;
-        [ObservableProperty]
-        private FlowEndpointRole _endPointRole;
-        [ObservableProperty]
-        private string? _footerContent;
         [ObservableProperty]
         private ObservableCollection<TreeNode> _treeNodes = new();
         [ObservableProperty]
         private bool _isExpanded = true;
 
+
         public FrameSharkJsonBubbleViewModel()
+            : base()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
                 var packet = DesignTimeData.GetPackets()[0];
                 TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(packet) };
-                EndPointRole = FlowEndpointRole.Pivot;
-                FooterContent = TimeSpan.Zero.ToString("mm\\.ss\\.ffff");
             }
         }
 
+
         public FrameSharkJsonBubbleViewModel(BubbleData data)
+            : base(data)
         {
             TreeNodes = new ObservableCollection<TreeNode>
             {
@@ -41,9 +39,6 @@ namespace Netryoshka
                     ?? new TSharkLayers()
                 )
             };
-            EndPointRole = data.EndPointRole;
-            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
-
     }
 }

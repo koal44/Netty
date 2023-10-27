@@ -7,15 +7,18 @@ using System.Windows;
 
 namespace Netryoshka.ViewModels
 {
-    [CanContentScroll(true)]
-    [RegisterBubbleViewModel("FrameNoShark")]
-    public partial class FrameNoSharkBubbleViewModel : BubbleViewModelBase
+    [CanContentScroll(false)]
+    [RequiresWireShark]
+    [RegisterBubbleViewModel("AppTls")]
+    public partial class AppTlsBubbleViewModel : BubbleViewModelBase
     {
         [ObservableProperty]
         private ObservableCollection<TreeNode> _treeNodes = new();
+        [ObservableProperty]
+        private bool _isExpanded = true;
 
 
-        public FrameNoSharkBubbleViewModel()
+        public AppTlsBubbleViewModel()
             : base()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
@@ -26,10 +29,12 @@ namespace Netryoshka.ViewModels
         }
 
 
-        public FrameNoSharkBubbleViewModel(BubbleData data)
+        public AppTlsBubbleViewModel(BubbleData data)
             : base(data)
         {
-            TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(data.BasicPacket) };
+            var TlsNode = data.WireSharkData?.WireSharkPacket.Source?.Layers?.Tls;
+            var treeNode = TlsNode != null ? TreeNode.BuildFromObject(TlsNode) : new TreeNode();
+            TreeNodes = new ObservableCollection<TreeNode> { treeNode };
         }
     }
 }

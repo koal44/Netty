@@ -1,43 +1,22 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.DesignTime;
-using Netryoshka.Extensions;
-using System;
-using System.ComponentModel;
-using System.Windows;
+﻿using Netryoshka.Extensions;
+using Netryoshka.ViewModels.ChatBubbles;
 
-namespace Netryoshka
+namespace Netryoshka.ViewModels
 {
-    public partial class EthernetBubbleViewModel : ObservableObject
+    [CanContentScroll(true)]
+    [RegisterBubbleViewModel("Eth")]
+    public partial class EthernetBubbleViewModel : BubbleViewModelBase
     {
-
-        [ObservableProperty]
-        private FlowEndpointRole _endPointRole;
-        [ObservableProperty]
-        private string? _headerContent;
-        [ObservableProperty]
-        private string? _bodyContent;
-        [ObservableProperty]
-        private string? _footerContent;
-
         public EthernetBubbleViewModel()
-        {
-            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
-            {
-                var packet = DesignTimeData.GetPackets()[0];
-                EndPointRole = FlowEndpointRole.Pivot;
-                HeaderContent = null;
-                BodyContent = GetEthernetContent(packet);
-                FooterContent = TimeSpan.Zero.ToString("mm\\.ss\\.ffff");
-            }
-        }
+            : base()
+        { }
 
         public EthernetBubbleViewModel(BubbleData data)
+            : base(data)
         {
-            EndPointRole = data.EndPointRole;
-            HeaderContent = null;
             BodyContent = GetEthernetContent(data.BasicPacket);
-            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
+
 
         private static string? GetEthernetContent(BasicPacket packet)
         {

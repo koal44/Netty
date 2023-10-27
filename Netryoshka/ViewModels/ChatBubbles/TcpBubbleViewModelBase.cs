@@ -1,48 +1,29 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.DesignTime;
-using Netryoshka.Utils;
+﻿using Netryoshka.Utils;
+using Netryoshka.ViewModels.ChatBubbles;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows;
 using static Netryoshka.BasicPacket;
 
 namespace Netryoshka.ViewModels
 {
-    public abstract partial class TcpBubbleViewModelBase : ObservableObject
+    public abstract partial class TcpBubbleViewModelBase : BubbleViewModelBase
     {
         public TcpEncoding? Encoding { get; }
 
-        [ObservableProperty]
-        private FlowEndpointRole _endPointRole;
-        [ObservableProperty]
-        private string? _headerContent;
-        [ObservableProperty]
-        private string? _bodyContent;
-        [ObservableProperty]
-        private string? _footerContent;
 
-
-        protected TcpBubbleViewModelBase()
+        protected TcpBubbleViewModelBase(TcpEncoding encoding)
+            : base()
         {
-            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
-            {
-                var packet = DesignTimeData.GetPackets()[0];
-                EndPointRole = FlowEndpointRole.Pivot;
-                HeaderContent = "TcpHeader";
-                BodyContent = "TcpBody";
-                FooterContent = "TcpFooter";
-            }
+            Encoding = encoding;
         }
 
 
         protected TcpBubbleViewModelBase(BubbleData data, TcpEncoding encoding)
+            : base(data)
         {
             Encoding = encoding;
-            EndPointRole = data.EndPointRole;
             HeaderContent = BuildTcpHeaderContent(data);
             BodyContent = GetDecodedTcpPayloadContent(data);
-            FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
 
 
@@ -91,6 +72,5 @@ namespace Netryoshka.ViewModels
                 _ => throw new InvalidOperationException($"Unexpected TCP role: {role}")
             };
         }
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Netryoshka.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,11 @@ namespace Netryoshka.Json
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
+            if (value is byte[] bytes)
+            {
+                writer.WriteValue(HexUtils.BytesToHex(bytes, TextCase.Lower));
+                return;
+            }
             writer.WriteValue($"{value}");
         }
 
@@ -26,7 +32,4 @@ namespace Netryoshka.Json
         public override bool CanConvert(Type objectType) => _supportedTypes.Contains(objectType);
         public override bool CanRead => false;
     }
-
-
-
 }

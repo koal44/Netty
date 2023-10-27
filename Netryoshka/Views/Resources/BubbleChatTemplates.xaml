@@ -1,54 +1,55 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Netryoshka">
+                    xmlns:local="clr-namespace:Netryoshka"
+                    xmlns:vm="clr-namespace:Netryoshka.ViewModels">
 
 
-  <DataTemplate x:Key="AppHttpsDataTemplate"
-                DataType="{x:Type local:AppHttpsBubbleViewModel}">
-    <local:AppHttpsBubble />
+  <DataTemplate x:Key="AppTlsDataTemplate"
+                DataType="{x:Type vm:AppTlsBubbleViewModel}">
+    <local:AppTlsBubble />
   </DataTemplate>
   <DataTemplate x:Key="AppHttpDataTemplate"
-                DataType="{x:Type local:AppHttpBubbleViewModel}">
+                DataType="{x:Type vm:AppHttpBubbleViewModel}">
     <local:AppHttpBubble />
   </DataTemplate>
   <DataTemplate x:Key="AppLengthPrefixDataTemplate"
-                DataType="{x:Type local:AppLengthPrefixBubbleViewModel}">
+                DataType="{x:Type vm:AppLengthPrefixBubbleViewModel}">
     <local:AppLengthPrefixBubble />
   </DataTemplate>
   <DataTemplate x:Key="TcpAsciiDataTemplate"
-                DataType="{x:Type local:TcpAsciiBubbleViewModel}">
+                DataType="{x:Type vm:TcpAsciiBubbleViewModel}">
     <local:TcpAsciiBubble />
   </DataTemplate>
   <DataTemplate x:Key="TcpHexDataTemplate"
-                DataType="{x:Type local:TcpHexBubbleViewModel}">
+                DataType="{x:Type vm:TcpHexBubbleViewModel}">
     <local:TcpHexBubble />
   </DataTemplate>
   <DataTemplate x:Key="IpDataTemplate"
-                DataType="{x:Type local:IpBubbleViewModel}">
+                DataType="{x:Type vm:IpBubbleViewModel}">
     <local:IpBubble />
   </DataTemplate>
   <DataTemplate x:Key="EthernetDataTemplate"
-                DataType="{x:Type local:EthernetBubbleViewModel}">
+                DataType="{x:Type vm:EthernetBubbleViewModel}">
     <local:EthernetBubble />
   </DataTemplate>
   <DataTemplate x:Key="FrameSharkTextDataTemplate"
-                DataType="{x:Type local:FrameSharkTextBubbleViewModel}">
+                DataType="{x:Type vm:FrameSharkTextBubbleViewModel}">
     <local:FrameSharkTextBubble />
   </DataTemplate>
   <DataTemplate x:Key="FrameSharkJsonDataTemplate"
-                DataType="{x:Type local:FrameSharkJsonBubbleViewModel}">
+                DataType="{x:Type vm:FrameSharkJsonBubbleViewModel}">
     <local:FrameSharkJsonBubble />
   </DataTemplate>
   <DataTemplate x:Key="FrameNoSharkDataTemplate"
-                DataType="{x:Type local:FrameNoSharkBubbleViewModel}">
+                DataType="{x:Type vm:FrameNoSharkBubbleViewModel}">
     <local:FrameNoSharkBubble />
   </DataTemplate>
 
 
   <local:BubbleTemplateSelector x:Key="ChatBubbleSelector"
                                 AppHttpBubbleTemplate="{StaticResource AppHttpDataTemplate}"
-                                AppHttpsBubbleTemplate="{StaticResource AppHttpsDataTemplate}"
                                 AppLengthPrefixBubbleTemplate="{StaticResource AppLengthPrefixDataTemplate}"
+                                AppTlsBubbleTemplate="{StaticResource AppTlsDataTemplate}"
                                 EthernetBubbleTemplate="{StaticResource EthernetDataTemplate}"
                                 FrameNoSharkBubbleTemplate="{StaticResource FrameNoSharkDataTemplate}"
                                 FrameSharkJsonBubbleTemplate="{StaticResource FrameSharkJsonDataTemplate}"

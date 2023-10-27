@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Text.RegularExpressions;
 
 namespace Netryoshka
 {
@@ -16,6 +15,7 @@ namespace Netryoshka
         public string? PropertyName { get; set; }
         public string? PropertyValue { get; set; }
         public ObservableCollection<TreeNode>? Children { get; set; }
+
 
         public TreeNode()
         {
@@ -29,11 +29,13 @@ namespace Netryoshka
             return CreateTreeNodeFromJToken(jObject);
         }
 
+
         public static TreeNode BuildFromObject(object obj)
         {
             var jObject = SerializeToJObject(obj);
             return CreateTreeNodeFromJToken(jObject);
         }
+
 
         private static JObject SerializeToJObject(object obj)
         {
@@ -45,6 +47,7 @@ namespace Netryoshka
                     {
                         typeof(PhysicalAddress),
                         typeof(IPAddress),
+                        typeof(byte[]),
                     })
                 },
                 NullValueHandling = NullValueHandling.Ignore,

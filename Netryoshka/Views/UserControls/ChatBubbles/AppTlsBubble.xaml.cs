@@ -1,8 +1,8 @@
 ﻿namespace Netryoshka
 {
-    public partial class AppHttpsBubble
+    public partial class AppTlsBubble
     {
-        public AppHttpsBubble()
+        public AppTlsBubble()
         {
             InitializeComponent();
         }
