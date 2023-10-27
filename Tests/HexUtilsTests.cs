@@ -94,5 +94,42 @@ namespace Tests
         }
 
 
+        [Theory]
+        [InlineData(0x0, TextCase.Upper, '0')]
+        [InlineData(0x1, TextCase.Upper, '1')]
+        [InlineData(0x9, TextCase.Upper, '9')]
+        [InlineData(0xA, TextCase.Upper, 'A')]
+        [InlineData(0xF, TextCase.Upper, 'F')]
+        [InlineData(0xA, TextCase.Lower, 'a')]
+        [InlineData(0xF, TextCase.Lower, 'f')]
+        [InlineData(0x1F, TextCase.Lower, 'f')]
+        [InlineData(0x12F, TextCase.Lower, 'f')]
+        [InlineData(0x123F, TextCase.Lower, 'f')]
+        [InlineData(0x1234567F, TextCase.Lower, 'f')]
+        public void NibbleToHexChar_ShouldReturnCorrectValue(int input, TextCase textCase, char expected)
+        {
+            // Act
+            var result = HexUtils.NibbleToHexChar(input, textCase);
+
+            // Assert
+            result.Should().Be(expected);
+        }
+
+
+        [Theory]
+        [InlineData(new byte[] { 0x1, 0x2 }, TextCase.Upper, null, "0102")]
+        [InlineData(new byte[] { 0x1, 0x2, 0xA, 0xF }, TextCase.Upper, null, "01020A0F")]
+        [InlineData(new byte[] { 0x1, 0x2, 0xA, 0xF }, TextCase.Lower, null, "01020a0f")]
+        [InlineData(new byte[] { 0x1, 0x2, 0xA, 0xF }, TextCase.Upper, '-', "01-02-0A-0F")]
+        [InlineData(new byte[] { 0x1, 0x2, 0xA, 0xF }, TextCase.Lower, ':', "01:02:0a:0f")]
+        public void BytesToHex_ShouldReturnCorrectValue(byte[] bytes, TextCase textCase, char? separator, string expected)
+        {
+            // Act
+            var result = HexUtils.BytesToHex(bytes, textCase, separator);
+
+            // Assert
+            result.Should().Be(expected);
+        }
+
     }
 }

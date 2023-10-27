@@ -196,5 +196,68 @@ namespace Netryoshka.Utils
         }
 
 
+        /// <summary>
+        /// Converts a byte array to its hexadecimal string representation.
+        /// </summary>
+        /// <param name="bytes">The byte array to convert.</param>
+        /// <param name="textCase">The text case for the hexadecimal string.</param>
+        /// <param name="separator">The separator character to use between bytes.</param>
+        /// <returns>A hexadecimal string representation of the byte array.</returns>
+        public static string BytesToHex(byte[] bytes, TextCase textCase, char? separator = null)
+        {
+            if (bytes == null) throw new ArgumentNullException(nameof(bytes));
+            if (bytes.Length == 0) return string.Empty;
+
+            int length = (bytes.Length * 2) + (separator.HasValue ? bytes.Length - 1 : 0);
+            const int MaxLength = 2621440; // 5MB = 5 * 1024 * 1024 bytes / 2 bytes per char
+
+            if (length > MaxLength)
+            {
+                throw new ArgumentOutOfRangeException($"The length of the byte array is too large to convert to a hex string. The maximum character length for the resulting string is {MaxLength}.");
+            }
+
+            return string.Create(length, (bytes, textCase, separator), static (result, args) =>
+            {
+                var (byteArray, caseArg, sepArg) = args;
+                int byteIndex = 0;
+                int charIndex = 0;
+
+                byte currentByte = byteArray[byteIndex++];
+                result[charIndex++] = NibbleToHexChar(currentByte >> 4, caseArg);
+                result[charIndex++] = NibbleToHexChar(currentByte, caseArg);
+
+                while (byteIndex < byteArray.Length)
+                {
+                    currentByte = byteArray[byteIndex++];
+                    if (sepArg.HasValue)
+                    {
+                        result[charIndex++] = sepArg.Value;
+                    }
+                    result[charIndex++] = NibbleToHexChar(currentByte >> 4, caseArg);
+                    result[charIndex++] = NibbleToHexChar(currentByte, caseArg);
+                }
+            });
+        }
+
+
+        /// <summary>
+        /// Converts the least significant 4 bits (rightmost nibble) of an 32-bit int to its 4-bit hexadecimal character representation.
+        /// </summary>
+        /// <param name="value">The 32-bit int containing the nibble to convert.</param>
+        /// <param name="textCase">Specifies the text casing for the hexadecimal letter when the nibble is 10 or above.</param>
+        /// <returns>A char representing the hexadecimal value of the least significant 4 bits in the int.</returns>
+        public static char NibbleToHexChar(int value, TextCase textCase)
+        {
+            int digit = value & 0xF; // Take the least significant 4 bits (ie rightmost nibble)
+            if (digit < 10)
+            {
+                return (char)('0' + digit);
+            }
+            else
+            {
+                return (char)((textCase == TextCase.Upper ? 'A' : 'a') + digit - 10);
+            }
+        }
+
     }
 }
