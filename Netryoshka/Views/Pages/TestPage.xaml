@@ -26,11 +26,11 @@
 
       <TreeView Width="300"
                 Height="200"
-                ItemsSource="{Binding Nodes}">
+                ItemsSource="{Binding TreeNodes}">
         <TreeView.ItemTemplate>
           <HierarchicalDataTemplate DataType="{x:Type local:TreeNode}"
                                     ItemsSource="{Binding Children}">
-            <TextBlock Text="{Binding Converter={local:JsonNodeToStringConverter}}" />
+            <TextBlock Text="{Binding Converter={local:TreeNodeToStringConverter}}" />
           </HierarchicalDataTemplate>
         </TreeView.ItemTemplate>
       </TreeView>

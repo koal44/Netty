@@ -2,6 +2,7 @@
 using Netryoshka.Services;
 using Netryoshka.Utils;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
@@ -22,20 +23,28 @@ namespace Netryoshka
         private async void ButtonClickHandler(object sender, RoutedEventArgs e)
         {
             await _sharkService.WritePcapngWithKeys(new System.Collections.Generic.List<string>(), new System.Threading.CancellationToken());
-            //Print(Util.GetCurrentWindowsTheme().PrettyPrint());
-            //Print(Util.GetCurrentWpfTheme());
-            //Print(Util.GetXmlStyle(typeof(Slider)));
-            //Print(Util.GetCleanXmlTemplateString(typeof(TreeView)));
-            //Print($"{Util.GetDeclaringBaseTypeOfProperty(typeof(TreeView), "ThemeStyle")}");
+            //Print(WpfUtils.GetCurrentWindowsTheme().PrettyPrint());
+            //PrintList(WpfUtils.GetCurrentWpfTheme());
+            //Print(WpfUtils.GetXmlStyle(WpfUtils.GetStyleFromType(typeof(Slider))));
+            //Print(WpfUtils.GetCleanXml(WpfUtils.GetXmlStyle(WpfUtils.GetStyleFromType(typeof(TreeView)))));
+            //Print($"{ReflectionUtils.GetDeclaringBaseTypeOfProperty(typeof(TreeView), "ThemeStyle")}");
             //var style = GetThemeStyle(typeof(TreeView));
-            //var style = Util.GetStyleFromType(typeof(TreeView));
-            //var xmlStyle = Util.GetCleanXml(Util.GetXmlStyle(style));
+            //var style = WpfUtils.GetStyleFromType(typeof(TreeView));
+            //var xmlStyle = WpfUtils.GetCleanXml(WpfUtils.GetXmlStyle(style));
             //Print(xmlStyle);
         }
 
         public void Print(string? text)
         {
             TextBox.Text = text;
+        }
+
+        public void PrintList(List<string> list)
+        {
+            foreach (var item in list)
+            {
+                TextBox.Text += item + Environment.NewLine;
+            }
         }
 
         public Style GetThemeStyle(Type controlType)

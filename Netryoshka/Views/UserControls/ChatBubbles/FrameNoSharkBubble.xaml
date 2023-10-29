@@ -64,7 +64,7 @@
           <HierarchicalDataTemplate DataType="{x:Type local:TreeNode}"
                                     ItemsSource="{Binding Children}">
             <TextBlock FontSize="11"
-                       Text="{Binding Converter={local:JsonNodeToStringConverter}}" />
+                       Text="{Binding Converter={local:TreeNodeToStringConverter}}" />
           </HierarchicalDataTemplate>
         </TreeView.ItemTemplate>
       </TreeView>

@@ -84,7 +84,7 @@ namespace Netryoshka
             _selectedNetworkLayer = NetworkLayer.Tcp;
             _selectedFrameDisplay = FrameDisplay.NoShark;
             _selectedTcpEncoding = TcpEncoding.Hex;
-            _selectedDeframeMethod = DeframeMethod.LengthPrefix;
+            _selectedDeframeMethod = DeframeMethod.Tls; // DeframeMethod.LengthPrefix;
             _currentItemViewModelCollecion = new();
             _deframeMethods = Enum.GetValues(typeof(DeframeMethod)).Cast<DeframeMethod>();
             _canContentScroll = true;
@@ -177,7 +177,6 @@ namespace Netryoshka
                 _ => $"{SelectedNetworkLayer}"
             };
 
-            //BubbleViewModelsByName.TryGetValue(key, out var viewModelType);
             BubbleViewModelBase.RegisteredTypes.TryGetValue(key, out var viewModelType);
             if (viewModelType is null)
                 throw new InvalidOperationException($"Could not select a suitable view model for key '{key}'");
@@ -413,7 +412,7 @@ namespace Netryoshka
     {
         public DataTemplate AppLengthPrefixBubbleTemplate { get; set; } = null!;
         public DataTemplate AppHttpBubbleTemplate { get; set; } = null!;
-        public DataTemplate AppHttpsBubbleTemplate { get; set; } = null!;
+        public DataTemplate AppTlsBubbleTemplate { get; set; } = null!;
         public DataTemplate TcpHexBubbleTemplate { get; set; } = null!;
         public DataTemplate TcpAsciiBubbleTemplate { get; set; } = null!;
         public DataTemplate IpBubbleTemplate { get; set; } = null!;
@@ -435,7 +434,7 @@ namespace Netryoshka
                 TcpHexBubbleViewModel => TcpHexBubbleTemplate,
                 AppLengthPrefixBubbleViewModel => AppLengthPrefixBubbleTemplate,
                 AppHttpBubbleViewModel => AppHttpBubbleTemplate,
-                AppHttpsBubbleViewModel => AppHttpsBubbleTemplate,
+                AppTlsBubbleViewModel => AppTlsBubbleTemplate,
                 _ => base.SelectTemplate(item, container),
             };
             return template;

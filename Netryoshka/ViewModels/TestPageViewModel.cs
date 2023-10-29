@@ -1,17 +1,18 @@
-﻿using Netryoshka.DesignTime;
-using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Netryoshka.DesignTime;
+using System.Collections.Generic;
 
 namespace Netryoshka.ViewModels
 {
-    public class TestPageViewModel
+    public partial class TestPageViewModel : ObservableObject
     {
-        public ObservableCollection<TreeNode> Nodes { get; set; }
+        [ObservableProperty]
+        private List<TreeNode> _treeNodes;
 
         public TestPageViewModel()
         {
             var packet = DesignTimeData.GetPackets()[0];
-            var node = TreeNode.BuildFromObject(packet);
-            Nodes = new ObservableCollection<TreeNode>() { node };
+            TreeNodes = TreeNode.BuildNodesFromObject(packet);
         }
 
 

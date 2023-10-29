@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Netryoshka.DesignTime;
 using Netryoshka.ViewModels.ChatBubbles;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 
@@ -12,7 +12,7 @@ namespace Netryoshka.ViewModels
     public partial class FrameNoSharkBubbleViewModel : BubbleViewModelBase
     {
         [ObservableProperty]
-        private ObservableCollection<TreeNode> _treeNodes = new();
+        private List<TreeNode> _treeNodes = new();
 
 
         public FrameNoSharkBubbleViewModel()
@@ -21,7 +21,7 @@ namespace Netryoshka.ViewModels
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
                 var packet = DesignTimeData.GetPackets()[0];
-                TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(packet) };
+                TreeNodes = TreeNode.BuildNodesFromObject(packet);
             }
         }
 
@@ -29,7 +29,7 @@ namespace Netryoshka.ViewModels
         public FrameNoSharkBubbleViewModel(BubbleData data)
             : base(data)
         {
-            TreeNodes = new ObservableCollection<TreeNode> { TreeNode.BuildFromObject(data.BasicPacket) };
+            TreeNodes = TreeNode.BuildNodesFromObject(data.BasicPacket);
         }
     }
 }

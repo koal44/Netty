@@ -721,6 +721,10 @@ namespace Netryoshka
         [JsonProperty("tls.session_id")]
         public string? SessionId { get; set; }
 
+        [JsonConverter(typeof(StringToListConverter))]
+        [JsonProperty("tls.segment.data")]
+        public List<string>? SegmentData { get; set; }
+
         public class TlsRecordToListConverter : SingleToListConverter<TlsRecord> { }
         public class TlsHandshakeToListConverter : SingleToListConverter<TlsHandshake> { }
         public class StringToHandshakeVersionConverter : StringToEnumConverter<TlsHandshakeVersion> { }

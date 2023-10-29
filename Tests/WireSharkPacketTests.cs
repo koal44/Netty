@@ -688,19 +688,22 @@ namespace Tests
             expectedObject.Should().BeEquivalentTo(actualobject);
         }
 
+
         [Fact]
         public void ShouldBeSerializedTo_Test2()
         {
             // Arrange
             string _json = @"{
-              ""tls.record"": {
-                ""tls.record.opaque_type"": ""23"",
-                ""tls.record.version"": ""0x0303"",
-                ""tls.record.length"": ""185"",
-                ""tls.record.content_type"": ""23"",
-                ""tls.app_data"": ""8e:de:7b:2a:f3:68:f7:be:18:a4:32:dc:33:d3:1a:2e:89:13:3b:b1:34"",
-                ""tls.app_data_proto"": ""HyperText Transfer Protocol 2""
-              }
+                ""tls.record"": {
+                    ""tls.record.opaque_type"": ""23"",
+                    ""tls.record.version"": ""0x0303"",
+                    ""tls.record.length"": ""185"",
+                    ""tls.record.content_type"": ""23"",
+                    ""tls.app_data"": ""8e:de:7b:2a:f3:68:f7:be:18:a4:32:dc:33:d3:1a:2e:89:13:3b:b1:34"",
+                    ""tls.app_data_proto"": ""HyperText Transfer Protocol 2""
+                },
+                ""tls.segment.data"": ""2a:40:cb:a3"",
+                ""tls.segment.data"": ""00:06:30:00:01:00:00:00:59""
             }";
 
             var expectedObject = new TSharkTls
@@ -719,7 +722,12 @@ namespace Tests
                     }
                 },
                 AlertMessage = null,
-                SessionId = null
+                SessionId = null,
+                SegmentData = new List<string>
+                {
+                    "2a:40:cb:a3",
+                    "00:06:30:00:01:00:00:00:59"
+                }
             };
             var actualObject = JsonConvert.DeserializeObject<TSharkTls>(_json);
 
@@ -1259,6 +1267,38 @@ namespace Tests
 
             // Act
             var result = JsonConvert.DeserializeObject<TSharkHttp2>(json);
+
+            // Assert
+            result.Should().BeEquivalentTo(expectedObject);
+        }
+    }
+
+
+    public class TSharkTlsSegementsTests
+    {
+        [Fact]
+        public void ShouldDeserializeTlsSegmentsCorrectly()
+        {
+            // Arrange
+            string json = @"{
+              ""tls.segment"": ""19"",
+              ""tls.segment"": ""20"",
+              ""tls.segment.count"": ""2"",
+              ""tls.reassembled.length"": ""1936"",
+              ""tls.reassembled.data"": ""00:07:87:01""
+            }";
+
+            var expectedObject = new TSharkTlsSegments
+            {
+                SegmentFrameNumbers = new List<int> { 19, 20 },
+                SegmentCount = 2,
+                //ReassembledLength = 1936,
+                //ReassembledData = "00:07:87:01"
+            };
+            
+
+            // Act
+            var result = JsonConvert.DeserializeObject<TSharkTlsSegments>(json);
 
             // Assert
             result.Should().BeEquivalentTo(expectedObject);
