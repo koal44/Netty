@@ -9,13 +9,6 @@
              ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              mc:Ignorable="d">
-  <!--
-    d:DataContext="{d:DesignInstance Type=design:FlowChatBubbleDesignViewModel,
-    IsDesignTimeCreatable=True}"
-    
-    d:DataContext="{StaticResource DesignTimeFlowChatBubble}"
-  -->
-
 
   <StackPanel Orientation="Vertical">
     <Border MinWidth="100"

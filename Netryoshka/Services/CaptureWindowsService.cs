@@ -438,6 +438,7 @@ namespace Netryoshka.Services
 
         public void StopCapture()
         {
+            if (_device != null) _device.OnPacketArrival -= _arrivalEventHandler;
             _packetQueue.CompleteAdding(); // No more items will be added
 
             if (_device == null) { return; }

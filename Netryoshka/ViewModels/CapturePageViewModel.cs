@@ -24,7 +24,7 @@ namespace Netryoshka.ViewModels
 {
     public partial class CapturePageViewModel : ObservableObject
 	{
-        public bool AccessKeyHack { get; private set; } = false;
+        public bool AccessKeyHack { get; private set; } = true;
 
         private readonly ICaptureService _captureService;
 		private readonly ILogger _logger;
