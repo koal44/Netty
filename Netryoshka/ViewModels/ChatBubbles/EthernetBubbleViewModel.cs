@@ -1,11 +1,10 @@
 ﻿using Netryoshka.Extensions;
-using Netryoshka.ViewModels.ChatBubbles;
 
 namespace Netryoshka.ViewModels
 {
     [CanContentScroll(true)]
     [RegisterBubbleViewModel("Eth")]
-    public partial class EthernetBubbleViewModel : BubbleViewModelBase
+    public partial class EthernetBubbleViewModel : TextBubbleViewModel
     {
         public EthernetBubbleViewModel()
             : base()

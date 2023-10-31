@@ -1,10 +1,8 @@
-﻿using Netryoshka.ViewModels.ChatBubbles;
-
-namespace Netryoshka.ViewModels
+﻿namespace Netryoshka.ViewModels
 {
     [CanContentScroll(true)]
     [RegisterBubbleViewModel("AppLengthPrefix")]
-    public partial class AppLengthPrefixBubbleViewModel : BubbleViewModelBase
+    public partial class AppLengthPrefixBubbleViewModel : BubbleViewModel
     {
         public AppLengthPrefixBubbleViewModel()
             : base()
@@ -13,7 +11,6 @@ namespace Netryoshka.ViewModels
         public AppLengthPrefixBubbleViewModel(BubbleData data)
             : base(data)
         {
-            BodyContent = $"IP: {data.BasicPacket.SrcEndpoint.IpAddress} ⟶ {data.BasicPacket.DstEndpoint.IpAddress}";
         }
     }
 }

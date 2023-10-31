@@ -1,7 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.DesignTime;
-using Netryoshka.ViewModels.ChatBubbles;
-using System.Collections.Generic;
+﻿using Netryoshka.DesignTime;
 using System.ComponentModel;
 using System.Windows;
 
@@ -9,12 +6,8 @@ namespace Netryoshka.ViewModels
 {
     [CanContentScroll(true)]
     [RegisterBubbleViewModel("FrameNoShark")]
-    public partial class FrameNoSharkBubbleViewModel : BubbleViewModelBase
+    public partial class FrameNoSharkBubbleViewModel : TreeViewBubbleViewModel
     {
-        [ObservableProperty]
-        private List<TreeNode> _treeNodes = new();
-
-
         public FrameNoSharkBubbleViewModel()
             : base()
         {
@@ -22,6 +15,7 @@ namespace Netryoshka.ViewModels
             {
                 var packet = DesignTimeData.GetPackets()[0];
                 TreeNodes = TreeNode.BuildNodesFromObject(packet);
+                IsExpanded = false;
             }
         }
 
@@ -30,6 +24,7 @@ namespace Netryoshka.ViewModels
             : base(data)
         {
             TreeNodes = TreeNode.BuildNodesFromObject(data.BasicPacket);
+            IsExpanded = false;
         }
     }
 }

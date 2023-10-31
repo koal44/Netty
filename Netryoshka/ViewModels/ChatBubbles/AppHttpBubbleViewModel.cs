@@ -1,7 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.DesignTime;
-using Netryoshka.ViewModels.ChatBubbles;
-using System.Collections.Generic;
+﻿using Netryoshka.DesignTime;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -11,21 +8,18 @@ namespace Netryoshka.ViewModels
     [CanContentScroll(true)]
     [RequiresWireShark]
     [RegisterBubbleViewModel("AppHttp")]
-    public partial class AppHttpBubbleViewModel : BubbleViewModelBase
+    public partial class AppHttpBubbleViewModel : TreeViewBubbleViewModel
     {
-        [ObservableProperty]
-        private List<TreeNode> _treeNodes = new();
-        [ObservableProperty]
-        private bool _isExpanded = true;
-
         public AppHttpBubbleViewModel() : base()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
                 var packet = DesignTimeData.GetPackets()[0];
                 TreeNodes = TreeNode.BuildNodesFromObject(packet);
+                IsExpanded = true;
             }
         }
+
 
         public AppHttpBubbleViewModel(BubbleData data)
             : base(data)
@@ -42,6 +36,7 @@ namespace Netryoshka.ViewModels
                 : Enumerable.Empty<TreeNode>();
 
             TreeNodes = httpTreeNodes.Concat(http2TreeNodes).ToList();
+            IsExpanded = true;
         }
     }
 }

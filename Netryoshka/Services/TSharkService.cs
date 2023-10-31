@@ -15,6 +15,9 @@ namespace Netryoshka.Services
 {
     public class TSharkService
     {
+        private readonly bool IsTraceDebugging = false;
+
+
         private readonly ICaptureService _captureService;
         private readonly ILogger _logger;
         private readonly string _pcapFilePath;
@@ -141,10 +144,14 @@ namespace Netryoshka.Services
 
             var serializerSettings = new JsonSerializerSettings
             {
-                TraceWriter = new CustomTraceWriter(),
                 NullValueHandling = NullValueHandling.Ignore,
                 MissingMemberHandling = MissingMemberHandling.Ignore,
             };
+
+            if (IsTraceDebugging)
+            {
+                serializerSettings.TraceWriter = new CustomTraceWriter();
+            }
 
             //var sharkPackets = JsonUtil.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings, loadSettings)
             var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings)

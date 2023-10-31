@@ -98,36 +98,6 @@
       <Compile Update="Views\Pages\TestPage.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\AppLengthPrefixBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\AppHttpBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\AppTlsBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\IpBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\FrameSharkTextChatBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\FrameSharkJsonChatBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\FrameNoSharkBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\EthernetBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\ChatBubbles\TcpAsciiFlowChatBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\UserControls\FlowChatBubble.xaml.cs">
-        <SubType>Code</SubType>
-      </Compile>
       <Compile Update="Views\UserControls\MatryoshkaBox.xaml.cs">
         <SubType>Code</SubType>
       </Compile>

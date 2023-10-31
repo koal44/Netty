@@ -1,7 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Netryoshka.DesignTime;
-using Netryoshka.ViewModels.ChatBubbles;
-using System.Collections.Generic;
+﻿using Netryoshka.DesignTime;
 using System.ComponentModel;
 using System.Windows;
 
@@ -10,14 +7,8 @@ namespace Netryoshka.ViewModels
     [CanContentScroll(true)]
     [RequiresWireShark]
     [RegisterBubbleViewModel("FrameSharkJson")]
-    public partial class FrameSharkJsonBubbleViewModel : BubbleViewModelBase
+    public partial class FrameSharkJsonBubbleViewModel : TreeViewBubbleViewModel
     {
-        [ObservableProperty]
-        private List<TreeNode> _treeNodes = new();
-        [ObservableProperty]
-        private bool _isExpanded = true;
-
-
         public FrameSharkJsonBubbleViewModel()
             : base()
         {
@@ -25,6 +16,7 @@ namespace Netryoshka.ViewModels
             {
                 var packet = DesignTimeData.GetPackets()[0];
                 TreeNodes = TreeNode.BuildNodesFromObject(packet);
+                IsExpanded = false;
             }
         }
 
@@ -34,6 +26,7 @@ namespace Netryoshka.ViewModels
         {
             var layersObject = data.WireSharkData?.WireSharkPacket?.Source?.Layers ?? new TSharkLayers();
             TreeNodes = TreeNode.BuildNodesFromObject(layersObject);
+            IsExpanded = false;
         }
     }
 }

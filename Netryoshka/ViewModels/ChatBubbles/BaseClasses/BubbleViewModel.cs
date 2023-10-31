@@ -5,9 +5,9 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 
-namespace Netryoshka.ViewModels.ChatBubbles
+namespace Netryoshka.ViewModels
 {
-    public abstract partial class BubbleViewModelBase : ObservableObject
+    public abstract partial class BubbleViewModel : ObservableObject
     {
         private static Dictionary<string, Type>? _registeredTypes;
         public static Dictionary<string, Type> RegisteredTypes
@@ -17,9 +17,9 @@ namespace Netryoshka.ViewModels.ChatBubbles
                 if (_registeredTypes == null)
                 {
                     _registeredTypes = new Dictionary<string, Type>();
-                    foreach (var type in typeof(BubbleViewModelBase).Assembly.GetTypes())
+                    foreach (var type in typeof(BubbleViewModel).Assembly.GetTypes())
                     {
-                        if (type.IsSubclassOf(typeof(BubbleViewModelBase)))
+                        if (type.IsSubclassOf(typeof(BubbleViewModel)))
                         {
                             var attribute = type.GetCustomAttribute<RegisterBubbleViewModelAttribute>();
                             if (attribute != null)
@@ -39,29 +39,54 @@ namespace Netryoshka.ViewModels.ChatBubbles
         [ObservableProperty]
         private FlowEndpointRole _endPointRole;
         [ObservableProperty]
-        private string? _headerContent;
-        [ObservableProperty]
-        private string? _bodyContent;
-        [ObservableProperty]
         private string? _footerContent;
 
 
-        protected BubbleViewModelBase()
+        protected BubbleViewModel()
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
                 EndPointRole = FlowEndpointRole.Pivot;
-                HeaderContent = "Header";
-                BodyContent = "Body";
                 FooterContent = TimeSpan.Zero.ToString("mm\\.ss\\.ffff");
             }
         }
 
 
-        protected BubbleViewModelBase(BubbleData data)
+        protected BubbleViewModel(BubbleData data)
         {
             EndPointRole = data.EndPointRole;
             FooterContent = $"#{data.BubbleIndex} {data.PacketInterval:mm\\.ss\\.ffff}";
         }
+    }
+
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class CanContentScrollAttribute : Attribute
+    {
+        public bool CanScroll { get; }
+
+        public CanContentScrollAttribute(bool canScroll)
+        {
+            CanScroll = canScroll;
+        }
+    }
+
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class RegisterBubbleViewModelAttribute : Attribute
+    {
+        public string Key { get; set; }
+
+        public RegisterBubbleViewModelAttribute(string key)
+        {
+            Key = key;
+        }
+    }
+
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+    public sealed class RequiresWireSharkAttribute : Attribute
+    {
+
     }
 }

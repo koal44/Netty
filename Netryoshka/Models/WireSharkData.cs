@@ -1,18 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace Netryoshka
+﻿namespace Netryoshka
 {
-    public partial class WireSharkData : ObservableObject
+    public class WireSharkData
     {
-        [ObservableProperty]
-        private string _jsonString;
-        [ObservableProperty]
-        private WireSharkPacket _wireSharkPacket;
+        public string JsonString { get; }
+        public WireSharkPacket WireSharkPacket { get; }
 
         public WireSharkData(string jsonString, WireSharkPacket wireSharkPacket)
         {
-            _jsonString = jsonString;
-            _wireSharkPacket = wireSharkPacket;
+            JsonString = jsonString;
+            WireSharkPacket = wireSharkPacket;
         }
     }
 }

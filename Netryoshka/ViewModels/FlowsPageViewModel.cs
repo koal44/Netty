@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using Netryoshka.Services;
 using Netryoshka.ViewModels;
-using Netryoshka.ViewModels.ChatBubbles;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +31,7 @@ namespace Netryoshka
         [ObservableProperty]
         private List<BubbleData> _currentBubbleDataList;
         [ObservableProperty]
-        private ObservableCollection<object> _currentItemViewModelCollecion;
+        private ObservableCollection<BubbleViewModel> _currentItemViewModelCollecion;
         [ObservableProperty] 
         private InteractionEndpoint? _selectedPivotEndpoint;
         [ObservableProperty]
@@ -177,7 +176,7 @@ namespace Netryoshka
                 _ => $"{SelectedNetworkLayer}"
             };
 
-            BubbleViewModelBase.RegisteredTypes.TryGetValue(key, out var viewModelType);
+            BubbleViewModel.RegisteredTypes.TryGetValue(key, out var viewModelType);
             if (viewModelType is null)
                 throw new InvalidOperationException($"Could not select a suitable view model for key '{key}'");
 
@@ -199,11 +198,11 @@ namespace Netryoshka
                 return;
             }
 
-            var newItemViewModelCollecion = new ObservableCollection<object>();
+            var newItemViewModelCollecion = new ObservableCollection<BubbleViewModel>();
             foreach (var bubbleData in CurrentBubbleDataList)
             {
-                var viewModel = Activator.CreateInstance(viewModelType, bubbleData)
-                    ?? throw new InvalidOperationException($"Could not create a view model of type '{viewModelType}'");
+                var viewModel = (BubbleViewModel)(Activator.CreateInstance(viewModelType, bubbleData)
+                    ?? throw new InvalidOperationException($"Could not create a view model of type '{viewModelType}'"));
                 newItemViewModelCollecion.Add(viewModel);
             }
             CurrentItemViewModelCollecion = newItemViewModelCollecion;

@@ -1,10 +1,8 @@
-﻿using Netryoshka.ViewModels.ChatBubbles;
-
-namespace Netryoshka.ViewModels
+﻿namespace Netryoshka.ViewModels
 {
     [CanContentScroll(true)]
     [RegisterBubbleViewModel("Ip")]
-    public partial class IpBubbleViewModel : BubbleViewModelBase
+    public partial class IpBubbleViewModel : TextBubbleViewModel
     {
         public IpBubbleViewModel()
             : base()
