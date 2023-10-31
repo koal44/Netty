@@ -83,7 +83,7 @@ namespace Tests
             }
 
 
-            public class TestTSharkTls : IFallbackString
+            public class TestTSharkTls
             {
                 public string? FallbackString { get; set; }
 
@@ -97,7 +97,7 @@ namespace Tests
                 [JsonConverter(typeof(TestTlsRecordToListConverter))]
                 public List<TestTlsRecord>? Records { get; set; }
 
-                public class TestTlsRecord : IFallbackString
+                public class TestTlsRecord
                 {
                     public string? Name { get; set; }
                     public string? FallbackString { get; set; }
@@ -332,10 +332,8 @@ namespace Tests
             public List<NestedClass>? NestedList { get; set; }
 
 
-            public class NestedClass : IFallbackString
+            public class NestedClass
             {
-                public string? FallbackString { get; set; }
-
                 [JsonProperty("sub.property")]
                 public string? Property { get; set; }
             }
