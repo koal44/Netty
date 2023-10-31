@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace Netryoshka.ViewModels
 {
-    [CanContentScroll(false)]
+    [CanContentScroll(true)]
     [RequiresWireShark]
     [RegisterBubbleViewModel("AppTls")]
     public partial class AppTlsBubbleViewModel : TreeViewBubbleViewModel

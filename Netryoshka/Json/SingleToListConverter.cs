@@ -15,6 +15,7 @@ namespace Netryoshka.Json
     /// In cases where the token is a string, a custom handler in the derived class is necessary.
     /// </remarks>
     public class SingleToListConverter<T> : JsonConverter<List<T>?>
+        where T : IFallbackString, new()
     {
         public override List<T>? ReadJson(JsonReader reader, Type objectType, List<T>? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
@@ -70,9 +71,14 @@ namespace Netryoshka.Json
         /// This method serves as an unusual workaround for cases where the JSON data 
         /// from Wireshark returns a plain string instead of an expected JSON object.
         /// </remarks>
-        public virtual T FallbackDeserializeFromString(string? str)
+        public T FallbackDeserializeFromString(string? str)
         {
-            throw new NotImplementedException("Handling of string tokens is not implemented in the base class.");
+            return new T { FallbackString = str };
         }
+    }
+
+    public interface IFallbackString
+    {
+        string? FallbackString { get; set; }
     }
 }

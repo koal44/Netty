@@ -68,7 +68,6 @@ namespace Tests
     tls.record.version:""0x0303""
     > tls.handshake[0]
       tls.handshake.type:""2""
-      tls.handshake.version:0
   > tls.record[1]
     tls.record.content_type:""20""
     tls.record.version:""0x0303""";
@@ -121,7 +120,6 @@ namespace Tests
                                     Children = new List<TreeNode>
                                     {
                                         new TreeNode { PropertyName = "tls.handshake.type", PropertyValue = "\"2\"" },
-                                        new TreeNode { PropertyName = "tls.handshake.version", PropertyValue = "0" }
                                     }
                                 }
                             }

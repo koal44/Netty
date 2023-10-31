@@ -56,6 +56,7 @@ namespace Tests
                 }
             }";
 
+
             [Fact]
             public void ShouldDeserializeJsonObjectIntoDictionary1()
             {
@@ -78,6 +79,7 @@ namespace Tests
                 messageMember!.Key.Should().Be("message");
                 messageMember!.Path.Should().Be("/detail/message");
             }
+
 
             [Fact]
             public void ShouldDeserializeJsonObjectIntoDictionary2()
@@ -165,6 +167,7 @@ namespace Tests
             ""ip.host"": ""1.1.1.1""
         }";
 
+
         [Fact]
         public void ShouldUseCustomConverter()
         {
@@ -233,6 +236,7 @@ namespace Tests
               ""tcp.analysis.missed_segment"": ""0"",
               ""tcp.analysis.fast_retransmission_ack"": ""0"",
               }";
+
 
         [Fact]
         public void DeserializeJson_ShouldPopulateTSharkTcpObject()
@@ -305,6 +309,7 @@ namespace Tests
           },
           ""eth.type"": ""0x0800""
         }";
+
 
         [Fact]
         public void ShouldDeserializeCorrectly()
@@ -410,6 +415,7 @@ namespace Tests
           ""http.file_data"": ""\n<html>\n<head>\n<title>Outgoing Port Tester<\/title>\nbody {\n\tfont-family: sans-serif;\n\tfont-size: 0.9em;\n}\n<\/style>\n\n<\/head>\n\n<body><\/body>\n\n<\/html>\n""
         }";
 
+
         [Fact]
         public void ShouldDeserializeHttpRequestCorrectly()
         {
@@ -452,6 +458,7 @@ namespace Tests
             // Assert
             actualObject.Should().BeEquivalentTo(expectedObject);
         }
+
 
         [Fact]
         public void ShouldDeserializeHttpResponseCorrectly()
@@ -500,166 +507,169 @@ namespace Tests
 
     public class TSharkTlsTests
     {
-        private readonly string _json = @"{
-            ""tls.record"": {
-                ""tls.record.content_type"": ""22"",
-                ""tls.record.version"": ""0x0301"",
-                ""tls.record.length"": ""680"",
-                ""tls.handshake"": {
-                    ""tls.handshake.type"": ""1"",
-                    ""tls.handshake.length"": ""676"",
-                    ""tls.handshake.version"": ""0x0303"",
-                    ""tls.handshake.random"": ""0c:d2:de:d2:3c:f8:dd:4a:79:75:b1:4f:c1:c1:ef:4d"",
-                    ""tls.handshake.random_tree"": {
-                        ""tls.handshake.random_time"": ""Oct 25, 1976 19:49:54.000000000 Pacific Daylight Time"",
-                        ""tls.handshake.random_bytes"": ""3c:f8:dd:4a:79:75:2a:78:c1:86:4f:c1:c1:ef:4d""
-                    },
-                    ""tls.handshake.session_id_length"": ""32"",
-                    ""tls.handshake.session_id"": ""66:38:16:e8:24:1c:f9:43:c3:4c:db:8c:db:9c:5d:4c:99"",
-                    ""tls.handshake.cipher_suites_length"": ""34"",
-                    ""tls.handshake.ciphersuites"": {
-                        ""tls.handshake.ciphersuite"": ""0x0035""
-                    },
-                    ""tls.handshake.comp_methods_length"": ""1"",
-                    ""tls.handshake.comp_methods"": {
-                        ""tls.handshake.comp_method"": ""0""
-                    },
-                    ""tls.handshake.extensions_length"": ""569"",
-                    ""Extension: server_name (len=42)"": {
-                        ""tls.handshake.extension.type"": ""0"",
-                        ""tls.handshake.extension.len"": ""42"",
-                        ""Server Name Indication extension"": {
-                            ""tls.handshake.extensions_server_name_list_len"": ""40"",
-                            ""tls.handshake.extensions_server_name_type"": ""0"",
-                            ""tls.handshake.extensions_server_name_len"": ""37"",
-                            ""tls.handshake.extensions_server_name"": ""firefox.settings.services.mozilla.com""
-                        }
-                    },
-                    ""Extension: extended_master_secret (len=0)"": {
-                        ""tls.handshake.extension.type"": ""23"",
-                        ""tls.handshake.extension.len"": ""0""
-                    },
-                    ""Extension: renegotiation_info (len=1)"": {
-                        ""tls.handshake.extension.type"": ""65281"",
-                        ""tls.handshake.extension.len"": ""1"",
-                        ""Renegotiation Info extension"": {
-                            ""tls.handshake.extensions_reneg_info_len"": ""0""
-                        }
-                    },
-                    ""Extension: supported_groups (len=14)"": {
-                        ""tls.handshake.extension.type"": ""10"",
-                        ""tls.handshake.extension.len"": ""14"",
-                        ""tls.handshake.extensions_supported_groups_length"": ""12"",
-                        ""tls.handshake.extensions_supported_groups"": {
-                            ""tls.handshake.extensions_supported_group"": ""0x0101""
-                        }
-                    },
-                    ""Extension: ec_point_formats (len=2)"": {
-                        ""tls.handshake.extension.type"": ""11"",
-                        ""tls.handshake.extension.len"": ""2"",
-                        ""tls.handshake.extensions_ec_point_formats_length"": ""1"",
-                        ""tls.handshake.extensions_ec_point_formats"": {
-                            ""tls.handshake.extensions_ec_point_format"": ""0""
-                        }
-                    },
-                    ""Extension: session_ticket (len=0)"": {
-                        ""tls.handshake.extension.type"": ""35"",
-                        ""tls.handshake.extension.len"": ""0"",
-                        ""tls.handshake.extensions.session_ticket"": """"
-                    },
-                    ""Extension: application_layer_protocol_negotiation (len=14)"": {
-                        ""tls.handshake.extension.type"": ""16"",
-                        ""tls.handshake.extension.len"": ""14"",
-                        ""tls.handshake.extensions_alpn_len"": ""12"",
-                        ""tls.handshake.extensions_alpn_list"": {
-                            ""tls.handshake.extensions_alpn_str_len"": ""8"",
-                            ""tls.handshake.extensions_alpn_str"": ""http/1.1""
-                        }
-                    },
-                    ""Extension: status_request (len=5)"": {
-                        ""tls.handshake.extension.type"": ""5"",
-                        ""tls.handshake.extension.len"": ""5"",
-                        ""tls.handshake.extensions_status_request_type"": ""1"",
-                        ""tls.handshake.extensions_status_request_responder_ids_len"": ""0"",
-                        ""tls.handshake.extensions_status_request_exts_len"": ""0""
-                    },
-                    ""Extension: delegated_credentials (len=10)"": {
-                        ""tls.handshake.extension.type"": ""34"",
-                        ""tls.handshake.extension.len"": ""10"",
-                        ""tls.handshake.sig_hash_alg_len"": ""8"",
-                        ""tls.handshake.sig_hash_algs"": {
-                            ""tls.handshake.sig_hash_alg"": ""0x0203"",
-                            ""tls.handshake.sig_hash_alg_tree"": {
-                                ""tls.handshake.sig_hash_hash"": ""2"",
-                                ""tls.handshake.sig_hash_sig"": ""3""
-                            }
-                        }
-                    },
-                    ""Extension: key_share (len=107)"": {
-                        ""tls.handshake.extension.type"": ""51"",
-                        ""tls.handshake.extension.len"": ""107"",
-                        ""Key Share extension"": {
-                            ""tls.handshake.extensions_key_share_client_length"": ""105"",
-                            ""Key Share Entry: Group: x25519, Key Exchange length: 32"": {
-                                ""tls.handshake.extensions_key_share_group"": ""29"",
-                                ""tls.handshake.extensions_key_share_key_exchange_length"": ""32"",
-                                ""tls.handshake.extensions_key_share_key_exchange"": ""1d:37:69:d2:a4:a9""
-                            },
-                            ""Key Share Entry: Group: secp256r1, Key Exchange length: 65"": {
-                                ""tls.handshake.extensions_key_share_group"": ""23"",
-                                ""tls.handshake.extensions_key_share_key_exchange_length"": ""65"",
-                                ""tls.handshake.extensions_key_share_key_exchange"": ""04:3c:7c:00:70""
-                            }
-                        }
-                    },
-                    ""Extension: supported_versions (len=5)"": {
-                        ""tls.handshake.extension.type"": ""43"",
-                        ""tls.handshake.extension.len"": ""5"",
-                        ""tls.handshake.extensions.supported_versions_len"": ""4"",
-                        ""tls.handshake.extensions.supported_version"": ""0x0303""
-                    },
-                    ""Extension: signature_algorithms (len=24)"": {
-                        ""tls.handshake.extension.type"": ""13"",
-                        ""tls.handshake.extension.len"": ""24"",
-                        ""tls.handshake.sig_hash_alg_len"": ""22"",
-                        ""tls.handshake.sig_hash_algs"": {
-                            ""tls.handshake.sig_hash_alg"": ""0x0201"",
-                            ""tls.handshake.sig_hash_alg_tree"": {
-                                ""tls.handshake.sig_hash_hash"": ""2"",
-                                ""tls.handshake.sig_hash_sig"": ""1""
-                            }
-                        }
-                    },
-                    ""Extension: psk_key_exchange_modes (len=2)"": {
-                        ""tls.handshake.extension.type"": ""45"",
-                        ""tls.handshake.extension.len"": ""2"",
-                        ""tls.extension.psk_ke_modes_length"": ""1"",
-                        ""tls.extension.psk_ke_mode"": ""1""
-                    },
-                    ""Extension: record_size_limit (len=2)"": {
-                        ""tls.handshake.extension.type"": ""28"",
-                        ""tls.handshake.extension.len"": ""2"",
-                        ""tls.record_size_limit"": ""16385""
-                    },
-                    ""Extension: Unknown type 65037 (len=281)"": {
-                        ""tls.handshake.extension.type"": ""65037"",
-                        ""tls.handshake.extension.len"": ""281"",
-                        ""tls.handshake.extension.data"": ""00:00:01:00:03:91:00:20:ff:b3:4b""
-                    },
-                    ""tls.handshake.ja3_full"": ""771,4865-4867-28-65037,29-23-24-25-256-257,0"",
-                    ""tls.handshake.ja3"": ""b5001237acdf006056b409cc433726b0""
-                }
-            }
-        }";
-
-
         [Fact]
         public void ShouldBeSerializedTo_Test()
         {
             // Arrange
+            string _json = @"{
+                ""tls.record"": {
+                    ""tls.record.content_type"": ""22"",
+                    ""tls.record.version"": ""0x0301"",
+                    ""tls.record.length"": ""680"",
+                    ""tls.handshake"": {
+                        ""tls.handshake.type"": ""1"",
+                        ""tls.handshake.length"": ""676"",
+                        ""tls.handshake.version"": ""0x0303"",
+                        ""tls.handshake.random"": ""0c:d2:de:d2:3c:f8:dd:4a:79:75:b1:4f:c1:c1:ef:4d"",
+                        ""tls.handshake.random_tree"": {
+                            ""tls.handshake.random_time"": ""Oct 25, 1976 19:49:54.000000000 Pacific Daylight Time"",
+                            ""tls.handshake.random_bytes"": ""3c:f8:dd:4a:79:75:2a:78:c1:86:4f:c1:c1:ef:4d""
+                        },
+                        ""tls.handshake.session_id_length"": ""32"",
+                        ""tls.handshake.session_id"": ""66:38:16:e8:24:1c:f9:43:c3:4c:db:8c:db:9c:5d:4c:99"",
+                        ""tls.handshake.cipher_suites_length"": ""34"",
+                        ""tls.handshake.ciphersuites"": {
+                            ""tls.handshake.ciphersuite"": ""0x0035""
+                        },
+                        ""tls.handshake.comp_methods_length"": ""1"",
+                        ""tls.handshake.comp_methods"": {
+                            ""tls.handshake.comp_method"": ""0""
+                        },
+                        ""tls.handshake.extensions_length"": ""569"",
+                        ""Extension: server_name (len=42)"": {
+                            ""tls.handshake.extension.type"": ""0"",
+                            ""tls.handshake.extension.len"": ""42"",
+                            ""Server Name Indication extension"": {
+                                ""tls.handshake.extensions_server_name_list_len"": ""40"",
+                                ""tls.handshake.extensions_server_name_type"": ""0"",
+                                ""tls.handshake.extensions_server_name_len"": ""37"",
+                                ""tls.handshake.extensions_server_name"": ""firefox.settings.services.mozilla.com""
+                            }
+                        },
+                        ""Extension: extended_master_secret (len=0)"": {
+                            ""tls.handshake.extension.type"": ""23"",
+                            ""tls.handshake.extension.len"": ""0""
+                        },
+                        ""Extension: renegotiation_info (len=1)"": {
+                            ""tls.handshake.extension.type"": ""65281"",
+                            ""tls.handshake.extension.len"": ""1"",
+                            ""Renegotiation Info extension"": {
+                                ""tls.handshake.extensions_reneg_info_len"": ""0""
+                            }
+                        },
+                        ""Extension: supported_groups (len=14)"": {
+                            ""tls.handshake.extension.type"": ""10"",
+                            ""tls.handshake.extension.len"": ""14"",
+                            ""tls.handshake.extensions_supported_groups_length"": ""12"",
+                            ""tls.handshake.extensions_supported_groups"": {
+                                ""tls.handshake.extensions_supported_group"": ""0x0101""
+                            }
+                        },
+                        ""Extension: ec_point_formats (len=2)"": {
+                            ""tls.handshake.extension.type"": ""11"",
+                            ""tls.handshake.extension.len"": ""2"",
+                            ""tls.handshake.extensions_ec_point_formats_length"": ""1"",
+                            ""tls.handshake.extensions_ec_point_formats"": {
+                                ""tls.handshake.extensions_ec_point_format"": ""0""
+                            }
+                        },
+                        ""Extension: session_ticket (len=0)"": {
+                            ""tls.handshake.extension.type"": ""35"",
+                            ""tls.handshake.extension.len"": ""0"",
+                            ""tls.handshake.extensions.session_ticket"": """"
+                        },
+                        ""Extension: application_layer_protocol_negotiation (len=14)"": {
+                            ""tls.handshake.extension.type"": ""16"",
+                            ""tls.handshake.extension.len"": ""14"",
+                            ""tls.handshake.extensions_alpn_len"": ""12"",
+                            ""tls.handshake.extensions_alpn_list"": {
+                                ""tls.handshake.extensions_alpn_str_len"": ""8"",
+                                ""tls.handshake.extensions_alpn_str"": ""http/1.1""
+                            }
+                        },
+                        ""Extension: status_request (len=5)"": {
+                            ""tls.handshake.extension.type"": ""5"",
+                            ""tls.handshake.extension.len"": ""5"",
+                            ""tls.handshake.extensions_status_request_type"": ""1"",
+                            ""tls.handshake.extensions_status_request_responder_ids_len"": ""0"",
+                            ""tls.handshake.extensions_status_request_exts_len"": ""0""
+                        },
+                        ""Extension: delegated_credentials (len=10)"": {
+                            ""tls.handshake.extension.type"": ""34"",
+                            ""tls.handshake.extension.len"": ""10"",
+                            ""tls.handshake.sig_hash_alg_len"": ""8"",
+                            ""tls.handshake.sig_hash_algs"": {
+                                ""tls.handshake.sig_hash_alg"": ""0x0203"",
+                                ""tls.handshake.sig_hash_alg_tree"": {
+                                    ""tls.handshake.sig_hash_hash"": ""2"",
+                                    ""tls.handshake.sig_hash_sig"": ""3""
+                                }
+                            }
+                        },
+                        ""Extension: key_share (len=107)"": {
+                            ""tls.handshake.extension.type"": ""51"",
+                            ""tls.handshake.extension.len"": ""107"",
+                            ""Key Share extension"": {
+                                ""tls.handshake.extensions_key_share_client_length"": ""105"",
+                                ""Key Share Entry: Group: x25519, Key Exchange length: 32"": {
+                                    ""tls.handshake.extensions_key_share_group"": ""29"",
+                                    ""tls.handshake.extensions_key_share_key_exchange_length"": ""32"",
+                                    ""tls.handshake.extensions_key_share_key_exchange"": ""1d:37:69:d2:a4:a9""
+                                },
+                                ""Key Share Entry: Group: secp256r1, Key Exchange length: 65"": {
+                                    ""tls.handshake.extensions_key_share_group"": ""23"",
+                                    ""tls.handshake.extensions_key_share_key_exchange_length"": ""65"",
+                                    ""tls.handshake.extensions_key_share_key_exchange"": ""04:3c:7c:00:70""
+                                }
+                            }
+                        },
+                        ""Extension: supported_versions (len=5)"": {
+                            ""tls.handshake.extension.type"": ""43"",
+                            ""tls.handshake.extension.len"": ""5"",
+                            ""tls.handshake.extensions.supported_versions_len"": ""4"",
+                            ""tls.handshake.extensions.supported_version"": ""0x0303""
+                        },
+                        ""Extension: signature_algorithms (len=24)"": {
+                            ""tls.handshake.extension.type"": ""13"",
+                            ""tls.handshake.extension.len"": ""24"",
+                            ""tls.handshake.sig_hash_alg_len"": ""22"",
+                            ""tls.handshake.sig_hash_algs"": {
+                                ""tls.handshake.sig_hash_alg"": ""0x0201"",
+                                ""tls.handshake.sig_hash_alg_tree"": {
+                                    ""tls.handshake.sig_hash_hash"": ""2"",
+                                    ""tls.handshake.sig_hash_sig"": ""1""
+                                }
+                            }
+                        },
+                        ""Extension: psk_key_exchange_modes (len=2)"": {
+                            ""tls.handshake.extension.type"": ""45"",
+                            ""tls.handshake.extension.len"": ""2"",
+                            ""tls.extension.psk_ke_modes_length"": ""1"",
+                            ""tls.extension.psk_ke_mode"": ""1""
+                        },
+                        ""Extension: record_size_limit (len=2)"": {
+                            ""tls.handshake.extension.type"": ""28"",
+                            ""tls.handshake.extension.len"": ""2"",
+                            ""tls.record_size_limit"": ""16385""
+                        },
+                        ""Extension: Unknown type 65037 (len=281)"": {
+                            ""tls.handshake.extension.type"": ""65037"",
+                            ""tls.handshake.extension.len"": ""281"",
+                            ""tls.handshake.extension.data"": ""00:00:01:00:03:91:00:20:ff:b3:4b""
+                        },
+                        ""tls.handshake.ja3_full"": ""771,4865-4867-28-65037,29-23-24-25-256-257,0"",
+                        ""tls.handshake.ja3"": ""b5001237acdf006056b409cc433726b0""
+                    }
+                }
+            }";
+
+            // Act
+            var actualobject = JsonConvert.DeserializeObject<TSharkTls>(_json);
+
+            // Assert
             var expectedObject = new TSharkTls
             {
-                Tls = null,
+                FallbackString = null,
                 Records = new List<TSharkTls.TlsRecord>
                 {
                     new TSharkTls.TlsRecord
@@ -682,10 +692,8 @@ namespace Tests
                 AlertMessage = null,
                 SessionId = null
             };
-            var actualobject = JsonConvert.DeserializeObject<TSharkTls>(_json);
 
-            // Act & Assert
-            expectedObject.Should().BeEquivalentTo(actualobject);
+            actualobject.Should().BeEquivalentTo(expectedObject);
         }
 
 
@@ -706,9 +714,13 @@ namespace Tests
                 ""tls.segment.data"": ""00:06:30:00:01:00:00:00:59""
             }";
 
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkTls>(_json);
+
+            // Assert
             var expectedObject = new TSharkTls
             {
-                Tls = null,
+                FallbackString = null,
                 Records = new List<TSharkTls.TlsRecord>
                 {
                     new TSharkTls.TlsRecord
@@ -729,10 +741,8 @@ namespace Tests
                     "00:06:30:00:01:00:00:00:59"
                 }
             };
-            var actualObject = JsonConvert.DeserializeObject<TSharkTls>(_json);
 
-            // Act & Assert
-            expectedObject.Should().BeEquivalentTo(actualObject);
+            actualObject.Should().BeEquivalentTo(expectedObject);
         }
 
 
@@ -795,6 +805,10 @@ namespace Tests
               }
             }";
 
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkLayers>(_json);
+
+            // Assert
             var expectedObject = new TSharkLayers
             {
                 Tls = new List<TSharkTls>
@@ -848,12 +862,88 @@ namespace Tests
                 }
             };
 
-
-            var actualObject = JsonConvert.DeserializeObject<TSharkLayers>(_json);
-
-            // Act & Assert
-            expectedObject.Should().BeEquivalentTo(actualObject);
+            actualObject.Should().BeEquivalentTo(expectedObject);
         }
+
+
+        [Fact]
+        public void Deserialize_WithEmptyStringHandshake_ShouldHandleFallbackCorrectly()
+        {
+            // Arrange
+            var json = @"{
+              ""tls.record"": {
+                ""tls.record.content_type"": ""22"",
+                ""tls.record.version"": ""0x0303"",
+                ""tls.record.length"": ""102"",
+                ""tls.handshake"": {
+                  ""tls.handshake.type"": ""16"",
+                  ""tls.handshake.length"": ""98"",
+                  ""EC Diffie-Hellman Client Params"": {
+                    ""tls.handshake.client_point_len"": ""97"",
+                    ""tls.handshake.client_point"": ""04:2a""
+                  }
+                }
+              },
+              ""tls.record"": {
+                ""tls.record.content_type"": ""20"",
+                ""tls.record.version"": ""0x0303"",
+                ""tls.record.length"": ""1"",
+                ""tls.change_cipher_spec"": """"
+              },
+              ""tls.record"": {
+                ""tls.record.content_type"": ""22"",
+                ""tls.record.version"": ""0x0303"",
+                ""tls.record.length"": ""40"",
+                ""tls.handshake"": """"
+              }
+            }";
+
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkTls>(json);
+
+            // Assert
+            var expectedObject = new TSharkTls
+            {
+                Records = new List<TSharkTls.TlsRecord>
+                {
+                    new TSharkTls.TlsRecord
+                    {
+                        ContentType = "22",
+                        Version = "0x0303",
+                        Length = 102,
+                        Handshake = new List<TSharkTls.TlsHandshake>
+                        {
+                            new TSharkTls.TlsHandshake
+                            {
+                                HandshakeType = "16",
+                            },
+                        }
+                    },
+                    new TSharkTls.TlsRecord
+                    {
+                        ContentType = "20",
+                        Version = "0x0303",
+                        Length = 1,
+                    },
+                    new TSharkTls.TlsRecord
+                    {
+                        ContentType = "22",
+                        Version = "0x0303",
+                        Length = 40,
+                        Handshake = new List<TSharkTls.TlsHandshake>
+                        {
+                            new TSharkTls.TlsHandshake
+                            {
+                                FallbackString = "",
+                            }
+                        }
+                    }
+                }
+            };
+
+            actualObject.Should().BeEquivalentTo(expectedObject);
+        }
+
     }
 
 
@@ -884,6 +974,10 @@ namespace Tests
               ""frame.protocols"": ""eth: ethertype: ip: tcp: tls: http2""
             }";
 
+            // Act
+            var actualObj = JsonConvert.DeserializeObject<TSharkFrame>(json);
+
+            // Assert
             var expectedObj = new TSharkFrame
             {
                 SectionNumber = 1,
@@ -897,10 +991,6 @@ namespace Tests
                 Protocols = "eth: ethertype: ip: tcp: tls: http2"
             };
 
-            // Act
-            var actualObj = JsonConvert.DeserializeObject<TSharkFrame>(json);
-
-            // Assert
             actualObj.Should().NotBeNull();
             actualObj!.Should().BeEquivalentTo(expectedObj);
         }
@@ -960,6 +1050,7 @@ namespace Tests
 
             actualObj.Should().BeEquivalentTo(expectedObj);
         }
+
 
         [Fact]
         public void DeserializeJson_WithMinimalData_ShouldCreateEquivalentWireSharkObject()
@@ -1231,6 +1322,12 @@ namespace Tests
               }
             }";
 
+            
+
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkHttp2>(json);
+
+            // Assert
             var expectedObject = new TSharkHttp2
             {
                 Stream = new TSharkHttp2.Http2Stream
@@ -1265,11 +1362,7 @@ namespace Tests
                 }
             };
 
-            // Act
-            var result = JsonConvert.DeserializeObject<TSharkHttp2>(json);
-
-            // Assert
-            result.Should().BeEquivalentTo(expectedObject);
+            actualObject.Should().BeEquivalentTo(expectedObject);
         }
     }
 
@@ -1288,6 +1381,10 @@ namespace Tests
               ""tls.reassembled.data"": ""00:07:87:01""
             }";
 
+            // Act
+            var actualObject = JsonConvert.DeserializeObject<TSharkTlsSegments>(json);
+
+            // Assert
             var expectedObject = new TSharkTlsSegments
             {
                 SegmentFrameNumbers = new List<int> { 19, 20 },
@@ -1295,13 +1392,8 @@ namespace Tests
                 //ReassembledLength = 1936,
                 //ReassembledData = "00:07:87:01"
             };
-            
 
-            // Act
-            var result = JsonConvert.DeserializeObject<TSharkTlsSegments>(json);
-
-            // Assert
-            result.Should().BeEquivalentTo(expectedObject);
+            actualObject.Should().BeEquivalentTo(expectedObject);
         }
     }
 

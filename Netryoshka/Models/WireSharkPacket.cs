@@ -79,7 +79,7 @@ namespace Netryoshka
 
         public class TlsToListConverter : SingleToListConverter<TSharkTls>
         {
-            public override TSharkTls FallbackDeserializeFromString(string? str) => new() { Tls = str };
+            //public override TSharkTls FallbackDeserializeFromString(string? str) => new() { FallbackString = str };
         }
         public class TlsSegmentsToListConverter : SingleToListConverter<TSharkTlsSegments> { }
         public class Http2ToListConverter : SingleToListConverter<TSharkHttp2> { }
@@ -618,8 +618,10 @@ namespace Netryoshka
     }
 
 
-    public class TSharkData
+    public class TSharkData : IFallbackString
     {
+        public string? FallbackString { get; set; }
+
         [JsonProperty("data.data")]
         public string? Data { get; set; }
 
@@ -641,8 +643,10 @@ namespace Netryoshka
 
 
     [JsonConverter(typeof(TSharkHttp2Converter))]
-    public class TSharkHttp2
+    public class TSharkHttp2 : IFallbackString
     {
+        public string? FallbackString { get; set; }
+
         [JsonProperty("http2.stream")]
         public Http2Stream? Stream { get; set; }
 
@@ -692,8 +696,10 @@ namespace Netryoshka
             public class HeaderToListConverter : SingleToListConverter<TSharkHttp2Header> { }
         }
 
-        public class TSharkHttp2Header
+        public class TSharkHttp2Header : IFallbackString
         {
+            public string? FallbackString { get; set; }
+
             [JsonProperty("http2.header.name")]
             public string? Name { get; set; }
 
@@ -707,9 +713,9 @@ namespace Netryoshka
 
 
     [JsonConverter(typeof(TSharkTlsConverter))]
-    public class TSharkTls
+    public class TSharkTls : IFallbackString
     {
-        public string? Tls { get; set; } // sometimes the entire class is just a string
+        public string? FallbackString { get; set; } // sometimes the entire class is just a string
 
         [JsonConverter(typeof(TlsRecordToListConverter))]
         [JsonProperty("tls.record")]
@@ -738,8 +744,10 @@ namespace Netryoshka
             Tls13 = 0x0304
         }
 
-        public class TlsRecord
+        public class TlsRecord : IFallbackString
         {
+            public string? FallbackString { get; set; }
+
             [JsonProperty("tls.record.content_type")]
             public string? ContentType { get; set; }
 
@@ -763,14 +771,16 @@ namespace Netryoshka
             public List<TlsHandshake>? Handshake { get; set; }
         }
 
-        public class TlsHandshake
+        public class TlsHandshake : IFallbackString
         {
+            public string? FallbackString { get; set; }
+
             [JsonProperty("tls.handshake.type")]
             public string? HandshakeType { get; set; }
 
             [JsonConverter(typeof(StringToHandshakeVersionConverter))]
             [JsonProperty("tls.handshake.version")]
-            public TlsHandshakeVersion HandshakeVersion { get; set; }
+            public TlsHandshakeVersion? HandshakeVersion { get; set; }
 
             [JsonProperty("tls.handshake.certificates")]
             public TlsCertificates? HandshakeCertificates { get; set; }
@@ -801,8 +811,10 @@ namespace Netryoshka
     }
 
 
-    public class TSharkTlsSegments
+    public class TSharkTlsSegments : IFallbackString
     {
+        public string? FallbackString { get; set; }
+
         [JsonProperty("tls.segment")]
         [JsonConverter(typeof(IntToListConverter))]
         public List<int>? SegmentFrameNumbers { get; set; }

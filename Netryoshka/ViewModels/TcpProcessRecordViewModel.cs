@@ -4,7 +4,7 @@ namespace Netryoshka.ViewModels
 {
     public class TcpProcessRecordViewModel
     {
-        private TcpProcessRecord _record;
+        private readonly TcpProcessRecord _record;
 
         public TcpProcessRecordViewModel(TcpProcessRecord record)
         {

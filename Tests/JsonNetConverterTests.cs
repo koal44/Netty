@@ -76,14 +76,16 @@ namespace Tests
             [JsonConverter(typeof(TestTlsToListConverter))]
             public List<TestTSharkTls>? Tls { get; set; }
 
+
             public class TestTlsToListConverter : SingleToListConverter<TestTSharkTls>
             {
-                public override TestTSharkTls FallbackDeserializeFromString(string? str) => new() { Tls = str };
+                //public override TestTSharkTls FallbackDeserializeFromString(string? str) => new() { FallbackString = str };
             }
 
-            public class TestTSharkTls
+
+            public class TestTSharkTls : IFallbackString
             {
-                public string? Tls { get; set; }
+                public string? FallbackString { get; set; }
 
                 [JsonProperty("tls.alert_message")]
                 public string? AlertMessage { get; set; }
@@ -95,9 +97,10 @@ namespace Tests
                 [JsonConverter(typeof(TestTlsRecordToListConverter))]
                 public List<TestTlsRecord>? Records { get; set; }
 
-                public class TestTlsRecord
+                public class TestTlsRecord : IFallbackString
                 {
                     public string? Name { get; set; }
+                    public string? FallbackString { get; set; }
                 }
 
                 public class TestTlsRecordToListConverter : SingleToListConverter<TestTlsRecord> { }
@@ -114,8 +117,9 @@ namespace Tests
 
             obj.Should().NotBeNull();
             obj!.Tls.Should().HaveCount(1);
-            obj.Tls!.First().Tls.Should().Be("someStringValue");
+            obj.Tls!.First().FallbackString.Should().Be("someStringValue");
         }
+
 
         [Fact]
         public void Deserialize_WhenTlsIsSingleObject_HandlesCorrectly()
@@ -134,6 +138,7 @@ namespace Tests
             obj.Tls!.First().AlertMessage.Should().Be("SomeAlert");
             obj.Tls!.First().SessionId.Should().Be("SomeSessionId");
         }
+
 
         [Fact]
         public void Deserialize_WhenTlsIsArrayOfObjects_HandlesCorrectly()
@@ -172,6 +177,7 @@ namespace Tests
             actualObj.Should().BeEquivalentTo(expectedObj);
         }
 
+
         [Fact]
         public void Deserialize_WhenMultipleTlsProperties_HandlesCorrectly()
         {
@@ -195,13 +201,14 @@ namespace Tests
             obj.Tls![0].AlertMessage.Should().Be("Alert1");
             obj.Tls[0].SessionId.Should().Be("Session1");
 
-            obj.Tls[1].Tls.Should().Be("AnotherTlsString");
+            obj.Tls[1].FallbackString.Should().Be("AnotherTlsString");
             obj.Tls[1].AlertMessage.Should().BeNull();
             obj.Tls[1].SessionId.Should().BeNull();
 
             obj.Tls[2].AlertMessage.Should().Be("Alert2");
             obj.Tls[2].SessionId.Should().Be("Session2");
         }
+
 
         [Fact]
         public void Should_Deserialize_MultipleTlsObjects_WithNestedProperties()
@@ -260,6 +267,7 @@ namespace Tests
 
     }
 
+
     public class KeyValuePairConverterTests
     {
         [Fact]
@@ -294,6 +302,7 @@ namespace Tests
         }
     }
 
+
     public class ErrorOnDupesConverterTests
     {
         [JsonConverter(typeof(TestConverter))]
@@ -322,11 +331,15 @@ namespace Tests
             [JsonConverter(typeof(NestedClassToListConverter))]
             public List<NestedClass>? NestedList { get; set; }
 
-            public class NestedClass
+
+            public class NestedClass : IFallbackString
             {
+                public string? FallbackString { get; set; }
+
                 [JsonProperty("sub.property")]
                 public string? Property { get; set; }
             }
+
 
             public class TestConverter : ErrorOnDupesConverter<TestClass>
             {
@@ -344,8 +357,10 @@ namespace Tests
                 }
             }
 
+
             public class NestedClassToListConverter : SingleToListConverter<NestedClass> { }
         }
+
 
         [Fact]
         public void DeserializeWithDuplicateKeys_ThrowsJsonException()
@@ -361,6 +376,7 @@ namespace Tests
 
             exception.Message.Should().Contain("Duplicate property 'property1' found");
         }
+
 
         [Fact]
         public void DeserializeWithoutDuplicateKeys_DeserializesCorrectly()
@@ -411,6 +427,7 @@ namespace Tests
             obj.Property3List.Should().ContainSingle().Which.Should().Be(1);
         }
 
+
         [Fact]
         public void DeserializeWithDuplicateKeys_ThrowsJsonException2()
         {
@@ -428,6 +445,7 @@ namespace Tests
 
             exception.Message.Should().Contain("Duplicate property 'property1' found");
         }
+
 
         [Fact]
         public void DeserializeWithDuplicateKeysInConverter_WhenConverterIgnored_HandlesCorrectly()
@@ -448,6 +466,7 @@ namespace Tests
             obj.Property3List.Should().HaveCount(3).And.ContainInOrder(1, 2, 3);
         }
 
+
         [Fact]
         public void DeserializeEmptyJsonObject_ReturnsDefaultValues()
         {
@@ -459,6 +478,7 @@ namespace Tests
             obj!.Property1.Should().BeNull();
             obj.Property2.Should().Be(0);
         }
+
 
         [Fact]
         public void DeserializeWithNestedJsonObject_HandlesCorrectly()
@@ -493,6 +513,7 @@ namespace Tests
             obj!.Property1.Should().Be("value1");
         }
 
+
         [Fact]
         public void DeserializeWithAlphaDynamicKey_HandlesCorrectly()
         {
@@ -513,6 +534,7 @@ namespace Tests
 
             actual.Should().BeEquivalentTo(expected);
         }
+
 
         // NOTE: This test would fail if property1 came after dynamic_beta_key in the JSON. The test is just meant to showcase what HandleDynamicProperty() can do.
         [Fact]
