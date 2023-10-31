@@ -676,6 +676,9 @@ namespace Netryoshka
             [JsonProperty("http2.request_in")]
             public uint? RequestIn { get; set; }
 
+            [JsonProperty("json")]
+            public TSharkJson? Json { get; set; }
+
             public class Http2BodyFragments
             {
                 [JsonConverter(typeof(IntToListConverter))]

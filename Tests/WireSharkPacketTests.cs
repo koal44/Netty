@@ -1247,6 +1247,108 @@ namespace Tests
             actualObj.Should().BeEquivalentTo(expectedObj);
         }
 
+
+        [Fact]
+        public void DeserializeWireSharkJson_WithHttp2JsonData_ShouldDeserializeCorrectly()
+        {
+            // Arrange
+            var json = @"{
+              ""_index"": ""packets-2023-10-31"",
+              ""_type"": ""doc"",
+              ""_score"": null,
+              ""_source"": {
+                ""layers"": {
+                  ""frame"": {
+                  },
+                  ""eth"": {
+                  },
+                  ""ip"": {
+                  },
+                  ""tcp"": {
+                  },
+                  ""tls"": {
+                  },
+                  ""http2"": {
+                    ""http2.stream"": {
+                      ""http2.length"": ""718"",
+                      ""http2.type"": ""0"",
+                      ""http2.flags"": ""0x01"",
+                      ""http2.flags_tree"": {
+                      },
+                      ""http2.r"": ""0x00000000"",
+                      ""http2.streamid"": ""29"",
+                      ""http2.pad_length"": ""0"",
+                      ""http2.body.fragments"": {
+                      },
+                      ""Content-encoded entity body (gzip): 1639 bytes -> 11778 bytes"": {
+                      },
+                      ""json"": {
+                        ""json.object"": {
+                          ""json.member"": ""familyName"",
+                          ""json.member_tree"": {
+                            ""json.path_with_value"": ""/familyName:.NET"",
+                            ""json.member_with_value"": ""familyName:.NET"",
+                            ""json.value.string"": "".NET"",
+                            ""json.key"": ""familyName"",
+                            ""json.path"": ""/familyName""
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }";
+
+            // Action
+            var actualObj = JsonConvert.DeserializeObject<WireSharkPacket>(json);
+
+            // Assert
+            var expectedObj = new WireSharkPacket
+            {
+                Source = new TSharkSource
+                {
+                    Layers = new TSharkLayers
+                    {
+                        Frame = new TSharkFrame(),
+                        Eth = new TSharkEth(),
+                        Ip = new TSharkIp(),
+                        Tcp = new TSharkTcp(),
+                        Tls = new List<TSharkTls> { new TSharkTls() },
+                        Http2 = new List<TSharkHttp2>
+                        {
+                            new TSharkHttp2
+                            {
+                                Stream = new TSharkHttp2.Http2Stream
+                                {
+                                    Type = "0",
+                                    Flags = "0x01",
+                                    StreamId = 29,
+                                    BodyFragments = new TSharkHttp2.Http2Stream.Http2BodyFragments(),
+                                    Json = new TSharkJson
+                                    {
+                                        Object = new Dictionary<string, TSharkJson.JsonMemberTree>
+                                        {
+                                            {
+                                                "familyName", new TSharkJson.JsonMemberTree
+                                                {
+                                                    ValueString = ".NET",
+                                                    Key = "familyName",
+                                                    Path = "/familyName"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            actualObj.Should().BeEquivalentTo(expectedObj);
+        }
+
     }
 
 
