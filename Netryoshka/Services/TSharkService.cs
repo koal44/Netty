@@ -16,7 +16,9 @@ namespace Netryoshka.Services
     public class TSharkService
     {
         private readonly bool IsTraceDebugging = false;
-
+        private readonly bool IsStandardErrorDebugging = false;
+        // piecemeal has a performance cost but allows more granular cancellation
+        private readonly bool IsPiecemealDeserialization = true; 
 
         private readonly ICaptureService _captureService;
         private readonly ILogger _logger;
@@ -46,18 +48,25 @@ namespace Netryoshka.Services
             KeysFile = Environment.GetEnvironmentVariable("SSLKEYLOGFILE", EnvironmentVariableTarget.User) ?? "";
         }
 
+
         // TODO: write our own binary writer
         private async Task<byte[]> GetPcapBytesAsync(List<BasicPacket> packets, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             _captureService.WritePacketsToFile(_pcapFilePath, packets);
+            ct.ThrowIfCancellationRequested();
 
             var randoms = await GetTlsHandshakeRandomsAsync(ct);
             var keys = GetKeysFromRandoms(randoms);
             CheckKeyAndRandomCounts(randoms, keys);
+            ct.ThrowIfCancellationRequested();
 
             if (keys.Count > 0)
             {
                 await WritePcapngWithKeys(keys, ct);
+                ct.ThrowIfCancellationRequested();
+
                 if (File.Exists(_pcapngFilePath))
                 {
                     return File.ReadAllBytes(_pcapngFilePath);
@@ -70,7 +79,13 @@ namespace Netryoshka.Services
 
         public async Task<string> SerializePacketsToJsonAsync(List<BasicPacket> packets, CancellationToken ct)
         {
+            var stopwatch = Stopwatch.StartNew();
             byte[] packetStream = await GetPcapBytesAsync(packets, ct);
+            ct.ThrowIfCancellationRequested();
+
+            stopwatch.Stop();
+            _logger.Info($"Read {packets.Count} packets into  PCAP bytes in {stopwatch.ElapsedMilliseconds} ms");
+
             string json;
 
             var psi = new ProcessStartInfo
@@ -91,6 +106,9 @@ namespace Netryoshka.Services
 
             using (Process process = new() { StartInfo = psi })
             {
+                stopwatch.Restart();
+                ct.ThrowIfCancellationRequested();
+
                 try
                 {
                     process.Start();
@@ -101,22 +119,31 @@ namespace Netryoshka.Services
                     {
                         await stdin.WriteAsync(packetStream, ct).ConfigureAwait(false);
                         stdin.Close();
+                        ct.ThrowIfCancellationRequested();
 
                         json = await sr.ReadToEndAsync(ct).ConfigureAwait(false);
+                        ct.ThrowIfCancellationRequested();
 
                         var errorResult = await serr.ReadToEndAsync(ct).ConfigureAwait(false);
-                        if (!string.IsNullOrEmpty(errorResult))
+                        if (IsStandardErrorDebugging && !string.IsNullOrEmpty(errorResult))
                         {
                             _logger.Info(errorResult);
                         }
                     }
 
-                    // Add timeout or cancellation logic?
-                    process.WaitForExit();  
+
+                    var waitForExitTask = process.WaitForExitAsync(ct);
+                    var delayTask = Task.Delay(TimeSpan.FromSeconds(10), ct);
+                    var completedTask = await Task.WhenAny(waitForExitTask, delayTask);
+                    if (completedTask == delayTask && !waitForExitTask.IsCompleted)
+                    {
+                        throw new TimeoutException("TShark process did not exit in time.");
+                    }
+                    ct.ThrowIfCancellationRequested();
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.Info("Operation was canceled.");
+                    _logger.Info("SerializePacketsToJsonAsync was canceled.");
                     process.Kill();
                     throw;
                 }
@@ -126,6 +153,11 @@ namespace Netryoshka.Services
                     process.Kill();
                     throw;
                 }
+                finally
+                {
+                    stopwatch.Stop();
+                    _logger.Info($"Serialized {packets.Count} packets ({packetStream.Length / 1048576.0:N2} MB) into JSON in {stopwatch.ElapsedMilliseconds} ms");
+                }
             }
 
             return json;
@@ -134,13 +166,13 @@ namespace Netryoshka.Services
 
         public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct)
         {
-            var json = await SerializePacketsToJsonAsync(packets, ct);
-            var jsonList = JsonUtils.SplitJsonObjects(json);
+            ct.ThrowIfCancellationRequested();
 
-            //var loadSettings = new JsonLoadSettings
-            //{
-            //    DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Ignore,
-            //};
+            var json = await SerializePacketsToJsonAsync(packets, ct);
+            ct.ThrowIfCancellationRequested();
+
+            var jsonList = JsonUtils.SplitJsonObjects(json);
+            ct.ThrowIfCancellationRequested();
 
             var serializerSettings = new JsonSerializerSettings
             {
@@ -153,9 +185,27 @@ namespace Netryoshka.Services
                 serializerSettings.TraceWriter = new CustomTraceWriter();
             }
 
-            //var sharkPackets = JsonUtil.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings, loadSettings)
-            var sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings)
-                ?? throw new InvalidOperationException("Failed to deserialize json to WireSharkPacket list");
+            var sharkPackets = new List<WireSharkPacket>();
+
+            var stopwatch = Stopwatch.StartNew();
+            if (IsPiecemealDeserialization)
+            {
+                foreach (var packetJson in jsonList)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var sharkPacket = JsonConvert.DeserializeObject<WireSharkPacket>(packetJson, serializerSettings)
+                        ?? throw new JsonException("Failed to deserialize a WireSharkPacket.");
+                    sharkPackets.Add(sharkPacket);
+                }
+            }
+            else
+            {
+                sharkPackets = JsonConvert.DeserializeObject<List<WireSharkPacket>>(json, serializerSettings)
+                    ?? throw new JsonException("Failed to deserialize json to WireSharkPacket list");
+            }
+            stopwatch.Stop();
+            _logger.Info($"Deserialized {sharkPackets.Count} packets in {stopwatch.ElapsedMilliseconds} ms");
 
             if (packets.Count != jsonList.Count || jsonList.Count != sharkPackets.Count)
             {
@@ -165,25 +215,12 @@ namespace Netryoshka.Services
             var sharkData = new List<WireSharkData>();
             for (int i = 0; i < packets.Count; i++)
             {
+                ct.ThrowIfCancellationRequested();
                 sharkData.Add(new WireSharkData(jsonList[i], sharkPackets[i]));
             }
 
             return sharkData;
         }
-
-
-        //private static string FixForJsonWithDuplicateKeys(string json)
-        //{
-        //    string jsonWithCombinedKeys;
-        //    using (var stringReader = new StringReader(json))
-        //    using (var jsonTextReader = new JsonTextReader(stringReader))
-        //    {
-        //        var jToken = JsonNetUtils.DeserializeAndCombineDuplicateKeys(jsonTextReader);
-        //        jsonWithCombinedKeys = jToken.ToString();
-        //    }
-
-        //    return jsonWithCombinedKeys;
-        //}
 
 
         public async Task<List<string>> GetTlsHandshakeRandomsAsync(CancellationToken ct)
@@ -231,7 +268,7 @@ namespace Netryoshka.Services
                             .ToList();
 
                         var errorResult = await serr.ReadToEndAsync(ct).ConfigureAwait(false);
-                        if (!string.IsNullOrEmpty(errorResult))
+                        if (IsStandardErrorDebugging && !string.IsNullOrEmpty(errorResult))
                         {
                             _logger.Info(errorResult);
                         }
@@ -371,7 +408,7 @@ namespace Netryoshka.Services
                     await sr.ReadToEndAsync(ct);
 
                     var errorResult = await serr.ReadToEndAsync(ct).ConfigureAwait(false);
-                    if (!string.IsNullOrEmpty(errorResult))
+                    if (IsStandardErrorDebugging && !string.IsNullOrEmpty(errorResult))
                     {
                         _logger.Info(errorResult);
                     }

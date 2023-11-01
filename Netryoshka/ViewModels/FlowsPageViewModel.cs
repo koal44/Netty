@@ -57,7 +57,7 @@ namespace Netryoshka
         private string? _keyLogFileName;
         [ObservableProperty]
         private IEnumerable<DeframeMethod> _deframeMethods;
-        private CancellationTokenSource? _ctsSharkService;
+        private CancellationTokenSource _ctsUpdateWireSharkData;
         [ObservableProperty]
         private bool _canContentScroll;
         [ObservableProperty]
@@ -66,6 +66,8 @@ namespace Netryoshka
         private InteractionComboBoxMode _pivotCBDisplayMode;
         [ObservableProperty]
         private InteractionComboBoxMode _orbitCBDisplayMode;
+        [ObservableProperty]
+        private bool _showSpinner;
 
 
         public FlowsPageViewModel(FlowManager flowManager, ILogger logger, TSharkService tSharkService, ICaptureService captureService)
@@ -89,6 +91,8 @@ namespace Netryoshka
             _canContentScroll = true;
             _pivotCBDisplayMode = InteractionComboBoxMode.ProcessInfo;
             _orbitCBDisplayMode = InteractionComboBoxMode.DomainName;
+            _ctsUpdateWireSharkData = new CancellationTokenSource();
+            _showSpinner = true;
 
             PropertyChanged += OnPropertyChanged;
 
@@ -121,20 +125,32 @@ namespace Netryoshka
             }
         }
 
+        private Task _updatingWireSharkTask = Task.CompletedTask;
 
-        private void UpdateWireSharkData()
+        private async void UpdateWireSharkData()
         {
-            // If a previous task is still running, cancel it
-            _ctsSharkService?.Cancel();
-
+            if (!_updatingWireSharkTask.IsCompleted)
+            {
+                if (!_ctsUpdateWireSharkData.IsCancellationRequested)
+                {
+                    _ctsUpdateWireSharkData.Cancel();
+                    await _updatingWireSharkTask;
+                }
+                else
+                {
+                    // A cancellation was already set by a previous call so we'll let the previous call wait and do the work.
+                    return;
+                }
+            }
+            
+            _ctsUpdateWireSharkData = new CancellationTokenSource();
             var packets = CurrentBubbleDataList.Select(bd => bd.BasicPacket).ToList();
 
-            _ = Task.Run(async () =>
+            _updatingWireSharkTask = Task.Run(async () =>
             {
                 try
                 {
-                    _ctsSharkService = new CancellationTokenSource();
-                    var sharkDataList = await _tSharkService.ConvertToWireSharkDataAsync(packets, _ctsSharkService.Token);
+                    var sharkDataList = await _tSharkService.ConvertToWireSharkDataAsync(packets, _ctsUpdateWireSharkData.Token);
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -146,6 +162,10 @@ namespace Netryoshka
 
                         for (int i = 0; i < CurrentBubbleDataList.Count; i++)
                         {
+                            if (_ctsUpdateWireSharkData.Token.IsCancellationRequested)
+                            {
+                                throw new OperationCanceledException(_ctsUpdateWireSharkData.Token);
+                            }
                             if (sharkDataList[i] == null)
                                 _logger.Error($"sharkDataList[{i}] was null");
                             CurrentBubbleDataList[i].WireSharkData = sharkDataList[i];
@@ -162,12 +182,15 @@ namespace Netryoshka
                 {
                     _logger.Error($"Error in UpdateFrameData: {ex.Message}", ex);
                 }
-            });
+            }, _ctsUpdateWireSharkData.Token);
         }
 
 
         private void UpdateBubbleItemsViewModels()
         {
+            CurrentItemViewModelCollecion.Clear();
+            ShowSpinner = true;
+
             string key = SelectedNetworkLayer switch
             {
                 NetworkLayer.App => $"App{SelectedDeframeMethod}",
@@ -188,11 +211,11 @@ namespace Netryoshka
 
             bool isWireSharkDependent = viewModelType.GetCustomAttributes(typeof(RequiresWireSharkAttribute), true).Any();
 
-            // if it's a WireSharkViewModel and the first bubble doesn't have WireSharkData, then update it
+            // if it's a WireSharkViewModel and the last bubble doesn't have WireSharkData, then update it
             // UpdateWireSharkData() will call UpdateBubbleItemsViewModels() when it's done
             if (isWireSharkDependent
                 && CurrentBubbleDataList.Count > 0 
-                && CurrentBubbleDataList.First().WireSharkData == null)
+                && CurrentBubbleDataList.Last().WireSharkData == null)
             {
                 UpdateWireSharkData();
                 return;
@@ -205,6 +228,7 @@ namespace Netryoshka
                     ?? throw new InvalidOperationException($"Could not create a view model of type '{viewModelType}'"));
                 newItemViewModelCollecion.Add(viewModel);
             }
+            ShowSpinner = true;
             CurrentItemViewModelCollecion = newItemViewModelCollecion;
         }
 

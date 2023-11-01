@@ -111,6 +111,9 @@ namespace Netryoshka.ViewModels
 
 		private async Task StartCapturingAsync()
 		{
+            CapturedTextCollection.Clear();
+            _capturedTextBuffer.Clear();
+
             LoadNetworkDevices();
 
             // can't proceed forward without a capture device.
