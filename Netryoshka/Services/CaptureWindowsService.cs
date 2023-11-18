@@ -28,7 +28,7 @@ namespace Netryoshka.Services
         private readonly int MaxPacketQueueCount = 10_000;
         private readonly List<string> _privilegedDeviceNames;
         private FilterData? _filterData;
-        private bool _isDynamicFiltering;
+        private bool _hasAdditionalFiltering;
         private PhysicalAddress _macAddress;
         private readonly FlowManager _flowManager;
         private bool _canUpdateWithProcessInfo;
@@ -43,7 +43,7 @@ namespace Netryoshka.Services
             _flowManager = packetCollectionService;
             _packetQueue = new(new ConcurrentQueue<RawCapture>(), MaxPacketQueueCount);
             _capturedPackets = new(MaxPacketQueueCount);
-            _isDynamicFiltering = false;
+            _hasAdditionalFiltering = false;
             _macAddress = PhysicalAddress.None;
             _canUpdateWithProcessInfo = false;
 
@@ -84,15 +84,15 @@ namespace Netryoshka.Services
             return _device?.Description;
         }
 
-
-        private static bool IsDynamicFiltering(FilterData filterData)
+        // whether filtering is done entirely by the device or whether additional, post-processing filtering is required
+        private static bool HasAdditionalFiltering(FilterData filterData)
         {
             return (filterData.LocalProcessNames != null && filterData.LocalProcessNames.Any())
                 || filterData.LocalPIDs != null && filterData.LocalPIDs.Any();
         }
 
 
-        private async Task<ILiveDevice?> ConfigureStandardDevice(string deviceName, bool isPromiscuous, bool isDynamicFiltering)
+        private async Task<ILiveDevice?> ConfigureStandardDevice(string deviceName, bool isPromiscuous, bool hasAdditionalFiltering)
         {
             var device = CaptureDeviceList.Instance.FirstOrDefault(x => x.Description.Contains(deviceName));
 
@@ -105,7 +105,7 @@ namespace Netryoshka.Services
                 device?.Open();
             }
 
-            if (!isDynamicFiltering && device != null)
+            if (!hasAdditionalFiltering && device != null)
             {
                 string filter = await BuildStaticFilterForStandardDevice(_filterData!.Value);
                 device.Filter = filter;
@@ -119,11 +119,11 @@ namespace Netryoshka.Services
         private async Task<ILiveDevice> InitializeDeviceAsync(string deviceName, FilterData filterdata, bool isPromiscuous)
         {
             _filterData = filterdata;
-            _isDynamicFiltering = IsDynamicFiltering(filterdata);
+            _hasAdditionalFiltering = HasAdditionalFiltering(filterdata);
 
             _device = deviceName == "WinDivert"
                 ? await InitializeWinDivertAsync(filterdata, isPromiscuous)
-                : await ConfigureStandardDevice(deviceName, isPromiscuous, _isDynamicFiltering);
+                : await ConfigureStandardDevice(deviceName, isPromiscuous, _hasAdditionalFiltering);
 
             if (_device == null)
             {
@@ -246,12 +246,17 @@ namespace Netryoshka.Services
                 filterBuilder.Append(')');
             }
 
-            if (filterData.LogDNSLookups)
-            {
-                if (filterBuilder.Length > 0)
-                    filterBuilder.Append(" or ");
 
-                filterBuilder.Append("(udp port 53 or tcp port 53)");
+            bool hasRestrictiveFilters = filterBuilder.Length > 0;
+            if (hasRestrictiveFilters && filterData.LogDNSLookups)
+            {
+                filterBuilder.Append(" or (udp port 53 or tcp port 53)");
+            }
+
+            // Default to a broader filter, like 'tcp' or 'ip', if no other filters are specified
+            if (filterBuilder.Length == 0)
+            {
+                filterBuilder.Append("tcp");
             }
 
             return Task.FromResult(filterBuilder.ToString());
@@ -317,7 +322,7 @@ namespace Netryoshka.Services
                     //    ? BPDirection.Incoming
                     //    : BPDirection.Other;
 
-                    if (_canUpdateWithProcessInfo || _isDynamicFiltering)
+                    if (_canUpdateWithProcessInfo || _hasAdditionalFiltering)
                     {
                         var processRecord = GetTcpProcessRecord(basicPacket, tcpConnectionsByLocalPortDict);
                         if (processRecord == null)
@@ -338,7 +343,7 @@ namespace Netryoshka.Services
                         }
                     }
 
-                    if (_isDynamicFiltering)
+                    if (_hasAdditionalFiltering)
                     {
                         if (!_filterData!.Value.ShouldKeepPacket(basicPacket))
                         {
@@ -476,7 +481,7 @@ namespace Netryoshka.Services
 
         public void LoadPacketsFromFile(Action<BasicPacket> packetReceivedCallback, string fileName)
         {
-            _isDynamicFiltering = false;
+            _hasAdditionalFiltering = false;
             _canUpdateWithProcessInfo = false;
 
             _flowManager.Clear();
