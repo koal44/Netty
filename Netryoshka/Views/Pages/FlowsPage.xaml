@@ -293,6 +293,64 @@
                              PathData="{StaticResource DitzyBotBorderless}" />
           </StackPanel>
         </Grid>
+        <!--<Grid Grid.Row="1"
+              Visibility="{Binding ShowSpinner, Converter={local:BoolToVisibilityConverter}}">
+        -->
+        <!--  Gray circle with radius 20  -->
+        <!--
+          <Ellipse Width="40"
+                   Height="40"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Fill="Gray" />
+        -->
+        <!--  Black dot with radius 2.5  -->
+        <!--
+          <Ellipse Name="spinnerEllipse"
+                   Width="5"
+                   Height="5"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Fill="Black"
+                   RenderTransformOrigin="0.5,0.5">
+            <Ellipse.RenderTransform>
+        -->
+        <!--  Set the initial position of the black dot at (20, 0) relative to the gray circle's center  -->
+        <!--
+              <TransformGroup>
+                <TranslateTransform X="20" Y="0" />
+        -->
+        <!--  Rotate around the gray circle's center, which is (0, 0) relative to the gray circle  -->
+        <!--
+                <RotateTransform x:Name="SpinnerRotateTransform" CenterX="0" CenterY="0" />
+              </TransformGroup>
+            </Ellipse.RenderTransform>
+          </Ellipse>
+
+          <Grid.Triggers>
+            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+              <BeginStoryboard>
+                <Storyboard>
+        -->
+        <!--  Rotate the black dot 360 degrees around the gray circle's center  -->
+        <!--
+                  <DoubleAnimation RepeatBehavior="Forever"
+                                   Storyboard.TargetName="SpinnerRotateTransform"
+                                   Storyboard.TargetProperty="Angle"
+                                   From="0"
+                                   To="360"
+                                   Duration="0:0:1" />
+                </Storyboard>
+              </BeginStoryboard>
+            </EventTrigger>
+          </Grid.Triggers>
+        </Grid>-->
+
+
+        <!--<ProgressBar Grid.Row="1"
+                     Margin="50,0"
+                     IsIndeterminate="True"
+                     Visibility="{Binding ShowSpinner, Converter={local:BoolToVisibilityConverter}}" />-->
         <ListBox x:Name="FlowChatListBox"
                  Grid.Row="1"
                  ItemContainerStyle="{DynamicResource FlowChatItemContainerStyle}"

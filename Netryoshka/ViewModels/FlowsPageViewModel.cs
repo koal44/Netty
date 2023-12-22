@@ -145,12 +145,13 @@ namespace Netryoshka
             
             _ctsUpdateWireSharkData = new CancellationTokenSource();
             var packets = CurrentBubbleDataList.Select(bd => bd.BasicPacket).ToList();
+            var progress = new Progress<double>(i => ShowSpinner = i < 100);
 
             _updatingWireSharkTask = Task.Run(async () =>
             {
                 try
                 {
-                    var sharkDataList = await _tSharkService.ConvertToWireSharkDataAsync(packets, _ctsUpdateWireSharkData.Token);
+                    var sharkDataList = await _tSharkService.ConvertToWireSharkDataAsync(packets, _ctsUpdateWireSharkData.Token, progress);
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {

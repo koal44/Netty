@@ -164,7 +164,7 @@ namespace Netryoshka.Services
         }
         
 
-        public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct)
+        public async Task<List<WireSharkData>> ConvertToWireSharkDataAsync(List<BasicPacket> packets, CancellationToken ct, IProgress<double> progress)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -190,13 +190,16 @@ namespace Netryoshka.Services
             var stopwatch = Stopwatch.StartNew();
             if (IsPiecemealDeserialization)
             {
-                foreach (var packetJson in jsonList)
+                int totalPackets = jsonList.Count;
+                for (int i = 0; i < totalPackets; i++)
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    var sharkPacket = JsonConvert.DeserializeObject<WireSharkPacket>(packetJson, serializerSettings)
+                    var sharkPacket = JsonConvert.DeserializeObject<WireSharkPacket>(jsonList[i], serializerSettings)
                         ?? throw new JsonException("Failed to deserialize a WireSharkPacket.");
                     sharkPackets.Add(sharkPacket);
+
+                    progress.Report((double)i / totalPackets);
                 }
             }
             else
